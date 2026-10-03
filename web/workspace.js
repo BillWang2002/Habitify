@@ -32,9 +32,9 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
   const dialog = $('habit-dialog');
   const navigation = createNavigation({
     normalize: next => next.startsWith('habit/') && habits.some(item=>item.id===next.slice(6)) ? next : [...routes,'archive'].includes(next) ? next : 'habits',
-    readView: () => ({ filter, selectedDay, scroll: $('workspace-content').scrollTop, detailMonth: [...detailMonth], logsOpen: !!$('habit-detail').querySelector('#detail-logs')?.open }),
+    readView: () => ({ filter, selectedDay, scroll: $('workspace-content').scrollTop, detailMonth: [...detailMonth], filterHeight: $('filter-results').style.minHeight, logsOpen: !!$('habit-detail').querySelector('#detail-logs')?.open }),
     onChange: (next, { source, view }) => {
-      cancelHold(); ++filterRevision; $('filter-results').inert=false;
+      cancelHold(); ++filterRevision; $('filter-results').inert=false; $('filter-results').style.minHeight=view?.filterHeight || '';
       root.querySelectorAll('[data-page], #filter-results').forEach(element=>element.getAnimations().forEach(animation=>animation.cancel()));
       if (dialog.open) dialog.close(); if ($('manage-dialog').open) $('manage-dialog').close();
       if (view) { filter=view.filter; selectedDay=view.selectedDay; detailMonth=[...view.detailMonth]; }
@@ -51,9 +51,11 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
   });
   function notify(text) { clearTimeout(toastTimer); $('toast-text').textContent = text; $('undo-delete').hidden = !deletedHabit; $('workspace-toast').hidden = false; toastTimer = setTimeout(() => { $('workspace-toast').hidden = true; deletedHabit = null; }, deletedHabit ? 8000 : 3500); }
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function slide(element, direction = 1) {
+  const slideDuration = () => parseFloat(getComputedStyle(root).getPropertyValue('--slide-duration')) || 480;
+  const slideEasing = 'cubic-bezier(.22,.8,.28,1)';
+  function slide(element, direction = 1, duration = 420) {
     element.getAnimations().forEach(animation => animation.cancel());
-    if (!reducedMotion()) element.animate([{ opacity: .4, transform: `translateX(${direction * 44}px)` }, { opacity: 1, transform: 'translateX(0)' }], { duration: 420, easing: 'cubic-bezier(.2,.8,.3,1)' });
+    if (!reducedMotion()) element.animate([{ opacity: .4, transform: `translateX(${direction * 44}px)` }, { opacity: 1, transform: 'translateX(0)' }], { duration, easing: slideEasing });
   }
   function setRoute(next, { animate = true, view = null } = {}) {
     const oldRoute = route;
@@ -168,13 +170,16 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     const order = ['all', 'pending', 'done'], direction = order.indexOf(next) > order.indexOf(filter) ? 1 : -1;
     const revision = ++filterRevision, results = $('filter-results');
     results.getAnimations().forEach(animation => animation.cancel());
+    // Keep a shared result floor so a shorter filter cannot clamp the scroll position.
+    results.style.minHeight = `${Math.max(results.scrollHeight, results.getBoundingClientRect().height)}px`;
+    const duration = slideDuration();
     filter = next; updateFilters(); results.inert = true;
     if (!reducedMotion()) {
-      const outgoing = results.animate([{ opacity: 1, transform: 'translateX(0)' }, { opacity: .15, transform: `translateX(${-direction * 28}px)` }], { duration: 140, easing: 'ease-in' });
+      const outgoing = results.animate([{ opacity: 1, transform: 'translateX(0)' }, { opacity: .15, transform: `translateX(${-direction * 28}px)` }], { duration: duration / 4, easing: slideEasing });
       await outgoing.finished.catch(() => {});
     }
     if (revision !== filterRevision || root.hidden) return;
-    renderHabits(); results.inert = false; slide(results, direction);
+    renderHabits(); results.inert = false; slide(results, direction, duration * 3 / 4);
   }
   for (const button of root.querySelectorAll('[data-filter]')) button.onclick = () => changeFilter(button.dataset.filter);
   function renderIconPicker() {
