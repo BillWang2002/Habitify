@@ -36,3 +36,17 @@ test('未授权和未知图标回退默认，创建习惯保留合法图标 ID',
   assert.equal(resolveHabitIcon('sun', []), 'leaf'); assert.equal(resolveHabitIcon('<script>'), 'leaf');
   assert.equal(addHabit([], {name:'晒太阳',kind:'complete',unit:'',icon:'sun'}, 'sun-habit')[0].icon, 'sun');
 });
+test('归档保存进度和行动日，移出计划列表且不允许继续打卡，恢复重新计入', async () => {
+  const { archiveHabit } = await import('../web/habits-model.js');
+  const archived = archiveHabit(setProgress(sampleHabits(), 'read', 1), 'read');
+  assert.equal(archived[0].progress,1); assert.deepEqual(todaySummary(archived),{completed:0,total:2,actionDay:true});
+  assert.throws(()=>setProgress(archived,'read',0));
+  assert.deepEqual(todaySummary(archiveHabit(archived,'read',false)),{completed:1,total:3,actionDay:true});
+});
+test('排序仅改变顺序，跳过归档项并保留各自进度，边界无变化', async () => {
+  const { archiveHabit, moveHabit } = await import('../web/habits-model.js');
+  const habits=archiveHabit(setProgress(sampleHabits(),'water',3),'read');
+  const ordered=moveHabit(habits,'walk',-1);
+  assert.deepEqual(ordered.map(item=>item.id),['read','walk','water']); assert.equal(ordered[2].progress,3);
+  assert.equal(moveHabit(ordered,'walk',-1),ordered); assert.throws(()=>moveHabit(ordered,'read',1));
+});

@@ -64,3 +64,5 @@
 
 - [WebKit：主屏幕应用、standalone 与图标](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/)
 - [Service Worker 生命周期与缓存](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers)
+
+主界面第三版：已登录根视口固定、内容/弹窗滚动条隐藏，增加单指静止二次点击拦截；仍保留正常滚动与双指缩放。用户反馈第二版仍会双击放大，本轮修复等待真机复测，不提前标记已解决。详见 HOME.md。

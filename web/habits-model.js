@@ -7,12 +7,13 @@ export const sampleHabits = () => [
 ];
 export const isComplete = habit => habit.progress >= habit.goal;
 export function todaySummary(habits) {
-  const completed = habits.filter(isComplete).length;
-  return { completed, total: habits.length, actionDay: completed > 0 };
+  const active = habits.filter(item => !item.archived);
+  const completed = active.filter(isComplete).length;
+  return { completed, total: active.length, actionDay: habits.some(isComplete) };
 }
 export function setProgress(habits, id, value) {
   const habit = habits.find(item => item.id === id);
-  if (!habit || !Number.isSafeInteger(value) || value < 0 || value > habit.goal) throw new Error('请输入 0 到目标之间的整数。');
+  if (!habit || habit.archived || !Number.isSafeInteger(value) || value < 0 || value > habit.goal) throw new Error('请输入 0 到目标之间的整数。');
   return habits.map(item => item.id === id ? { ...item, progress: value } : item);
 }
 export function addHabit(habits, { name, kind, goal, unit, icon }, id) {
@@ -26,4 +27,19 @@ export function addHabit(habits, { name, kind, goal, unit, icon }, id) {
 export function removeHabit(habits, id) {
   if (!habits.some(item => item.id === id)) throw new Error('该习惯已不存在。');
   return habits.filter(item => item.id !== id);
+}
+
+export function archiveHabit(habits, id, archived = true) {
+  if (!habits.some(item => item.id === id)) throw new Error('该习惯已不存在。');
+  return habits.map(item => item.id === id ? { ...item, archived } : item);
+}
+export function moveHabit(habits, id, direction) {
+  if (![1, -1].includes(direction)) throw new Error('排序方向无效。');
+  const index = habits.findIndex(item => item.id === id);
+  if (index < 0 || habits[index].archived) throw new Error('请先恢复该习惯。');
+  let next = index + direction;
+  while (next >= 0 && next < habits.length && habits[next].archived) next += direction;
+  if (next < 0 || next >= habits.length) return habits;
+  const reordered = [...habits]; [reordered[index], reordered[next]] = [reordered[next], reordered[index]];
+  return reordered;
 }
