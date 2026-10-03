@@ -1,5 +1,6 @@
 import { sampleHabits, isComplete, todaySummary, setProgress, addHabit, removeHabit, archiveHabit, moveHabit } from './habits-model.js';
 import { defaultTheme, iconChoices, iconSvg, resolveHabitIcon } from './theme.js';
+import { createNavigation } from './navigation.js';
 import { renderDetail, localDay } from './habit-details.js';
 const routes = ['habits', 'rewards', 'stats', 'me'];
 export function createWorkspace(root, { onLogout = () => {}, onCheck = async () => '这是公开界面预览，不读取个人数据。', preview = false } = {}) {
@@ -24,26 +25,46 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     </div>
     <nav class="app-nav" aria-label="主要导航"><span class="nav-slider" aria-hidden="true"></span><a href="#/habits" data-route="habits" aria-current="page"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.habits)}</span>习惯</a><a href="#/rewards" data-route="rewards"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.rewards)}</span>激励</a><a href="#/stats" data-route="stats"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.stats)}</span>统计</a><a href="#/me" data-route="me"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.me)}</span>我的</a></nav>
     <div class="app-toast" id="workspace-toast" hidden><span id="toast-text" role="status" aria-live="polite"></span><button id="undo-delete" hidden>撤回</button></div>
-    <dialog id="manage-dialog" class="habit-dialog manage-dialog"><div class="dialog-heading"><h2 id="manage-title"></h2><button id="close-manage" aria-label="关闭管理菜单">×</button></div><p class="dialog-note">长按与更多按钮均可进入此菜单。</p><div class="manage-actions"><button id="move-up">↑ 上移一位</button><button id="move-down">↓ 下移一位</button><button id="archive-habit">归档习惯</button><button id="delete-managed" class="danger-text">删除习惯</button></div></dialog>
+    <dialog id="manage-dialog" class="habit-dialog manage-dialog"><div class="dialog-heading"><h2 id="manage-title"></h2><button id="close-manage" aria-label="关闭管理菜单">×</button></div><p class="dialog-note">长按与更多按钮均可进入此菜单。</p><div class="manage-actions"><button id="move-up">上移一位</button><button id="move-down">下移一位</button><button id="archive-habit">归档习惯</button><button id="delete-managed" class="danger-text">删除习惯</button></div></dialog>
     <dialog id="habit-dialog" class="habit-dialog"><div class="dialog-heading"><h2 id="dialog-title"></h2><button id="close-dialog" aria-label="关闭">×</button></div><form id="habit-form"><div id="create-fields"><label for="habit-name">习惯名称</label><input id="habit-name" maxlength="30" placeholder="例如：睡前读书"><fieldset class="icon-picker"><legend>习惯图标</legend><div id="icon-options"></div><p class="dialog-note">基础图标免费；更多个性图案后续开放。</p></fieldset><label id="kind-label">记录方式</label><input id="habit-kind" type="hidden" value="complete"><div class="kind-select"><button id="kind-trigger" type="button" aria-labelledby="kind-label kind-value" aria-haspopup="listbox" aria-expanded="false"><span id="kind-value">完成型 · 做完就打卡</span><span aria-hidden="true">⌄</span></button><div id="kind-options" role="listbox" aria-labelledby="kind-label" hidden><button type="button" role="option" data-kind="complete" aria-selected="true">完成型 · 做完就打卡</button><button type="button" role="option" data-kind="quantity" aria-selected="false">数量型 · 达到目标才完成</button></div></div><div id="quantity-fields" hidden><label for="habit-goal">每日目标</label><input id="habit-goal" type="number" inputmode="numeric" min="1" max="100000" step="1" value="8"><label for="habit-unit">单位</label><input id="habit-unit" maxlength="6" placeholder="杯、分钟、页"></div><label for="habit-note">备注（可选）</label><input id="habit-note" maxlength="200" placeholder="给这个习惯留一句提醒"><p class="dialog-note">本轮演示按每天计划，不设置单个习惯的金币。</p></div><div id="progress-fields" hidden><label for="habit-progress">今日累计进度</label><input id="habit-progress" type="number" inputmode="numeric" min="0" step="1"><p id="progress-note" class="dialog-note"></p></div><p id="dialog-error" role="status" class="message"></p><button class="primary" id="save-habit" type="submit"></button></form></dialog>
   </div>`;
   const $ = id => root.querySelector(`#${id}`);
   const dialog = $('habit-dialog');
+  const navigation = createNavigation({
+    normalize: next => next.startsWith('habit/') && habits.some(item=>item.id===next.slice(6)) ? next : [...routes,'archive'].includes(next) ? next : 'habits',
+    readView: () => ({ filter, selectedDay, scroll: $('workspace-content').scrollTop, detailMonth: [...detailMonth], logsOpen: !!$('habit-detail').querySelector('#detail-logs')?.open }),
+    onChange: (next, { source, view }) => {
+      cancelHold(); ++filterRevision; $('filter-results').inert=false;
+      root.querySelectorAll('[data-page], #filter-results').forEach(element=>element.getAnimations().forEach(animation=>animation.cancel()));
+      if (dialog.open) dialog.close(); if ($('manage-dialog').open) $('manage-dialog').close();
+      if (view) { filter=view.filter; selectedDay=view.selectedDay; detailMonth=[...view.detailMonth]; }
+      updateFilters(); dates(); renderHabits();
+      setRoute(next, { animate: source==='navigate', view });
+    }
+  });
+  $('workspace-content').addEventListener('scroll',()=>navigation.remember(),{passive:true});
+  root.addEventListener('click',event=> {
+    const link=event.target.closest('a[href^="#/"]');
+    if (!link || event.defaultPrevented || event.button!==0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (link.classList.contains('back-link')) navigation.back('habits'); else navigation.navigate(link.getAttribute('href').slice(2));
+  });
   function notify(text) { clearTimeout(toastTimer); $('toast-text').textContent = text; $('undo-delete').hidden = !deletedHabit; $('workspace-toast').hidden = false; toastTimer = setTimeout(() => { $('workspace-toast').hidden = true; deletedHabit = null; }, deletedHabit ? 8000 : 3500); }
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   function slide(element, direction = 1) {
     element.getAnimations().forEach(animation => animation.cancel());
     if (!reducedMotion()) element.animate([{ opacity: .4, transform: `translateX(${direction * 44}px)` }, { opacity: 1, transform: 'translateX(0)' }], { duration: 420, easing: 'cubic-bezier(.2,.8,.3,1)' });
   }
-  function setRoute(next) {
+  function setRoute(next, { animate = true, view = null } = {}) {
     const oldRoute = route;
-    if (next.startsWith('habit/')) { const id = next.slice(6); if (habits.some(item=>item.id===id)) { detailId=id; route='detail'; detailMonth=[new Date().getFullYear(),new Date().getMonth()]; refreshDetail(); } else route='habits'; }
+    if (next.startsWith('habit/')) { const id = next.slice(6); if (habits.some(item=>item.id===id)) { detailId=id; route='detail'; detailMonth=view?.detailMonth || [new Date().getFullYear(),new Date().getMonth()]; refreshDetail(); if(view?.logsOpen) $('habit-detail').querySelector('#detail-logs').open=true; } else route='habits'; }
     else route = [...routes,'archive'].includes(next) ? next : 'habits';
     if (route === 'archive') renderArchive();
     root.querySelector('.app-nav').style.setProperty('--nav-index', Math.max(0,routes.indexOf(route)));
     for (const page of root.querySelectorAll('[data-page]')) page.hidden = page.dataset.page !== route;
     for (const link of root.querySelectorAll('[data-route]')) { if (link.dataset.route === (['detail','archive'].includes(route) ? 'habits' : route)) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); }
-    if (oldRoute !== route) { $('workspace-content').scrollTop = 0; slide(root.querySelector(`[data-page="${route}"]`), (routes.includes(route) ? routes.indexOf(route) : 4) < (routes.includes(oldRoute) ? routes.indexOf(oldRoute) : 4) ? -1 : 1); }
+    $('workspace-content').scrollTop = view?.scroll || 0;
+    if (animate && oldRoute !== route) { slide(root.querySelector(`[data-page="${route}"]`), (routes.includes(route) ? routes.indexOf(route) : 4) < (routes.includes(oldRoute) ? routes.indexOf(oldRoute) : 4) ? -1 : 1); }
   }
   function refreshDetail() {
     const habit = habits.find(item=>item.id===detailId); if (!habit) return;
@@ -74,7 +95,7 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
       const done = isToday && isComplete(habit), card = document.createElement('article'); card.className = `habit-card ${done ? 'is-complete' : ''}`;
       card.innerHTML = `<span class="habit-icon ${resolveHabitIcon(habit.icon)}" aria-hidden="true">${iconSvg(resolveHabitIcon(habit.icon))}</span><div class="habit-info"><button class="habit-open"><h3></h3><span class="habit-description"></span></button><progress></progress><div class="recent-days" aria-label="最近七天的演示状态"></div></div><div class="habit-controls"><button class="habit-action"></button><button class="habit-more" aria-label="更多操作">•••</button></div>`;
       card.dataset.habitId = habit.id; card.querySelector('h3').textContent=habit.name;
-      const open=card.querySelector('.habit-open'); open.setAttribute('aria-label', `查看${habit.name}详情`); open.onclick=()=>location.hash=`/habit/${habit.id}`;
+      const open=card.querySelector('.habit-open'); open.setAttribute('aria-label', `查看${habit.name}详情`); open.onclick=()=>navigation.navigate(`habit/${habit.id}`);
       card.querySelector('.habit-description').textContent = !isToday ? '无演示记录' : `${habit.progress} / ${habit.goal} ${habit.unit} · ${done ? '已完成' : '待完成'}`;
       const more=card.querySelector('.habit-more'); more.setAttribute('aria-label', `${habit.name}更多操作`); more.onclick=()=>openManage(habit);
       const action=card.querySelector('.habit-action'); action.textContent = !isToday ? '仅查看' : done ? '✓ 完成' : habit.kind==='quantity' ? `＋${habit.step} ${habit.unit}` : '打卡'; action.disabled=!isToday;
@@ -87,7 +108,7 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
       for (const event of ['pointerup','pointercancel','pointerleave']) card.addEventListener(event,cancelHold);
       card.addEventListener('click',event=> { if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); suppressClick=false; } },true);
       card.addEventListener('contextmenu',event=> { if (!event.target.closest('.habit-controls')) { event.preventDefault(); openManage(habit); } });
-      card.addEventListener('click',event=> { if (!event.target.closest('button')) location.hash=`/habit/${habit.id}`; });
+      card.addEventListener('click',event=> { if (!event.target.closest('button')) navigation.navigate(`habit/${habit.id}`); });
       $('habit-list').append(card);
     }
     $('habit-empty').hidden = shown.length > 0;
@@ -135,7 +156,7 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     event.preventDefault();
     try {
       if (activeHabit.mode === 'create') { habits = addHabit(habits, { name: $('habit-name').value, kind: $('habit-kind').value, goal: Number($('habit-goal').value), unit: $('habit-unit').value, icon: selectedIcon }, crypto.randomUUID()); habits=habits.map((item,index)=>index===habits.length-1 ? {...item,note:$('habit-note').value.trim()} : item); filter = 'all'; selectedDay=localDay(); dates(); updateFilters(); renderHabits(); deletedHabit = null; $('habit-list').lastElementChild?.classList.add('habit-added'); notify('新习惯已加入，迈出第一步吧。'); }
-      else if (activeHabit.mode === 'delete') { const index = habits.findIndex(item => item.id === activeHabit.id); deletedHabit = { habit: habits[index], index }; habits = removeHabit(habits, activeHabit.id); renderHabits(); if (route==='detail') location.hash='/habits'; if (route==='archive') renderArchive(); notify('习惯已删除 · 演示'); }
+      else if (activeHabit.mode === 'delete') { const index = habits.findIndex(item => item.id === activeHabit.id); deletedHabit = { habit: habits[index], index }; habits = removeHabit(habits, activeHabit.id); renderHabits(); if (route==='detail') navigation.navigate('habits', {replace:true}); if (route==='archive') renderArchive(); notify('习惯已删除 · 演示'); }
       else updateProgress(activeHabit.id, activeHabit.mode === 'undo' ? 0 : Number($('habit-progress').value));
       closeDialog();
       if (activeHabit.mode === 'create') { const card = $('habit-list').lastElementChild; card.tabIndex = -1; card.focus({ preventScroll: true }); card.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }
@@ -183,9 +204,8 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
   for (const type of ['gesturestart','gesturechange','gestureend']) document.addEventListener(type,event=> { if (!root.hidden && event.cancelable) event.preventDefault(); },{passive:false});
   $('logout').onclick = onLogout;
   $('check-data').onclick = async () => { const id = owner; $('check-data').disabled = true; try { const text = await onCheck(); if (owner === id) $('data-message').textContent = text; } catch { if (owner === id) $('data-message').textContent = '连接检查未完成，请联网后重试。'; } finally { $('check-data').disabled = false; } };
-  $('reset-demo').onclick = () => { habits = sampleHabits(); logs=[]; selectedDay=localDay(); dates(); deletedHabit = null; filter = 'all'; updateFilters(); renderHabits(); if (route==='archive') renderArchive(); if (route==='detail') location.hash='/habits'; notify('已恢复初始演示。'); };
-  const hashChange = () => { if (!root.hidden) setRoute(location.hash.slice(2)); };
-  window.addEventListener('hashchange', hashChange);
+  $('reset-demo').onclick = () => { habits = sampleHabits(); logs=[]; selectedDay=localDay(); dates(); deletedHabit = null; filter = 'all'; updateFilters(); renderHabits(); if (route==='archive') renderArchive(); if (route==='detail') navigation.navigate('habits', {replace:true}); notify('已恢复初始演示。'); };
+
   function dates() {
     const today=new Date();
     $('today-date').textContent=new Intl.DateTimeFormat('zh-CN',{month:'long',day:'numeric',weekday:'long'}).format(today);
@@ -193,8 +213,8 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     for (let i=-4;i<=2;i++) { const date=new Date(today); date.setDate(today.getDate()+i); const li=document.createElement('li'), button=document.createElement('button'); const key=localDay(date); button.innerHTML=`<span>${date.getMonth()+1}月 · ${['日','一','二','三','四','五','六'][date.getDay()]}</span><b>${date.getDate()}</b>`; button.setAttribute('aria-label',`${key}${i===0 ? ' 今天' : ''}`); button.setAttribute('aria-pressed',String(key===selectedDay)); if (key===selectedDay) li.className='today'; button.onclick=()=>{ selectedDay=key; dates(); renderHabits(); slide($('habit-list'),i<0 ? -1 : 1); }; li.append(button); $('week-strip').append(li); }
   }
   return {
-    enter(user) { const now = new Date(); const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`; if (owner !== user.id || dayKey !== todayKey) { habits = sampleHabits(); logs=[]; selectedDay=localDay(); filter = 'all'; updateFilters(); } owner = user.id; dayKey = todayKey; $('account-email').textContent = preview ? '公开演示，不使用真实账户' : user.email || '已登录'; $('data-message').textContent = ''; dates(); renderHabits(); root.hidden = false; document.body.classList.add('workspace-active'); document.documentElement.classList.add('workspace-active'); const requested = location.hash.slice(2); setRoute(requested || 'habits'); location.hash = route==='detail' ? `/habit/${detailId}` : `/${route}`; },
-    leave(reset = false) { root.hidden = true; ++filterRevision; $('filter-results').getAnimations().forEach(animation=>animation.cancel()); $('filter-results').inert=false; pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) { owner = null; habits = sampleHabits(); logs=[]; } },
+    enter(user) { const now = new Date(); const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`; if (owner !== user.id || dayKey !== todayKey) { habits = sampleHabits(); logs=[]; selectedDay=localDay(); filter = 'all'; updateFilters(); } owner = user.id; dayKey = todayKey; $('account-email').textContent = preview ? '公开演示，不使用真实账户' : user.email || '已登录'; $('data-message').textContent = ''; dates(); renderHabits(); root.hidden = false; document.body.classList.add('workspace-active'); document.documentElement.classList.add('workspace-active'); const requested = location.hash.slice(2); navigation.start(requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive'].includes(requested) ? requested : 'habits'); },
+    leave(reset = false) { navigation.stop({reset}); root.hidden = true; ++filterRevision; $('filter-results').getAnimations().forEach(animation=>animation.cancel()); $('filter-results').inert=false; pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) { owner = null; habits = sampleHabits(); logs=[]; } },
     isEditing() { return dialog.open || manage.open; }
   };
 }
