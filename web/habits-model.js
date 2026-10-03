@@ -1,3 +1,4 @@
+import { resolveHabitIcon } from './theme.js';
 // This model is only for the explicitly labelled interface preview. No persistence or coins.
 export const sampleHabits = () => [
   { id: 'read', name: '读一会儿书', kind: 'complete', goal: 1, unit: '次', step: 1, progress: 0, icon: 'book' },
@@ -14,10 +15,15 @@ export function setProgress(habits, id, value) {
   if (!habit || !Number.isSafeInteger(value) || value < 0 || value > habit.goal) throw new Error('请输入 0 到目标之间的整数。');
   return habits.map(item => item.id === id ? { ...item, progress: value } : item);
 }
-export function addHabit(habits, { name, kind, goal, unit }, id) {
+export function addHabit(habits, { name, kind, goal, unit, icon }, id) {
   name = name.trim(); unit = unit.trim();
   if (!name || name.length > 30 || !['complete', 'quantity'].includes(kind)) throw new Error('请填写不超过 30 个字的习惯名称。');
   if (kind === 'quantity' && (!Number.isSafeInteger(goal) || goal < 1 || goal > 100000 || !unit || unit.length > 6)) throw new Error('请填写正整数目标和不超过 6 个字的单位。');
   if (habits.some(item => item.id === id)) throw new Error('请重新添加。');
-  return [...habits, { id, name, kind, goal: kind === 'complete' ? 1 : goal, unit: kind === 'complete' ? '次' : unit, step: 1, progress: 0, icon: kind === 'complete' ? 'leaf' : 'target' }];
+  return [...habits, { id, name, kind, goal: kind === 'complete' ? 1 : goal, unit: kind === 'complete' ? '次' : unit, step: 1, progress: 0, icon: resolveHabitIcon(icon || (kind === 'complete' ? 'leaf' : 'target')) }];
+}
+
+export function removeHabit(habits, id) {
+  if (!habits.some(item => item.id === id)) throw new Error('该习惯已不存在。');
+  return habits.filter(item => item.id !== id);
 }

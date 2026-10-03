@@ -24,3 +24,15 @@ test('新增数量型目标必须有效，空列表不生成行动日', () => {
   const habits = addHabit([], { name: '  喝水 ', kind: 'quantity', goal: 8, unit: '杯' }, 'new');
   assert.equal(habits[0].name, '喝水'); assert.equal(todaySummary(habits).actionDay, false);
 });
+test('删除最后完成的习惯重算行动日，输入列表和历史快照不改写', async () => {
+  const { removeHabit } = await import('../web/habits-model.js');
+  const before = setProgress(sampleHabits(), 'read', 1);
+  const after = removeHabit(before, 'read');
+  assert.equal(todaySummary(after).actionDay, false); assert.equal(before.length, 3); assert.equal(before[0].progress, 1);
+  assert.throws(() => removeHabit(after, 'read'));
+});
+test('未授权和未知图标回退默认，创建习惯保留合法图标 ID', async () => {
+  const { resolveHabitIcon } = await import('../web/theme.js');
+  assert.equal(resolveHabitIcon('sun', []), 'leaf'); assert.equal(resolveHabitIcon('<script>'), 'leaf');
+  assert.equal(addHabit([], {name:'晒太阳',kind:'complete',unit:'',icon:'sun'}, 'sun-habit')[0].icon, 'sun');
+});
