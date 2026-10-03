@@ -44,6 +44,7 @@ npm run check:backend
 - [开发规范](./DEVELOPMENT.md)
 - [阶段计划](./ROADMAP.md)
 - [决策记录](./DECISIONS.md)
+- [后续后台管理规划](./ADMIN.md)
 - [登录业务与前端方案](./AUTH.md)
 - [PWA 安装与验收](./PWA.md)
 - [主界面与打卡设计](./HOME.md)

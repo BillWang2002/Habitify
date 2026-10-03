@@ -147,7 +147,7 @@
 
 实施建议采用邮箱 + 密码登录：
 
-- 管理员通过 Supabase Dashboard 创建账户；第一版不建设应用内管理员面板。
+- 现阶段管理员通过 Supabase Dashboard 创建账户；后续版本建设管理员账号与应用后台，范围见 [ADMIN.md](./ADMIN.md)，不开放公开注册。
 - 保留 Supabase Auth 邮箱密码登录，在服务端关闭新用户公开注册。
 - 不仅隐藏注册按钮，还要验证未授权客户端无法自行注册。
 - 不开启匿名登录、第三方登录或自动创建账户的登录通道。
@@ -161,6 +161,10 @@
 
 - https://supabase.com/docs/guides/auth/general-configuration
 - https://supabase.com/docs/reference/javascript/auth-admin-createuser
+
+### 3.9 后续后台管理
+
+已确认后续通过管理员账号查看成员账户信息、添加成员、发布公告及管理部分普通用户内容，日常管理不再依赖数据库控制台。具体内容权限、角色授予、成员停用/删除等尚待确认；不默认授权访问全部个人数据。实施规划及架构建议见 [ADMIN.md](./ADMIN.md)。本模块尚未实现，通讯方案仍在选择阶段。
 
 ## 4. 试运行参数（未最终确认）
 
