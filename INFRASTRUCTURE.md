@@ -15,8 +15,8 @@ GitHub 仓库负责同步源码，GitHub Actions 负责生成和发布静态产�
 | --- | --- | --- | --- |
 | L0 本地 | 本地静态服务、打包、诊断页 | 页面和相对路径资源返回 200；探针配置可加载 | 已通过；后端未配置时明确显示未连接 |
 | L1 GitHub 同步 | 建仓库、远端、首次提交与推送 | 远端提交 SHA 与本地一致，内容完整 | 已通过：首次提交同步，Actions 基础检查通过 |
-| L2 Pages | Actions 部署、公开网页地址 | 从正式网页打开诊断页及资源，版本与提交一致 | 待 L1 |
-| L3 后端公共 API | 创建 Supabase 项目、运行迁移、设置公开连接参数 | health RPC 返回成功及服务端时间 | 待提供项目 |
+| L2 Pages | Actions 部署、公开网页地址 | 从正式网页打开诊断页及资源，版本与提交一致 | Git 同步通过；Pages 设置与仓库变量待配置 |
+| L3 后端公共 API | 创建 Supabase 项目、运行迁移、设置公开连接参数 | health RPC 返回成功及服务端时间 | 认证与公钥端点通过；测试 RPC 返回 404，待执行迁移 |
 | L4 登录与私有 API | 关闭公开注册、管理员创建两个测试账户 | 登录后返回本人身份，探针可写入读取；退出后私有访问被拒绝 | 待 L3 |
 | L5 权限与完整链路 | 两账户验证、公开注册拒绝验证 | B 查不到 A 的探针；匿名不能操作；Pages 上完成登录读写 | 待 L2/L4 |
 
@@ -40,6 +40,18 @@ GitHub 仓库负责同步源码，GitHub Actions 负责生成和发布静态产�
 - 下一步：用户创建 Supabase 开发项目，提供公开连接参数；Pages 设置与后端验证仍待完成。
 
 每层记录真实结果；不得用本地通过代替正式 Pages 通过，也不得用模拟响应代替真实 API。
+
+### 2026-10-03 Supabase 初步连接验证
+
+- 项目 URL：https://crtzbheoogvcansekmmw.supabase.co 。
+- 仅把 Project URL 与 publishable key 写入被 Git 忽略的 config.local.json，静态打包与配置保护测试通过。
+- npm run check:backend 实测：Auth health HTTP 200，JWKS HTTP 200；JWKS 无需在前端单独配置。
+- infra_health 返回 HTTP 404 / PGRST202，测试 RPC 尚不存在或未进入 schema cache，迁移尚待用户执行。
+- infra_identity 匿名请求返回 HTTP 404，不能当作权限拒绝验收通过。
+- 尚未验证登录、数据库读写、两账户隔离或关闭注册。
+- 用户误贴了一把后台 secret key，已提醒撤销并重新生成；未使用、未保存其值，撤销情况待用户确认。
+- 后续：用户在 SQL Editor 执行迁移一次，再运行同一通信检查；随后配置管理员测试账户与 Pages。
+
 L1 与 L3 可准备，但前置结果未通过的完整链路不能声明完成。
 
 ## 用户需要提供或操作的内容
@@ -58,6 +70,7 @@ L1 与 L3 可准备，但前置结果未通过的完整链路不能声明完成�
 - 本地复制 config.example.json 为 config.local.json，填入公开参数；此文件不提交。
 - config.example.json 与仓库文件中不填写 secret/service_role。
 - npm run dev 启动通信页，npm run build 生成 dist，npm test 验证基础配置保护。
+- npm run check:backend 使用本地公开配置检查真实认证、JWKS、health RPC 与匿名拒绝路径，任何未通过项令命令失败。
 - GitHub Actions 从仓库变量生成 dist/config.json，仅上传 dist。
 - 变量未齐备时基础检查仍执行，但跳过构建发布；配置齐备后才发布可连接的通信页。
 - 相对路径适配仓库子路径，不引入 Service Worker 缓存，便于排查首轮部署。

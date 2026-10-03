@@ -17,6 +17,7 @@
 npm test
 npm run build
 npm run dev
+npm run check:backend
 ```
 
 浏览器打开 http://127.0.0.1:5173 。
