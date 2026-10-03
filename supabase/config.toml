@@ -1,0 +1,3 @@
+[functions.habits]
+# getUser verifies the actual user token inside the handler; publishable keys are not JWTs.
+verify_jwt = false

@@ -270,3 +270,10 @@ html.workspace-active, #workspace { touch-action: pan-x pan-y; }
 #filter-results { position: relative; }
 #filter-results.is-switching { overflow: hidden; }
 .result-ghost { position: absolute; top: 0; left: 0; width: 100%; pointer-events: none; }
+
+/* Online synchronization and the personal coin rules remain within the app scroll area. */
+.sync-retry { margin:0 0 16px; padding:10px 18px; border:0; border-radius:14px; background:var(--green,#397a50); color:white; font:inherit; }
+#coin-ledger { padding-left:20px; line-height:1.8; font-size:.9rem; overflow-wrap:anywhere; }
+#coin-rules-content .detail-panel { line-height:1.8; }
+#coin-rules-content .detail-panel p { overflow-wrap:anywhere; }
+#coin-balance { padding:12px 0; font-weight:700; }

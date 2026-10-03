@@ -1,10 +1,11 @@
 import { createWorkspace } from './workspace.js';
+import { createHabitsApi } from './habits-api.js';
 import { initPwa } from './pwa.js';
 import { createClient } from '@supabase/supabase-js';
 import { AuthController, loginError } from './auth.js';
 const $ = id => document.getElementById(id);
-let controller, busy = false, logoutFailed = false;
-const workspace = createWorkspace($('workspace'), { onLogout: logout, onCheck: async () => { const count = await controller.readOwnProbes(); return count === null ? '' : `数据连接已通过：${count} 条测试记录均属于当前账户。`; } });
+let habitRequest, controller, busy = false, logoutFailed = false;
+const workspace = createWorkspace($('workspace'), { request: payload => habitRequest(payload), onLogout: logout, onCheck: async () => { const count = await controller.readOwnProbes(); return count === null ? '' : `数据连接已通过：${count} 条测试记录均属于当前账户。`; } });
 const views = ['restoring', 'login-view', 'unavailable'];
 function render(state) {
   const view = { restoring: 'restoring', signedOut: 'login-view', unavailable: 'unavailable', verified: 'account-view' }[state.phase];
@@ -55,6 +56,7 @@ try {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: `habitify-${url.hostname}-auth` },
     global: { fetch: (input, init = {}) => fetch(input, { ...init, signal: init.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000) }) }
   });
+  habitRequest = createHabitsApi(client,{url:url.origin,key:config.supabasePublishableKey});
   controller = new AuthController(client, render);
   $('submit').disabled = false;
   await controller.start({ verify: navigator.onLine });
