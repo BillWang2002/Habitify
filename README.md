@@ -42,5 +42,6 @@ npm run check:backend
 - [开发规范](./DEVELOPMENT.md)
 - [阶段计划](./ROADMAP.md)
 - [决策记录](./DECISIONS.md)
+- [登录业务与前端方案](./AUTH.md)
 
 所有“通过”状态须有对应真实验证，不以文件准备完成代替云端验收。
