@@ -66,3 +66,5 @@
 - [Service Worker 生命周期与缓存](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers)
 
 主界面第三版：已登录根视口固定、内容/弹窗滚动条隐藏，增加单指静止二次点击拦截；仍保留正常滚动与双指缩放。用户反馈第二版仍会双击放大，本轮修复等待真机复测，不提前标记已解决。详见 HOME.md。
+
+第四版：用户报告第三版网页问题已解决；按新要求限制页面双指缩放，主界面使用 pan-x pan-y、双指触摸/Safari gesture 拦截，并增加 viewport 限制提示。单指列表与弹窗仍滚动；第四版新增手势行为需真机复测。

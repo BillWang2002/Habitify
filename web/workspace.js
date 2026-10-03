@@ -3,7 +3,7 @@ import { defaultTheme, iconChoices, iconSvg, resolveHabitIcon } from './theme.js
 import { renderDetail, localDay } from './habit-details.js';
 const routes = ['habits', 'rewards', 'stats', 'me'];
 export function createWorkspace(root, { onLogout = () => {}, onCheck = async () => '这是公开界面预览，不读取个人数据。', preview = false } = {}) {
-  let owner, dayKey, habits = sampleHabits(), filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', deletedHabit, detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false;
+  let owner, dayKey, habits = sampleHabits(), filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', deletedHabit, detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false, filterRevision = 0;
   root.innerHTML = `<div class="app-frame">
 
     <div class="app-content" id="workspace-content">
@@ -13,7 +13,7 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
         <ol class="week-strip" id="week-strip" aria-label="本周日期"></ol>
         <section class="growth-card" aria-label="今日行动状态"><div><span class="growth-eyebrow">一点行动，一点成长</span><h2 id="growth-title">让今天，向前一点。</h2><p id="action-status"></p><span id="completion-count"></span></div><div class="growth-seed" aria-hidden="true"><i></i><b></b><em></em></div><div class="growth-meter"><span id="completion-meter"></span></div></section>
         <div class="habit-toolbar"><h2>我的习惯 <span id="habit-count"></span></h2><div class="habit-filters" aria-label="筛选习惯"><span class="filter-slider" aria-hidden="true"></span><button data-filter="all" aria-pressed="true">全部</button><button data-filter="pending" aria-pressed="false">待完成</button><button data-filter="done" aria-pressed="false">已完成</button></div></div>
-        <p id="selected-day-note" class="dialog-note"></p><div id="habit-list" class="habit-list"></div><div id="habit-empty" class="habit-empty" hidden><span aria-hidden="true">🌱</span><h3 id="empty-title"></h3><p id="empty-note"></p></div>
+        <p id="selected-day-note" class="dialog-note"></p><div id="filter-results"><div id="habit-list" class="habit-list"></div><div id="habit-empty" class="habit-empty" hidden><span aria-hidden="true">🌱</span><h3 id="empty-title"></h3><p id="empty-note"></p></div></div>
         <p class="habits-footnote">点击卡片查看详情 · 右侧打卡 · 长按管理习惯。</p>
       </section>
       <section data-page="detail" id="habit-detail" hidden aria-label="习惯详情"></section>
@@ -33,7 +33,7 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   function slide(element, direction = 1) {
     element.getAnimations().forEach(animation => animation.cancel());
-    if (!reducedMotion()) element.animate([{ opacity: .4, transform: `translateX(${direction * 44}px)` }, { opacity: 1, transform: 'translateX(0)' }], { duration: 260, easing: 'cubic-bezier(.2,.8,.3,1)' });
+    if (!reducedMotion()) element.animate([{ opacity: .4, transform: `translateX(${direction * 44}px)` }, { opacity: 1, transform: 'translateX(0)' }], { duration: 420, easing: 'cubic-bezier(.2,.8,.3,1)' });
   }
   function setRoute(next) {
     const oldRoute = route;
@@ -142,7 +142,20 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     } catch (error) { $('dialog-error').textContent = error.message; }
   };
   function updateFilters() { root.querySelector('.habit-filters').style.setProperty('--filter-index', ['all','pending','done'].indexOf(filter)); for (const button of root.querySelectorAll('[data-filter]')) button.setAttribute('aria-pressed', String(button.dataset.filter === filter)); }
-  for (const button of root.querySelectorAll('[data-filter]')) button.onclick = () => { const old=filter; filter = button.dataset.filter; updateFilters(); renderHabits(); slide($('habit-list'), ['all','pending','done'].indexOf(filter) < ['all','pending','done'].indexOf(old) ? -1 : 1); };
+  async function changeFilter(next) {
+    if (next === filter) return;
+    const order = ['all', 'pending', 'done'], direction = order.indexOf(next) > order.indexOf(filter) ? 1 : -1;
+    const revision = ++filterRevision, results = $('filter-results');
+    results.getAnimations().forEach(animation => animation.cancel());
+    filter = next; updateFilters(); results.inert = true;
+    if (!reducedMotion()) {
+      const outgoing = results.animate([{ opacity: 1, transform: 'translateX(0)' }, { opacity: .15, transform: `translateX(${-direction * 28}px)` }], { duration: 140, easing: 'ease-in' });
+      await outgoing.finished.catch(() => {});
+    }
+    if (revision !== filterRevision || root.hidden) return;
+    renderHabits(); results.inert = false; slide(results, direction);
+  }
+  for (const button of root.querySelectorAll('[data-filter]')) button.onclick = () => changeFilter(button.dataset.filter);
   function renderIconPicker() {
     $('icon-options').replaceChildren();
     for (const choice of iconChoices) { const button = document.createElement('button'); button.type = 'button'; button.innerHTML = iconSvg(choice.id); button.setAttribute('aria-label', choice.name + '图标'); button.setAttribute('aria-pressed', String(choice.id === selectedIcon)); button.onclick = () => { selectedIcon = choice.id; renderIconPicker(); }; $('icon-options').append(button); }
@@ -154,18 +167,20 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     cancelHold(); managedId=habit.id; $('manage-title').textContent=habit.name; $('archive-habit').textContent=habit.archived ? '恢复习惯' : '归档习惯';
     const active=habits.filter(item=>!item.archived), index=active.findIndex(item=>item.id===habit.id);
     $('move-up').disabled=habit.archived || index<=0; $('move-down').disabled=habit.archived || index===active.length-1;
-    if (!manage.open) manage.showModal();
+    if (!manage.open) { manage.showModal(); manage.querySelector('.manage-actions button:not(:disabled)').focus({preventScroll:true}); }
   }
   $('close-manage').onclick=()=>manage.close();
   manage.addEventListener('close',()=>{ cancelHold(); setTimeout(()=>{suppressClick=false;},0); });
   for (const [id,amount] of [['move-up',-1],['move-down',1]]) $(id).onclick=()=> { habits=moveHabit(habits,managedId,amount); deletedHabit=null; renderHabits(); manage.close(); notify('顺序已调整 · 演示'); };
   $('archive-habit').onclick=()=> { const habit=habits.find(item=>item.id===managedId); habits=archiveHabit(habits,managedId,!habit.archived); deletedHabit=null; renderHabits(); if (route==='detail') refreshDetail(); if (route==='archive') renderArchive(); manage.close(); notify(habit.archived ? '已恢复习惯 · 演示' : '已归档，进度保留；可从“我的”恢复。'); };
   $('delete-managed').onclick=()=>{ const habit=habits.find(item=>item.id===managedId); manage.close(); openDialog(habit,'delete'); };
-  // Only block a second stationary single-finger tap; scrolling, pinch and editing stay available.
-  let tapStart, previousTap;
-  root.addEventListener('touchstart',event=> { tapStart=event.touches.length===1 ? {x:event.touches[0].clientX,y:event.touches[0].clientY,at:Date.now()} : null; },{passive:true});
-  root.addEventListener('touchmove',event=> { if (tapStart && (event.touches.length!==1 || Math.hypot(event.touches[0].clientX-tapStart.x,event.touches[0].clientY-tapStart.y)>10)) tapStart=null; },{passive:true});
-  root.addEventListener('touchend',event=> { if (!tapStart || Date.now()-tapStart.at>450 || event.target.closest('input,textarea,[contenteditable],#account-email,#data-message')) { previousTap=null; return; } const now=Date.now(); if (previousTap && now-previousTap.at<300 && Math.hypot(previousTap.x-tapStart.x,previousTap.y-tapStart.y)<24) { if(event.cancelable) event.preventDefault(); previousTap=null; } else previousTap={...tapStart,at:now}; tapStart=null; },{passive:false});
+  // Block page pinch gestures and stationary double taps; retain single-finger scrolling and editing.
+  let tapStart, previousTap, pinchActive = false;
+  root.addEventListener('touchstart',event=> { if (event.touches.length>1) { pinchActive=true; tapStart=null; previousTap=null; cancelHold(); if(event.cancelable) event.preventDefault(); return; } tapStart=!pinchActive ? {x:event.touches[0].clientX,y:event.touches[0].clientY,at:Date.now()} : null; },{passive:false});
+  root.addEventListener('touchmove',event=> { if (pinchActive || event.touches.length>1) { pinchActive=true; tapStart=null; cancelHold(); if(event.cancelable) event.preventDefault(); return; } if (tapStart && Math.hypot(event.touches[0].clientX-tapStart.x,event.touches[0].clientY-tapStart.y)>10) tapStart=null; },{passive:false});
+  root.addEventListener('touchend',event=> { if (pinchActive) { if(event.cancelable) event.preventDefault(); pinchActive=event.touches.length>0; tapStart=null; previousTap=null; return; } if (!tapStart || Date.now()-tapStart.at>450 || event.target.closest('input,textarea,[contenteditable],#account-email,#data-message')) { previousTap=null; return; } const now=Date.now(); if (previousTap && now-previousTap.at<300 && Math.hypot(previousTap.x-tapStart.x,previousTap.y-tapStart.y)<24) { if(event.cancelable) event.preventDefault(); previousTap=null; } else previousTap={...tapStart,at:now}; tapStart=null; },{passive:false});
+  root.addEventListener('touchcancel',()=>{pinchActive=false; tapStart=null; previousTap=null;},{passive:true});
+  for (const type of ['gesturestart','gesturechange','gestureend']) document.addEventListener(type,event=> { if (!root.hidden && event.cancelable) event.preventDefault(); },{passive:false});
   $('logout').onclick = onLogout;
   $('check-data').onclick = async () => { const id = owner; $('check-data').disabled = true; try { const text = await onCheck(); if (owner === id) $('data-message').textContent = text; } catch { if (owner === id) $('data-message').textContent = '连接检查未完成，请联网后重试。'; } finally { $('check-data').disabled = false; } };
   $('reset-demo').onclick = () => { habits = sampleHabits(); logs=[]; selectedDay=localDay(); dates(); deletedHabit = null; filter = 'all'; updateFilters(); renderHabits(); if (route==='archive') renderArchive(); if (route==='detail') location.hash='/habits'; notify('已恢复初始演示。'); };
@@ -179,7 +194,7 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
   }
   return {
     enter(user) { const now = new Date(); const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`; if (owner !== user.id || dayKey !== todayKey) { habits = sampleHabits(); logs=[]; selectedDay=localDay(); filter = 'all'; updateFilters(); } owner = user.id; dayKey = todayKey; $('account-email').textContent = preview ? '公开演示，不使用真实账户' : user.email || '已登录'; $('data-message').textContent = ''; dates(); renderHabits(); root.hidden = false; document.body.classList.add('workspace-active'); document.documentElement.classList.add('workspace-active'); const requested = location.hash.slice(2); setRoute(requested || 'habits'); location.hash = route==='detail' ? `/habit/${detailId}` : `/${route}`; },
-    leave(reset = false) { root.hidden = true; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) { owner = null; habits = sampleHabits(); logs=[]; } },
+    leave(reset = false) { root.hidden = true; ++filterRevision; $('filter-results').getAnimations().forEach(animation=>animation.cancel()); $('filter-results').inert=false; pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) { owner = null; habits = sampleHabits(); logs=[]; } },
     isEditing() { return dialog.open || manage.open; }
   };
 }
