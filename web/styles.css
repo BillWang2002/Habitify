@@ -253,3 +253,15 @@ html.workspace-active, #workspace { touch-action: pan-x pan-y; }
 #workspace .habit-open { transition: opacity .16s ease; }
 #workspace .habit-open:active { transform: none; opacity: .75; }
 #workspace #filter-results { overflow-anchor: none; }
+
+/* v7: full-screen session restoration, neutral dialog focus and bounded updates. */
+#restoring { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 0; padding: max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left)); background: var(--bg); text-align: center; }
+#restoring .loader { flex: none; width: 36px; height: 36px; }
+#restoring h2 { margin: 0; font-size: 23px; }
+#restoring p { margin: 0; max-width: 320px; font-size: 13px; overflow-wrap: anywhere; }
+#workspace #dialog-title:focus, #workspace #manage-title:focus { outline: none; box-shadow: none; }
+.update-banner, .workspace-active .update-banner { position: fixed; z-index: 5; left: max(16px,env(safe-area-inset-left)); right: max(16px,env(safe-area-inset-right)); bottom: max(16px,env(safe-area-inset-bottom)); width: auto; max-width: 440px; max-height: calc(100dvh - 48px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); margin: 0 auto; gap: 12px; padding: 14px; border-radius: 20px; background: var(--panel); box-shadow: 0 10px 35px #17382726; overflow: auto; }
+.workspace-active .update-banner { bottom: calc(90px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 122px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+.update-icon { display: grid; place-items: center; flex: 0 0 32px; height: 32px; border-radius: 11px; background: var(--bg); color: var(--accent); font-size: 23px; }
+.update-banner p { min-width: 0; overflow-wrap: anywhere; line-height: 1.6; }
+.update-banner button { flex: 0 0 auto; min-width: 60px; min-height: 44px; padding: 10px 12px; }

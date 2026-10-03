@@ -13,7 +13,8 @@
 <title>Habitify · 让行动生长</title><link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<main class="shell" id="auth-shell">
+<div id="restoring" role="status"><span class="loader" aria-hidden="true"></span><h2>正在进入你的空间</h2><p>正在恢复登录状态…</p></div>
+<main class="shell" id="auth-shell" hidden>
   <section class="story" aria-labelledby="story-title">
     <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">✦</span> Habitify</a>
     <div class="story-copy"><span class="eyebrow">一点行动，一点成长</span><h1 id="story-title">让每一次行动，<br>都留下足迹。</h1><p>从今天的小习惯出发，<br>慢慢长成你期待的自己。</p></div>
@@ -21,7 +22,6 @@
     <p class="story-footer">把成长，交给每一天的行动。</p>
   </section>
   <section class="panel" aria-label="账户登录">
-    <div id="restoring" role="status"><span class="loader" aria-hidden="true"></span><h2>正在准备你的空间</h2><p>正在恢复登录状态…</p></div>
     <div id="login-view" hidden>
       <span class="eyebrow">欢迎回来</span><h2>开启今天的成长</h2><p class="intro">登录，继续记录你的每一步。</p>
       <form id="login">
@@ -37,6 +37,6 @@
   </section>
 </main>
 <section id="workspace" hidden aria-label="Habitify 主界面"></section>
-<aside id="update-banner" class="update-banner" hidden aria-label="应用更新"><p id="update-note" role="status"></p><button id="apply-update" type="button">更新</button></aside>
+<aside id="update-banner" class="update-banner" hidden aria-label="应用更新"><span class="update-icon" aria-hidden="true">↻</span><p id="update-note" role="status"></p><button id="apply-update" type="button">更新</button></aside>
 <script type="module" src="./app.js"></script>
 </body></html>

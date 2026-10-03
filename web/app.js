@@ -9,7 +9,7 @@ const views = ['restoring', 'login-view', 'unavailable'];
 function render(state) {
   const view = { restoring: 'restoring', signedOut: 'login-view', unavailable: 'unavailable', verified: 'account-view' }[state.phase];
   for (const id of views) $(id).hidden = id !== view;
-  $('auth-shell').hidden = state.phase === 'verified';
+  $('auth-shell').hidden = ['verified', 'restoring'].includes(state.phase);
   if (state.phase === 'verified') workspace.enter(state.user);
   else workspace.leave(state.phase === 'signedOut');
   $('restoring').querySelector('p').textContent = state.message;
