@@ -56,7 +56,8 @@
 - 前端框架、组件及数据访问方式：P1 记录选型理由。
 - 正式仓库/网址和 Supabase 项目：实际连接前确定，不记录密钥。
 - GitHub 仓库：https://github.com/BillWang2002/Habitify ，main 分支已同步。
-- Supabase 项目：https://crtzbheoogvcansekmmw.supabase.co ，仅使用公开 key 配置前端；迁移已执行且 health RPC 通信通过，登录/RLS 仍待验证。
+- Supabase 项目：https://crtzbheoogvcansekmmw.supabase.co ，仅使用公开 key 配置前端；迁移、health RPC、登录、本人读写与跨账户读取隔离基础验证通过。
+- 正式通信页：https://billwang2002.github.io/Habitify/ ，不是正式业务界面；PWA 安装、离线、业务表权限尚未验收。
 - 首批素材来源与游戏化视觉风格：P1 原型起步，P4 完整落地。
 
 ## 变更记录
@@ -64,3 +65,4 @@
 - 2026-10-03：用户提出进入立项步骤与开发规范协定，建立阶段与决策文件。
 - 2026-10-03：Q01 已定案。用户选择达到当天目标才算行动日；已同步为 D11，不采用部分进度即可形成行动日的提案。
 - 2026-10-03：按用户要求调整顺序，基础架构和逐层通信验收先于业务原型。
+- 2026-10-03：用户提供正式页双账户完整复测日志，I0 基础通信验收完成；后续按业务模块继续验证对应权限与规则。
