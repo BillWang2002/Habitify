@@ -1,22 +1,23 @@
+import { createWorkspace } from './workspace.js';
 import { initPwa } from './pwa.js';
 import { createClient } from '@supabase/supabase-js';
 import { AuthController, loginError } from './auth.js';
 const $ = id => document.getElementById(id);
 let controller, busy = false, logoutFailed = false;
-const views = ['restoring', 'login-view', 'unavailable', 'account-view'];
+const workspace = createWorkspace($('workspace'), { onLogout: logout, onCheck: async () => { const count = await controller.readOwnProbes(); return count === null ? '' : `数据连接已通过：${count} 条测试记录均属于当前账户。`; } });
+const views = ['restoring', 'login-view', 'unavailable'];
 function render(state) {
   const view = { restoring: 'restoring', signedOut: 'login-view', unavailable: 'unavailable', verified: 'account-view' }[state.phase];
   for (const id of views) $(id).hidden = id !== view;
-  $('account-email').textContent = state.phase === 'verified' ? state.user.email || '已登录账户' : '';
-  $('data-message').textContent = '';
-  $('check-data').disabled = false;
+  $('auth-shell').hidden = state.phase === 'verified';
+  if (state.phase === 'verified') workspace.enter(state.user);
+  else workspace.leave(state.phase === 'signedOut');
   $('restoring').querySelector('p').textContent = state.message;
   $('login-message').textContent = state.phase === 'signedOut' ? state.message : '';
   $('connection-message').textContent = state.message;
   $('retry-logout').hidden = !logoutFailed;
   if (state.phase === 'signedOut') { $('password').value = ''; setPasswordVisible(false); }
-  if (state.phase === 'verified') location.hash = '/account';
-  else if (state.phase === 'signedOut') location.hash = '/login';
+  if (state.phase === 'signedOut') location.hash = '/login';
   // 私有数据只在身份确认后呈现；不根据 hash 或缓存 user 信息放行。
 }
 function setPasswordVisible(visible) {
@@ -41,17 +42,9 @@ async function logout() {
   catch { logoutFailed = true; $('retry-logout').hidden = false; }
   finally { busy = false; }
 }
-$('logout').onclick = logout; $('retry-logout').onclick = logout;
+$('retry-logout').onclick = logout;
 $('retry').onclick = () => navigator.onLine ? controller?.verify() : controller?.offline();
-$('check-data').onclick = async () => {
-  $('check-data').disabled = true;
-  try {
-    const count = await controller.readOwnProbes();
-    if (count !== null) $('data-message').textContent = `数据连接已通过：可见 ${count} 条测试记录，均属于当前账户。`;
-  } catch (error) { if (controller.state.phase === 'verified') $('data-message').textContent = error.message; }
-  finally { $('check-data').disabled = false; }
-};
-initPwa({ isBusy: () => busy }).catch(() => {});
+initPwa({ isBusy: () => busy || workspace.isEditing() }).catch(() => {});
 try {
   const response = await fetch('./config.json', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error('配置读取失败');

@@ -13,7 +13,7 @@
 <title>Habitify · 让行动生长</title><link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<main class="shell">
+<main class="shell" id="auth-shell">
   <section class="story" aria-labelledby="story-title">
     <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">✦</span> Habitify</a>
     <div class="story-copy"><span class="eyebrow">一点行动，一点成长</span><h1 id="story-title">让每一次行动，<br>都留下足迹。</h1><p>从今天的小习惯出发，<br>慢慢长成你期待的自己。</p></div>
@@ -33,16 +33,10 @@
       <p class="account-note">账户由管理员统一创建与管理。</p><p class="session-note">此设备会保持登录，共用设备使用后请退出。</p>
     </div>
     <div id="unavailable" hidden><span class="eyebrow">稍等一下</span><h2>连接暂时中断</h2><p id="connection-message" role="status"></p><button class="primary" id="retry">重新连接</button><button class="secondary" id="retry-logout">退出当前会话</button></div>
-    <div id="account-view" hidden>
-      <span class="eyebrow">欢迎回来</span><h2>你的成长空间</h2><p class="intro">登录已接通，习惯功能正在建设中。</p>
-      <div class="account-card"><span class="avatar" aria-hidden="true">✦</span><div><strong>当前账户</strong><p id="account-email"></p></div></div>
-      <p class="status-good" role="status">✓ 登录与后端身份校验已通过</p>
-      <button class="primary" id="check-data">检查我的数据连接</button><p class="message" id="data-message" role="status" aria-live="polite"></p>
-      <button class="secondary" id="logout">退出登录</button>
-    </div>
     <footer class="panel-footer"><a id="app-mode" href="./diagnostics/pwa.html">网页模式</a><a href="./diagnostics/">通信检查</a></footer>
   </section>
 </main>
+<section id="workspace" hidden aria-label="Habitify 主界面"></section>
 <aside id="update-banner" class="update-banner" hidden aria-label="应用更新"><p id="update-note" role="status"></p><button id="apply-update" type="button">更新</button></aside>
 <script type="module" src="./app.js"></script>
 </body></html>
