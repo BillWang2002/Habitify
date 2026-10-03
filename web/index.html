@@ -1,14 +1,40 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Habitify 基础通信</title><link rel="stylesheet" href="./styles.css"></head>
-<body><main>
-<h1>Habitify 基础通信</h1><p>工程验证页 · 不产生习惯记录或金币</p>
-<p id="version">读取部署版本……</p><p id="config">读取配置……</p>
-<section><h2>1. 公共后端 API</h2><button id="health" disabled>检查服务器通信</button></section>
-<section><h2>2. 管理员创建的账户</h2>
-<form id="login"><label>邮箱<input id="email" type="email" autocomplete="username" required></label><label>密码<input id="password" type="password" autocomplete="current-password" required></label><button disabled>登录并验证身份</button></form>
-<button id="logout" disabled>退出登录</button><p>当前页只在内存保存登录状态，刷新后需要重新登录。</p></section>
-<section><h2>3. 私有数据与权限</h2><button id="probe" disabled>写入并读取测试探针</button><button id="rows" disabled>读取当前可见探针</button><button id="denied" disabled>检查匿名身份被拒绝</button>
-<p>先用 A 账户写入，退出后用 B 账户读取。只允许看见各自的数据。测试探针不会修改业务数据。</p></section>
-<section><h2>检查结果</h2><pre id="results" role="status" aria-live="polite">尚未运行检查。</pre></section>
-</main><script type="module" src="./app.js"></script></body></html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#245b43">
+<title>Habitify · 让行动生长</title><link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="shell">
+  <section class="story" aria-labelledby="story-title">
+    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">✦</span> Habitify</a>
+    <div class="story-copy"><span class="eyebrow">一点行动，一点成长</span><h1 id="story-title">让每一次行动，<br>都留下足迹。</h1><p>从今天的小习惯出发，<br>慢慢长成你期待的自己。</p></div>
+    <div class="landscape" aria-hidden="true"><div class="sun"></div><div class="hill back"></div><div class="hill front"></div><div class="path"></div><div class="sprout"><i></i><b></b><em></em></div><span class="spark one">✦</span><span class="spark two">✧</span></div>
+    <p class="story-footer">把成长，交给每一天的行动。</p>
+  </section>
+  <section class="panel" aria-label="账户登录">
+    <div id="restoring" role="status"><span class="loader" aria-hidden="true"></span><h2>正在准备你的空间</h2><p>正在恢复登录状态…</p></div>
+    <div id="login-view" hidden>
+      <span class="eyebrow">欢迎回来</span><h2>开启今天的成长</h2><p class="intro">登录，继续记录你的每一步。</p>
+      <form id="login">
+        <label for="email">邮箱</label><input id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="你的账户邮箱" required>
+        <label for="password">密码</label><div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="输入密码" required><button type="button" id="toggle-password" aria-label="显示密码" aria-pressed="false">显示</button></div>
+        <p class="message" id="login-message" role="status" aria-live="polite"></p>
+        <button class="primary" id="submit" type="submit" disabled>登录 Habitify <span aria-hidden="true">↗</span></button>
+      </form>
+      <p class="account-note">账户由管理员统一创建与管理。</p><p class="session-note">此设备会保持登录，共用设备使用后请退出。</p>
+    </div>
+    <div id="unavailable" hidden><span class="eyebrow">稍等一下</span><h2>连接暂时中断</h2><p id="connection-message" role="status"></p><button class="primary" id="retry">重新连接</button><button class="secondary" id="retry-logout">退出当前会话</button></div>
+    <div id="account-view" hidden>
+      <span class="eyebrow">欢迎回来</span><h2>你的成长空间</h2><p class="intro">登录已接通，习惯功能正在建设中。</p>
+      <div class="account-card"><span class="avatar" aria-hidden="true">✦</span><div><strong>当前账户</strong><p id="account-email"></p></div></div>
+      <p class="status-good" role="status">✓ 登录与后端身份校验已通过</p>
+      <button class="primary" id="check-data">检查我的数据连接</button><p class="message" id="data-message" role="status" aria-live="polite"></p>
+      <button class="secondary" id="logout">退出登录</button>
+    </div>
+    <footer class="panel-footer"><span>每一步，都算数。</span><a href="./diagnostics/">通信检查</a></footer>
+  </section>
+</main>
+<script type="module" src="./app.js"></script>
+</body></html>

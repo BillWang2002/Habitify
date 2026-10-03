@@ -1,17 +1,24 @@
 import { createServer } from 'node:http';
+import { build } from 'esbuild';
 import { readFile } from 'node:fs/promises';
 
 const routes = new Map([
   ['/', ['web/index.html', 'text/html']],
   ['/index.html', ['web/index.html', 'text/html']],
-  ['/app.js', ['web/app.js', 'text/javascript']],
+  ['/diagnostics/', ['web/diagnostics/index.html', 'text/html']],
+  ['/diagnostics/index.html', ['web/diagnostics/index.html', 'text/html']],
+  ['/diagnostics/app.js', ['web/diagnostics/app.js', 'text/javascript']],
+  ['/diagnostics/styles.css', ['web/diagnostics/styles.css', 'text/css']],
   ['/styles.css', ['web/styles.css', 'text/css']]
 ]);
 const server = createServer(async (req, res) => {
   const pathname = new URL(req.url, 'http://localhost').pathname;
   try {
     let body, type;
-    if (pathname === '/config.json') {
+    if (pathname === '/app.js') {
+      const result = await build({ entryPoints: ['web/app.js'], bundle: true, format: 'esm', platform: 'browser', target: ['safari16'], write: false });
+      body = result.outputFiles[0].contents; type = 'text/javascript';
+    } else if (pathname === '/config.json') {
       type = 'application/json';
       try { body = await readFile('config.local.json'); }
       catch (error) { if (error.code !== 'ENOENT') throw error; body = await readFile('config.example.json'); }

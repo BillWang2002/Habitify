@@ -5,15 +5,17 @@
 
 ## 当前内容
 
-- 静态通信页：公共 API、账户身份、私有探针读写、匿名拒绝检查。
+- 正式登录页：成长冒险＋电脑分屏、邮箱密码、持久会话、当前会话退出；真实保持验收待完成。
+- 独立通信页：/diagnostics/，公共 API、身份、私有探针读写、匿名拒绝检查；仅内存会话。
 - Supabase 迁移：健康检查 RPC、私有身份 RPC、RLS 隔离的测试探针。
 - GitHub Actions：基础检查与 Pages 发布。
 
 ## 本地运行
 
-需要 Node.js 22 或更新版本，无需安装第三方运行依赖。
+需要 Node.js 22 或更新版本，使用 npm ci 安装官方客户端与打包工具。
 
 ```sh
+npm ci
 npm test
 npm run build
 npm run dev
@@ -30,7 +32,7 @@ npm run check:backend
 2. 关闭公开注册，管理员添加两个测试账户。
 3. GitHub Settings → Pages → Source 选择 GitHub Actions。
 4. Settings → Secrets and variables → Actions → Variables 添加 SUPABASE_URL 与 SUPABASE_PUBLISHABLE_KEY。
-5. 在 Actions 手动运行 Deploy communication page，或推送 main。
+5. 在 Actions 手动运行 Deploy Habitify，或推送 main。
 
 后端变量未齐备时，Actions 运行基础检查并跳过发布；齐备后构建校验参数并部署。
 仅发布 dist，不发布项目文档、SQL 或本地配置。

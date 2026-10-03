@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Habitify 基础通信</title><link rel="stylesheet" href="./styles.css"></head>
+<body><main>
+<h1>Habitify 基础通信</h1><p>工程验证页 · 不产生习惯记录或金币</p>
+<p id="version">读取部署版本……</p><p id="config">读取配置……</p>
+<section><h2>1. 公共后端 API</h2><button id="health" disabled>检查服务器通信</button></section>
+<section><h2>2. 管理员创建的账户</h2>
+<form id="login"><label>邮箱<input id="email" type="email" autocomplete="username" required></label><label>密码<input id="password" type="password" autocomplete="current-password" required></label><button disabled>登录并验证身份</button></form>
+<button id="logout" disabled>退出登录</button><p>当前页只在内存保存登录状态，刷新后需要重新登录。</p></section>
+<section><h2>3. 私有数据与权限</h2><button id="probe" disabled>写入并读取测试探针</button><button id="rows" disabled>读取当前可见探针</button><button id="denied" disabled>检查匿名身份被拒绝</button>
+<p>先用 A 账户写入，退出后用 B 账户读取。只允许看见各自的数据。测试探针不会修改业务数据。</p></section>
+<section><h2>检查结果</h2><pre id="results" role="status" aria-live="polite">尚未运行检查。</pre></section>
+</main><script type="module" src="./app.js"></script></body></html>

@@ -1,78 +1,71 @@
-let config, session;
-const output = document.querySelector('#results');
-function report(message) { output.textContent = `${new Date().toLocaleTimeString()} ${message}\n${output.textContent}`; }
-async function request(path, { body, token, method = 'POST' } = {}) {
-  const response = await fetch(`${config.supabaseUrl}${path}`, {
-    method, headers: { apikey: config.supabasePublishableKey, 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(15000)
-  });
-  if (!response.ok) { const error = new Error(`请求失败（HTTP ${response.status}），请检查配置、账户或权限。`); error.status = response.status; throw error; }
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
+import { createClient } from '@supabase/supabase-js';
+import { AuthController, loginError } from './auth.js';
+const $ = id => document.getElementById(id);
+let controller, busy = false, logoutFailed = false;
+const views = ['restoring', 'login-view', 'unavailable', 'account-view'];
+function render(state) {
+  const view = { restoring: 'restoring', signedOut: 'login-view', unavailable: 'unavailable', verified: 'account-view' }[state.phase];
+  for (const id of views) $(id).hidden = id !== view;
+  $('account-email').textContent = state.phase === 'verified' ? state.user.email || '已登录账户' : '';
+  $('data-message').textContent = '';
+  $('check-data').disabled = false;
+  $('restoring').querySelector('p').textContent = state.message;
+  $('login-message').textContent = state.phase === 'signedOut' ? state.message : '';
+  $('connection-message').textContent = state.message;
+  $('retry-logout').hidden = !logoutFailed;
+  if (state.phase === 'signedOut') { $('password').value = ''; setPasswordVisible(false); }
+  if (state.phase === 'verified') location.hash = '/account';
+  else if (state.phase === 'signedOut') location.hash = '/login';
+  // 私有数据只在身份确认后呈现；不根据 hash 或缓存 user 信息放行。
 }
-async function run(button, action) {
-  button.disabled = true;
-  try { await action(); } catch (error) { report(error.name === 'TimeoutError' ? '请求超时。' : error.message); }
-  finally { updateButtons(); }
+function setPasswordVisible(visible) {
+  $('password').type = visible ? 'text' : 'password';
+  $('toggle-password').textContent = visible ? '隐藏' : '显示';
+  $('toggle-password').setAttribute('aria-label', visible ? '隐藏密码' : '显示密码');
+  $('toggle-password').setAttribute('aria-pressed', String(visible));
 }
-function updateButtons() {
-  const ready = Boolean(config);
-  document.querySelector('#health').disabled = !ready;
-  document.querySelector('#login button').disabled = !ready || Boolean(session);
-  for (const id of ['logout', 'probe', 'rows']) document.querySelector(`#${id}`).disabled = !session;
-  document.querySelector('#denied').disabled = !ready;
-}
-try {
-  const response = await fetch('./config.json', { cache: 'no-store' });
-  if (!response.ok) throw new Error('配置文件读取失败。');
-  const value = await response.json();
-  if (!value.supabaseUrl || !value.supabasePublishableKey) throw new Error('后端尚未配置，先创建 Supabase 项目。');
-  const url = new URL(value.supabaseUrl);
-  if (url.protocol !== 'https:' || url.username || url.password || url.search || url.hash || !['', '/'].includes(url.pathname) || !value.supabasePublishableKey.startsWith('sb_publishable_')) throw new Error('连接配置格式不正确；只接受公开 publishable key。');
-  config = { ...value, supabaseUrl: url.origin };
-  document.querySelector('#config').textContent = '公开连接参数已加载；实际通信尚未验证。';
-} catch (error) { document.querySelector('#config').textContent = error.message; }
-try {
-  const response = await fetch('./version.json', { cache: 'no-store' });
-  if (!response.ok) throw new Error();
-  const value = await response.json(); document.querySelector('#version').textContent = `部署版本：${value.commit}`;
-} catch { document.querySelector('#version').textContent = '部署版本读取失败。'; }
-updateButtons();
-document.querySelector('#health').onclick = (event) => run(event.currentTarget, async () => {
-  const result = await request('/rest/v1/rpc/infra_health', { body: {} });
-  if (result?.ok !== true || result?.service !== 'habitify-infra' || !result?.server_time) throw new Error('响应不符合健康检查约定。');
-  report(`公共 API 已通过，服务器时间：${result.server_time}`);
-});
-document.querySelector('#login').onsubmit = (event) => {
-  event.preventDefault(); run(event.currentTarget.querySelector('button'), async () => {
-    const password = document.querySelector('#password');
-    let result;
-    try { result = await request('/auth/v1/token?grant_type=password', { body: { email: document.querySelector('#email').value, password: password.value } }); }
-    finally { password.value = ''; }
-    if (!result?.access_token || !result?.user?.id) throw new Error('登录响应不完整。');
-    const identity = await request('/rest/v1/rpc/infra_identity', { body: {}, token: result.access_token });
-    if (identity !== result.user.id) throw new Error('后端身份与登录身份不一致。');
-    session = { token: result.access_token, userId: result.user.id }; report('登录与后端身份校验已通过。');
-  });
+$('toggle-password').onclick = () => setPasswordVisible($('password').type === 'password');
+$('login').onsubmit = async event => {
+  event.preventDefault();
+  if (!controller || busy) return;
+  busy = true; $('submit').disabled = true; $('submit').textContent = '正在登录…'; $('login-message').textContent = ''; logoutFailed = false;
+  try { await controller.login($('email').value, $('password').value); }
+  catch (error) { $('login-message').textContent = loginError(error); }
+  finally { $('password').value = ''; setPasswordVisible(false); busy = false; $('submit').disabled = false; $('submit').textContent = '登录 Habitify ↗'; }
 };
-document.querySelector('#logout').onclick = (event) => run(event.currentTarget, async () => {
-  try { await request('/auth/v1/logout', { body: {}, token: session.token }); report('已退出，服务端会话退出请求成功。'); }
-  finally { session = null; output.textContent = '本地登录状态与此前结果已清空。'; }
-});
-document.querySelector('#probe').onclick = (event) => run(event.currentTarget, async () => {
-  const id = crypto.randomUUID();
-  await request('/rest/v1/infra_probes', { body: { id, user_id: session.userId }, token: session.token });
-  const rows = await request(`/rest/v1/infra_probes?id=eq.${id}&select=id,user_id`, { method: 'GET', token: session.token });
-  if (rows.length !== 1 || rows[0].id !== id || rows[0].user_id !== session.userId) throw new Error('写入与读取结果不一致。');
-  report('本人探针写入与读取已通过。');
-});
-document.querySelector('#rows').onclick = (event) => run(event.currentTarget, async () => {
-  const rows = await request('/rest/v1/infra_probes?select=id,user_id', { method: 'GET', token: session.token });
-  if (rows.some(row => row.user_id !== session.userId)) throw new Error('权限错误：读到了其他用户数据。');
-  report(`可见探针 ${rows.length} 条，均属于当前账户。另需确认 A 已写入后 B 看不到 A。`);
-});
-document.querySelector('#denied').onclick = (event) => run(event.currentTarget, async () => {
-  try { await request('/rest/v1/rpc/infra_identity', { body: {} }); }
-  catch (error) { if ([401, 403].includes(error.status)) { report('匿名调用私有 API 已被拒绝。'); return; } throw error; }
-  throw new Error('权限错误：匿名调用私有 API 未被拒绝。');
-});
+async function logout() {
+  if (busy || !controller) return;
+  busy = true;
+  try { logoutFailed = false; await controller.logout(); }
+  catch { logoutFailed = true; $('retry-logout').hidden = false; }
+  finally { busy = false; }
+}
+$('logout').onclick = logout; $('retry-logout').onclick = logout;
+$('retry').onclick = () => controller?.verify();
+$('check-data').onclick = async () => {
+  $('check-data').disabled = true;
+  try {
+    const count = await controller.readOwnProbes();
+    if (count !== null) $('data-message').textContent = `数据连接已通过：可见 ${count} 条测试记录，均属于当前账户。`;
+  } catch (error) { if (controller.state.phase === 'verified') $('data-message').textContent = error.message; }
+  finally { $('check-data').disabled = false; }
+};
+try {
+  const response = await fetch('./config.json', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error('配置读取失败');
+  const config = await response.json();
+  const url = new URL(config.supabaseUrl);
+  if (url.protocol !== 'https:' || url.username || url.password || url.search || url.hash || !['', '/'].includes(url.pathname) || !config.supabasePublishableKey?.startsWith('sb_publishable_')) throw new Error('公开配置不正确');
+  const client = createClient(url.origin, config.supabasePublishableKey, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: `habitify-${url.hostname}-auth` },
+    global: { fetch: (input, init = {}) => fetch(input, { ...init, signal: init.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000) }) }
+  });
+  controller = new AuthController(client, render);
+  $('submit').disabled = false;
+  await controller.start();
+} catch {
+  render({ phase: 'unavailable', user: null, message: '暂时无法初始化登录，请检查连接后重新加载页面。' });
+  $('retry').onclick = () => location.reload();
+}
+window.addEventListener('online', () => controller?.verify());
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && controller && !busy) controller.verify(); });
