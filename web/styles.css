@@ -265,3 +265,8 @@ html.workspace-active, #workspace { touch-action: pan-x pan-y; }
 .update-icon { display: grid; place-items: center; flex: 0 0 32px; height: 32px; border-radius: 11px; background: var(--bg); color: var(--accent); font-size: 23px; }
 .update-banner p { min-width: 0; overflow-wrap: anywhere; line-height: 1.6; }
 .update-banner button { flex: 0 0 auto; min-width: 60px; min-height: 44px; padding: 10px 12px; }
+
+/* v8: overlap outgoing/incoming results without a mid-transition pause. */
+#filter-results { position: relative; }
+#filter-results.is-switching { overflow: hidden; }
+.result-ghost { position: absolute; top: 0; left: 0; width: 100%; pointer-events: none; }

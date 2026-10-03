@@ -4,7 +4,7 @@ import { createNavigation } from './navigation.js';
 import { renderDetail, localDay } from './habit-details.js';
 const routes = ['habits', 'rewards', 'stats', 'me'];
 export function createWorkspace(root, { onLogout = () => {}, onCheck = async () => '这是公开界面预览，不读取个人数据。', preview = false } = {}) {
-  let owner, dayKey, habits = sampleHabits(), filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', deletedHabit, detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false, filterRevision = 0;
+  let owner, dayKey, habits = sampleHabits(), filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', deletedHabit, detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false, filterRevision = 0, resultAnimations = [], resultGhost;
   root.innerHTML = `<div class="app-frame">
 
     <div class="app-content" id="workspace-content">
@@ -34,7 +34,7 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     normalize: next => next.startsWith('habit/') && habits.some(item=>item.id===next.slice(6)) ? next : [...routes,'archive'].includes(next) ? next : 'habits',
     readView: () => ({ filter, selectedDay, scroll: $('workspace-content').scrollTop, detailMonth: [...detailMonth], filterHeight: $('filter-results').style.minHeight, logsOpen: !!$('habit-detail').querySelector('#detail-logs')?.open }),
     onChange: (next, { source, view }) => {
-      cancelHold(); ++filterRevision; $('filter-results').inert=false; $('filter-results').style.minHeight=view?.filterHeight || '';
+      cancelHold(); cancelResultsTransition(); $('filter-results').style.minHeight=view?.filterHeight || '';
       root.querySelectorAll('[data-page], #filter-results').forEach(element=>element.getAnimations().forEach(animation=>animation.cancel()));
       if (dialog.open) dialog.close(); if ($('manage-dialog').open) $('manage-dialog').close();
       if (view) { filter=view.filter; selectedDay=view.selectedDay; detailMonth=[...view.detailMonth]; }
@@ -165,21 +165,40 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     } catch (error) { $('dialog-error').textContent = error.message; }
   };
   function updateFilters() { root.querySelector('.habit-filters').style.setProperty('--filter-index', ['all','pending','done'].indexOf(filter)); for (const button of root.querySelectorAll('[data-filter]')) button.setAttribute('aria-pressed', String(button.dataset.filter === filter)); }
-  async function changeFilter(next) {
+  function cancelResultsTransition() {
+    ++filterRevision;
+    resultAnimations.forEach(animation => animation.cancel()); resultAnimations = [];
+    resultGhost?.remove(); resultGhost = null;
+    $('filter-results').inert = false;
+    $('filter-results').classList.remove('is-switching');
+  }
+  async function changeResults(update, direction) {
+    const results = $('filter-results');
+    const oldContent = $('habit-empty').hidden ? $('habit-list') : $('habit-empty');
+    const oldStyle = getComputedStyle(oldContent);
+    const previousTransform = oldStyle.transform, previousOpacity = oldStyle.opacity;
+    const snapshot = reducedMotion() ? null : oldContent.cloneNode(true);
+    cancelResultsTransition(); const revision = filterRevision;
+    // Keep the scroll range while both visual layers slide together.
+    results.style.minHeight = `${Math.max(results.scrollHeight, results.getBoundingClientRect().height)}px`;
+    update(); renderHabits();
+    if (!snapshot || root.hidden) return;
+    snapshot.removeAttribute('id'); snapshot.querySelectorAll('[id]').forEach(element => element.removeAttribute('id'));
+    snapshot.classList.add('result-ghost'); snapshot.setAttribute('aria-hidden', 'true'); snapshot.inert = true;
+    resultGhost = snapshot; results.append(snapshot); results.inert = true; results.classList.add('is-switching');
+    const newContent = $('habit-empty').hidden ? $('habit-list') : $('habit-empty');
+    const options = { duration: slideDuration(), easing: slideEasing };
+    resultAnimations = [
+      snapshot.animate([{ opacity: previousOpacity, transform: previousTransform }, { opacity: 0, transform: `translateX(${-direction * 44}px)` }], options),
+      newContent.animate([{ opacity: 0, transform: `translateX(${direction * 44}px)` }, { opacity: 1, transform: 'translateX(0)' }], options)
+    ];
+    await Promise.all(resultAnimations.map(animation => animation.finished.catch(() => {})));
+    if (revision === filterRevision) cancelResultsTransition();
+  }
+  function changeFilter(next) {
     if (next === filter) return;
     const order = ['all', 'pending', 'done'], direction = order.indexOf(next) > order.indexOf(filter) ? 1 : -1;
-    const revision = ++filterRevision, results = $('filter-results');
-    results.getAnimations().forEach(animation => animation.cancel());
-    // Keep a shared result floor so a shorter filter cannot clamp the scroll position.
-    results.style.minHeight = `${Math.max(results.scrollHeight, results.getBoundingClientRect().height)}px`;
-    const duration = slideDuration();
-    filter = next; updateFilters(); results.inert = true;
-    if (!reducedMotion()) {
-      const outgoing = results.animate([{ opacity: 1, transform: 'translateX(0)' }, { opacity: .15, transform: `translateX(${-direction * 28}px)` }], { duration: duration / 4, easing: slideEasing });
-      await outgoing.finished.catch(() => {});
-    }
-    if (revision !== filterRevision || root.hidden) return;
-    renderHabits(); results.inert = false; slide(results, direction, duration * 3 / 4);
+    return changeResults(() => { filter = next; updateFilters(); }, direction);
   }
   for (const button of root.querySelectorAll('[data-filter]')) button.onclick = () => changeFilter(button.dataset.filter);
   function renderIconPicker() {
@@ -215,11 +234,11 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     const today=new Date();
     $('today-date').textContent=new Intl.DateTimeFormat('zh-CN',{month:'long',day:'numeric',weekday:'long'}).format(today);
     $('week-strip').replaceChildren();
-    for (let i=-4;i<=2;i++) { const date=new Date(today); date.setDate(today.getDate()+i); const li=document.createElement('li'), button=document.createElement('button'); const key=localDay(date); button.innerHTML=`<span>${date.getMonth()+1}月 · ${['日','一','二','三','四','五','六'][date.getDay()]}</span><b>${date.getDate()}</b>`; button.setAttribute('aria-label',`${key}${i===0 ? ' 今天' : ''}`); button.setAttribute('aria-pressed',String(key===selectedDay)); if (key===selectedDay) li.className='today'; button.onclick=()=>{ selectedDay=key; dates(); renderHabits(); slide($('habit-list'),i<0 ? -1 : 1); }; li.append(button); $('week-strip').append(li); }
+    for (let i=-4;i<=2;i++) { const date=new Date(today); date.setDate(today.getDate()+i); const li=document.createElement('li'), button=document.createElement('button'); const key=localDay(date); button.innerHTML=`<span>${date.getMonth()+1}月 · ${['日','一','二','三','四','五','六'][date.getDay()]}</span><b>${date.getDate()}</b>`; button.setAttribute('aria-label',`${key}${i===0 ? ' 今天' : ''}`); button.setAttribute('aria-pressed',String(key===selectedDay)); if (key===selectedDay) li.className='today'; button.onclick=()=>{ if (key===selectedDay) return; const direction=key>selectedDay ? 1 : -1; changeResults(()=>{ selectedDay=key; dates(); },direction); }; li.append(button); $('week-strip').append(li); }
   }
   return {
     enter(user) { const now = new Date(); const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`; if (owner !== user.id || dayKey !== todayKey) { habits = sampleHabits(); logs=[]; selectedDay=localDay(); filter = 'all'; updateFilters(); } owner = user.id; dayKey = todayKey; $('account-email').textContent = preview ? '公开演示，不使用真实账户' : user.email || '已登录'; $('data-message').textContent = ''; dates(); renderHabits(); root.hidden = false; document.body.classList.add('workspace-active'); document.documentElement.classList.add('workspace-active'); const requested = location.hash.slice(2); navigation.start(requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive'].includes(requested) ? requested : 'habits'); },
-    leave(reset = false) { navigation.stop({reset}); root.hidden = true; ++filterRevision; $('filter-results').getAnimations().forEach(animation=>animation.cancel()); $('filter-results').inert=false; pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) { owner = null; habits = sampleHabits(); logs=[]; } },
+    leave(reset = false) { navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) { owner = null; habits = sampleHabits(); logs=[]; } },
     isEditing() { return dialog.open || manage.open; }
   };
 }
