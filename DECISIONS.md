@@ -56,7 +56,7 @@
 - 前端框架、组件及数据访问方式：P1 记录选型理由。
 - 正式仓库/网址和 Supabase 项目：实际连接前确定，不记录密钥。
 - GitHub 仓库：https://github.com/BillWang2002/Habitify ，main 分支已同步。
-- Supabase 项目：https://crtzbheoogvcansekmmw.supabase.co ，仅使用公开 key 配置前端；基础迁移仍待执行。
+- Supabase 项目：https://crtzbheoogvcansekmmw.supabase.co ，仅使用公开 key 配置前端；迁移已执行且 health RPC 通信通过，登录/RLS 仍待验证。
 - 首批素材来源与游戏化视觉风格：P1 原型起步，P4 完整落地。
 
 ## 变更记录

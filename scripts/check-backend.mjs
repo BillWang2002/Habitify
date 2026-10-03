@@ -5,8 +5,10 @@ const config = validateConfig(JSON.parse(await readFile('config.local.json', 'ut
 const checks = [
   { name: '身份认证服务', path: '/auth/v1/health', method: 'GET', verify: data => Boolean(data?.version || data?.name) },
   { name: 'JWT 公钥端点', path: '/auth/v1/.well-known/jwks.json', method: 'GET', verify: data => Array.isArray(data?.keys) },
+  { name: '公开注册关闭', path: '/auth/v1/settings', method: 'GET', verify: data => data?.disable_signup === true, failure: '未通过（未确认关闭注册）' },
   { name: '项目健康检查 RPC', path: '/rest/v1/rpc/infra_health', method: 'POST', verify: data => data?.ok === true && data?.service === 'habitify-infra' && Boolean(data?.server_time) },
-  { name: '匿名身份访问私有 RPC', path: '/rest/v1/rpc/infra_identity', method: 'POST', denied: true }
+  { name: '匿名身份访问私有 RPC', path: '/rest/v1/rpc/infra_identity', method: 'POST', denied: true },
+  { name: '匿名身份读取探针表', path: '/rest/v1/infra_probes?select=id', method: 'GET', denied: true }
 ];
 let failed = false;
 for (const check of checks) {
@@ -23,7 +25,7 @@ for (const check of checks) {
       failed ||= !pass;
     } else if (response.ok) {
       const pass = check.verify(await response.json());
-      console.log(`${check.name}: ${pass ? '通过' : '响应格式不符合约定'}，HTTP ${response.status}`);
+      console.log(`${check.name}: ${pass ? '通过' : (check.failure || '响应格式不符合约定')}，HTTP ${response.status}`);
       failed ||= !pass;
     } else {
       let code;
