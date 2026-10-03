@@ -33,3 +33,10 @@ html, body { overscroll-behavior-y: none; }
   .panel { padding: 16px 20px 10px; }
   .account-note { margin-top: 12px; }
 }
+
+/* Standalone still respects the notch/home indicator and allows keyboard scrolling. */
+body.is-standalone { min-height: 100dvh; }
+.update-banner { width: min(440px, 100%); padding: 12px 16px; margin: 14px auto 0; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); display: flex; align-items: center; gap: 16px; }
+.update-banner p { flex: 1; margin: 0; font-size: 13px; }
+.update-banner button { background: var(--accent); color: var(--button-ink); border: 0; border-radius: 10px; padding: 10px 16px; }
+.panel-footer a { min-height: 44px; display: flex; align-items: center; }

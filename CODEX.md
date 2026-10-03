@@ -2,7 +2,7 @@
 
 立项日期：2026-10-03（Australia/Sydney）  
 项目名称：Habitify（工作名称）  
-状态：基础通信验收已完成，登录视觉已确认、持久会话已接入，用户报告 iOS/电脑首轮登录验收通过；正在优化手机滚动体验。
+状态：基础通信验收已完成，登录视觉已确认、持久会话已接入，用户报告 iOS/电脑首轮登录验收通过；手机滚动已优化，PWA 可安装基础与应用壳已实现，主屏幕真机验收待完成。
 
 配套文档：[开发规范](./DEVELOPMENT.md)、[阶段计划](./ROADMAP.md)、[决策记录](./DECISIONS.md)。
 
@@ -182,7 +182,7 @@
 ## 5. 技术与数据原则
 
 - GitHub Pages 只提供静态前端，服务端逻辑放在 Supabase。
-- PWA 配置应用名称、图标、Manifest、Service Worker 与离线应用壳。
+- PWA 配置应用名称、图标、Manifest、Service Worker 与离线应用壳；用户要求提前实现，当前规格与实际边界见 PWA.md。
 - 适配 iPhone 安全区域、触摸操作和独立窗口运行，做真实设备验证。
 - 资源路径、Manifest 与 Service Worker scope 适配 GitHub 项目子路径。
 - 第一版建议 Hash 路由，避免静态托管的深链接刷新 404。

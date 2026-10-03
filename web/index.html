@@ -2,6 +2,13 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Habitify">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="color-scheme" content="light dark"><meta name="theme-color" content="#245b43">
 <title>Habitify · 让行动生长</title><link rel="stylesheet" href="./styles.css">
 </head>
@@ -33,8 +40,9 @@
       <button class="primary" id="check-data">检查我的数据连接</button><p class="message" id="data-message" role="status" aria-live="polite"></p>
       <button class="secondary" id="logout">退出登录</button>
     </div>
-    <footer class="panel-footer"><span>每一步，都算数。</span><a href="./diagnostics/">通信检查</a></footer>
+    <footer class="panel-footer"><a id="app-mode" href="./diagnostics/pwa.html">网页模式</a><a href="./diagnostics/">通信检查</a></footer>
   </section>
 </main>
+<aside id="update-banner" class="update-banner" hidden aria-label="应用更新"><p id="update-note" role="status"></p><button id="apply-update" type="button">更新</button></aside>
 <script type="module" src="./app.js"></script>
 </body></html>

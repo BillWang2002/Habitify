@@ -1,3 +1,4 @@
+import { initPwa } from './pwa.js';
 import { createClient } from '@supabase/supabase-js';
 import { AuthController, loginError } from './auth.js';
 const $ = id => document.getElementById(id);
@@ -41,7 +42,7 @@ async function logout() {
   finally { busy = false; }
 }
 $('logout').onclick = logout; $('retry-logout').onclick = logout;
-$('retry').onclick = () => controller?.verify();
+$('retry').onclick = () => navigator.onLine ? controller?.verify() : controller?.offline();
 $('check-data').onclick = async () => {
   $('check-data').disabled = true;
   try {
@@ -50,6 +51,7 @@ $('check-data').onclick = async () => {
   } catch (error) { if (controller.state.phase === 'verified') $('data-message').textContent = error.message; }
   finally { $('check-data').disabled = false; }
 };
+initPwa({ isBusy: () => busy }).catch(() => {});
 try {
   const response = await fetch('./config.json', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
   if (!response.ok) throw new Error('配置读取失败');
@@ -62,10 +64,12 @@ try {
   });
   controller = new AuthController(client, render);
   $('submit').disabled = false;
-  await controller.start();
+  await controller.start({ verify: navigator.onLine });
+  if (!navigator.onLine) controller.offline();
 } catch {
   render({ phase: 'unavailable', user: null, message: '暂时无法初始化登录，请检查连接后重新加载页面。' });
   $('retry').onclick = () => location.reload();
 }
+window.addEventListener('offline', () => controller?.offline());
 window.addEventListener('online', () => controller?.verify());
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && controller && !busy) controller.verify(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && controller && !busy) { if (navigator.onLine) controller.verify(); else controller.offline(); } });

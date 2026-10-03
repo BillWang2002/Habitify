@@ -63,3 +63,10 @@ test('凭据与网络错误文案区分且不带服务器原始信息', () => {
   assert.match(loginError({ code: 'invalid_credentials', status: 400 }), /邮箱或密码/);
   assert.match(loginError({ message: 'sensitive details' }), /连接服务器/);
 });
+test('离线启动不向本地缓存用户放行，恢复前不执行身份请求', async () => {
+  let calls = 0;
+  const { controller } = setup({ auth: { getSession: async () => { calls++; return { data: { session: { user } }, error: null }; } } });
+  await controller.start({ verify: false }); controller.offline();
+  assert.equal(calls, 0); assert.equal(controller.state.phase, 'unavailable'); assert.equal(controller.state.user, null);
+  await controller.verify(); assert.equal(controller.state.phase, 'verified');
+});

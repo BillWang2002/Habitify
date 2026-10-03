@@ -23,13 +23,17 @@ export class AuthController {
     this.state = { phase, user, message };
     this.onState(this.state);
   }
-  async start() {
+  async start({ verify = true } = {}) {
     this.subscription = this.client.auth.onAuthStateChange((event) => {
       if (this.disposed || this.signingOut) return;
       if (event === 'SIGNED_OUT') { this.epoch++; this.publish('signedOut'); }
       else if (event !== 'INITIAL_SESSION') this.schedule(() => this.verify());
     }).data.subscription;
-    await this.verify();
+    if (verify) await this.verify();
+  }
+  offline() {
+    ++this.epoch;
+    this.publish('unavailable', null, '当前处于离线状态。界面可打开，登录与个人数据需联网后确认。');
   }
   async verify() {
     if (this.disposed || this.signingOut) return;

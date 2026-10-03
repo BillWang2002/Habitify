@@ -1,5 +1,7 @@
-import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { build } from 'esbuild';
+import sharp from 'sharp';
 import { validateConfig } from './config.mjs';
 
 let config;
@@ -13,11 +15,29 @@ if (process.env.SUPABASE_URL || process.env.SUPABASE_PUBLISHABLE_KEY) {
   }
 }
 config = validateConfig(config, { required: process.env.CI === 'true' });
-await mkdir('dist', { recursive: true });
-for (const name of ['index.html', 'styles.css']) await copyFile(`web/${name}`, `dist/${name}`);
-await build({ entryPoints: ['web/app.js'], bundle: true, format: 'esm', platform: 'browser', target: ['safari16'], outfile: 'dist/app.js', minify: true });
+const hash = content => createHash('sha256').update(content).digest('hex').slice(0, 16);
+await rm('dist', { recursive: true, force: true });
+await mkdir('dist/assets', { recursive: true });
+const bundle = await build({ entryPoints: ['web/app.js'], bundle: true, format: 'esm', platform: 'browser', target: ['safari16'], minify: true, write: false });
+const js = bundle.outputFiles[0].contents;
+const css = await readFile('web/styles.css');
+const appName = `assets/app.${hash(js)}.js`, cssName = `assets/styles.${hash(css)}.css`;
+await writeFile(`dist/${appName}`, js); await writeFile(`dist/${cssName}`, css);
+let html = await readFile('web/index.html', 'utf8');
+html = html.replace('./app.js', `./${appName}`).replace('./styles.css', `./${cssName}`);
+await writeFile('dist/index.html', html);
+await copyFile('web/manifest.webmanifest', 'dist/manifest.webmanifest');
+await mkdir('dist/icons', { recursive: true });
+const icon = await readFile('web/icons/icon.svg');
+for (const [name, size] of [['icon-192.png', 192], ['icon-512.png', 512], ['icon-maskable-512.png', 512], ['apple-touch-icon.png', 180]]) {
+  await sharp(icon).resize(size, size).png().toFile(`dist/icons/${name}`);
+}
 await mkdir('dist/diagnostics', { recursive: true });
-for (const name of ['index.html', 'app.js', 'styles.css']) await copyFile(`web/diagnostics/${name}`, `dist/diagnostics/${name}`);
+for (const name of ['index.html', 'app.js', 'styles.css', 'pwa.html', 'pwa-check.js']) await copyFile(`web/diagnostics/${name}`, `dist/diagnostics/${name}`);
 await writeFile('dist/config.json', JSON.stringify(config));
-await writeFile('dist/version.json', JSON.stringify({ commit: process.env.GITHUB_SHA || 'local', builtAt: new Date().toISOString() }));
-console.log(config.supabaseUrl ? '已生成登录页及独立通信检查页。' : '已生成登录页：后端尚未配置，不会模拟成功。');
+const files = ['index.html', appName, cssName, 'config.json', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
+const revision = hash(Buffer.concat(await Promise.all(files.map(file => readFile(`dist/${file}`)))));
+const worker = (await readFile('web/sw.js', 'utf8')).replace('__REVISION__', revision).replace('__PRECACHE__', JSON.stringify(files));
+await writeFile('dist/sw.js', worker);
+await writeFile('dist/version.json', JSON.stringify({ commit: process.env.GITHUB_SHA || 'local', shell: revision, builtAt: new Date().toISOString() }));
+console.log('已生成 PWA 登录页、应用图标、版本缓存与独立通信检查页。');

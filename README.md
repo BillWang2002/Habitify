@@ -5,7 +5,7 @@
 
 ## 当前内容
 
-- 正式登录页：成长冒险＋电脑分屏、邮箱密码、持久会话、当前会话退出；首轮 iOS/电脑登录验收通过（用户报告）；完整 PWA 尚未完成。
+- 正式登录页：成长冒险＋电脑分屏、邮箱密码、持久会话、当前会话退出；首轮 iOS/电脑登录验收通过（用户报告）；PWA 可安装基础已接入，独立窗口真机验收与离线业务待完成。
 - 独立通信页：/diagnostics/，公共 API、身份、私有探针读写、匿名拒绝检查；仅内存会话。
 - Supabase 迁移：健康检查 RPC、私有身份 RPC、RLS 隔离的测试探针。
 - GitHub Actions：基础检查与 Pages 发布。
@@ -22,7 +22,7 @@ npm run dev
 npm run check:backend
 ```
 
-浏览器打开 http://127.0.0.1:5173 。
+浏览器打开 http://127.0.0.1:5173/Habitify/ ，按正式子路径检查 PWA。开发服务启动时构建 dist；修改后重新运行 npm run build 或重启服务，有更新提示时点击更新。
 复制 config.example.json 为 config.local.json，填入 Supabase Project URL 和 `sb_publishable_` 开头的公开 key。
 后端未配置时，页面明确显示未连接。禁止填写管理密钥或密码。
 
@@ -45,5 +45,6 @@ npm run check:backend
 - [阶段计划](./ROADMAP.md)
 - [决策记录](./DECISIONS.md)
 - [登录业务与前端方案](./AUTH.md)
+- [PWA 安装与验收](./PWA.md)
 
 所有“通过”状态须有对应真实验证，不以文件准备完成代替云端验收。
