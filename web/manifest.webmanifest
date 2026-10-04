@@ -1,9 +1,9 @@
 {
   "id": "./",
-  "name": "Habitify · 让行动生长",
-  "short_name": "Habitify",
+  "name": "Habitify · 今日打卡",
+  "short_name": "今日打卡",
   "lang": "zh-CN",
-  "description": "记录每一天的行动，让习惯慢慢生长。",
+  "description": "记录每一天的小行动，积累自己的成长。",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

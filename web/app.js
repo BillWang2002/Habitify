@@ -1,3 +1,4 @@
+import { showFieldErrors } from './form-validation.js';
 import { createWorkspace } from './workspace.js';
 import { createHabitsApi } from './habits-api.js';
 import { initPwa } from './pwa.js';
@@ -28,9 +29,15 @@ function setPasswordVisible(visible) {
   $('toggle-password').setAttribute('aria-pressed', String(visible));
 }
 $('toggle-password').onclick = () => setPasswordVisible($('password').type === 'password');
+for(const id of ['email','password']) $(id).addEventListener('input',()=>showFieldErrors(document,{},[id],{focus:false}));
 $('login').onsubmit = async event => {
   event.preventDefault();
   if (!controller || busy) return;
+  const errors={};
+  if(!$('email').value.trim()) errors.email='请填写账户邮箱。';
+  else if($('email').validity.typeMismatch) errors.email='请填写有效的邮箱地址。';
+  if(!$('password').value) errors.password='请填写密码。';
+  if(!showFieldErrors(document,errors,['email','password'])) return;
   busy = true; $('submit').disabled = true; $('submit').textContent = '正在登录…'; $('login-message').textContent = ''; logoutFailed = false;
   try { await controller.login($('email').value, $('password').value); }
   catch (error) { $('login-message').textContent = loginError(error); }

@@ -1,13 +1,13 @@
 # Habitify
 
-个人与小范围使用的习惯管理 PWA，采用 GitHub Pages + Supabase。
-基础通信与登录验收已完成，用户报告 iOS PWA 验证通过。主界面与打卡前端第一至第七版已验收归档，当前实施真实习惯持久化与金币，进度/部署/验收见 DATA.md；完整离线业务尚未实现。
+个人与小范围使用的打卡管理 PWA，采用 GitHub Pages + Supabase。
+基础通信与登录验收已完成，用户报告 iOS PWA 验证通过。主界面与打卡前端第一至第七版已验收归档，当前实施真实打卡持久化与金币，进度/部署/验收见 DATA.md；完整离线业务尚未实现。
 
 ## 当前内容
 
 - 正式登录页：成长冒险＋电脑分屏、邮箱密码、持久会话、当前会话退出；首轮 iOS/电脑登录验收通过（用户报告）；PWA 可安装基础已接入，用户报告独立窗口验收通过，完整离线业务待完成。
 - 独立通信页：/diagnostics/，公共 API、身份、私有探针读写、匿名拒绝检查；仅内存会话。
-- Supabase 迁移：基础通信；新增习惯、记录、金币流水和受限交易 RPC，配套 habits Edge API。发布与验收见 DATA.md。
+- Supabase 迁移：基础通信；新增打卡、记录、金币流水和受限交易 RPC，配套 habits Edge API。发布与验收见 DATA.md。
 - GitHub Actions：基础检查与 Pages 发布。
 
 ## 本地运行
@@ -34,7 +34,7 @@ npm run check:backend
 4. Settings → Secrets and variables → Actions → Variables 添加 SUPABASE_URL 与 SUPABASE_PUBLISHABLE_KEY。
 5. 在 Actions 手动运行 Deploy Habitify，或推送 main。
 
-当前习惯业务还需按 [DATA.md](./DATA.md) 部署第二个迁移与 habits API；仅执行基础迁移不能提供业务保存。
+当前打卡业务还需按 [DATA.md](./DATA.md) 部署第二个迁移与 habits API；仅执行基础迁移不能提供业务保存。
 
 后端变量未齐备时，Actions 运行基础检查并跳过发布；齐备后构建校验参数并部署。
 仅发布 dist，不发布项目文档、SQL 或本地配置。
@@ -57,4 +57,4 @@ npm run check:backend
 
 所有“通过”状态须有对应真实验证，不以文件准备完成代替云端验收。
 
-统计第一版：行动概览、月历、习惯统计和柱形/累计折线；口径、部署及验收见 [STATS.md](./STATS.md)。
+统计第一版：行动概览、月历、打卡统计和柱形/累计折线；口径、部署及验收见 [STATS.md](./STATS.md)。

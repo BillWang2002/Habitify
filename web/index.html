@@ -7,26 +7,26 @@
 <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Habitify">
+<meta name="apple-mobile-web-app-title" content="今日打卡">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="color-scheme" content="light dark"><meta name="theme-color" content="#245b43">
-<title>Habitify · 让行动生长</title><link rel="stylesheet" href="./styles.css">
+<title>Habitify · 今日打卡</title><link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 <div id="restoring" role="status"><span class="loader" aria-hidden="true"></span><h2>正在进入你的空间</h2><p>正在恢复登录状态…</p></div>
 <main class="shell" id="auth-shell" hidden>
   <section class="story" aria-labelledby="story-title">
-    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">✦</span> Habitify</a>
-    <div class="story-copy"><span class="eyebrow">一点行动，一点成长</span><h1 id="story-title">让每一次行动，<br>都留下足迹。</h1><p>从今天的小习惯出发，<br>慢慢长成你期待的自己。</p></div>
+    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-9M12 14C5 14 4 10 4 6c6 0 8 3 8 8Zm0-3c0-6 3-8 8-8 0 5-3 8-8 8Z"/><path d="m14 18 2 2 5-5"/></svg></span> Habitify</a>
+    <div class="story-copy"><span class="eyebrow">一点行动，一点成长</span><h1 id="story-title">让每一次行动，<br>都留下足迹。</h1><p>从今天的小行动出发，<br>慢慢长成你期待的自己。</p></div>
     <div class="landscape" aria-hidden="true"><div class="sun"></div><div class="hill back"></div><div class="hill front"></div><div class="path"></div><div class="sprout"><i></i><b></b><em></em></div><span class="spark one">✦</span><span class="spark two">✧</span></div>
     <p class="story-footer">把成长，交给每一天的行动。</p>
   </section>
   <section class="panel" aria-label="账户登录">
     <div id="login-view" hidden>
       <span class="eyebrow">欢迎回来</span><h2>开启今天的成长</h2><p class="intro">登录，继续记录你的每一步。</p>
-      <form id="login">
-        <label for="email">邮箱</label><input id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="你的账户邮箱" required>
-        <label for="password">密码</label><div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="输入密码" required><button type="button" id="toggle-password" aria-label="显示密码" aria-pressed="false">显示</button></div>
+      <form id="login" novalidate>
+        <label for="email">邮箱</label><input id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" maxlength="254" placeholder="你的账户邮箱" aria-describedby="email-error" required><p id="email-error" class="field-error" role="status" hidden></p>
+        <label for="password">密码</label><div class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="输入密码" aria-describedby="password-error" required><button type="button" id="toggle-password" aria-label="显示密码" aria-pressed="false">显示</button></div><p id="password-error" class="field-error" role="status" hidden></p>
         <p class="message" id="login-message" role="status" aria-live="polite"></p>
         <button class="primary" id="submit" type="submit" disabled>登录 Habitify <span aria-hidden="true">↗</span></button>
       </form>

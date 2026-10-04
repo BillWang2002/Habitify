@@ -2,10 +2,10 @@ import { isComplete } from './habits-model.js';
 import { iconSvg, resolveHabitIcon } from './theme.js';
 export const localDay = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 export function renderDetail(root, habit, logs, month, { onMenu, onProgress, records=[], busy=false, today:todayKey=localDay() }) {
-  root.innerHTML = `<div class="detail-header"><a href="#/habits" class="back-link" aria-label="返回上一页">‹</a><h1></h1><button id="detail-menu" aria-label="习惯管理菜单">•••</button></div>
+  root.innerHTML = `<div class="detail-header"><a href="#/habits" class="back-link" aria-label="返回上一页">‹</a><h1></h1><button id="detail-menu" aria-label="打卡管理菜单">•••</button></div>
   <div class="detail-profile"><span class="habit-icon"></span><div><strong id="detail-plan"></strong><p id="detail-note"></p></div></div>
   <div class="detail-today"><div><h2>今日进度</h2><p id="detail-progress"></p></div><button id="detail-check" class="habit-action"></button></div>
-  <section class="detail-panel"><h2>习惯概览</h2><div class="detail-metrics"><div><strong id="detail-days"></strong><span>完成天数</span></div><div><strong id="detail-month-days">0</strong><span>本月完成</span></div><div><strong id="detail-log-count"></strong><span>操作日志</span></div></div><p class="dialog-note">累计完成按保存的每日目标计算；最多展示最近 200 条操作日志。</p></section>
+  <section class="detail-panel"><h2>打卡概览</h2><div class="detail-metrics"><div><strong id="detail-days"></strong><span>完成天数</span></div><div><strong id="detail-month-days">0</strong><span>本月完成</span></div><div><strong id="detail-log-count"></strong><span>操作日志</span></div></div><p class="dialog-note">累计完成按保存的每日目标计算；最多展示最近 200 条操作日志。</p></section>
   <section class="detail-panel"><div class="calendar-heading"><button id="month-prev" aria-label="上个月">‹</button><h2 id="calendar-month"></h2><button id="month-next" aria-label="下个月">›</button></div><p id="month-summary" class="dialog-note"></p><div class="calendar-week">${['一','二','三','四','五','六','日'].map(day=>`<span>${day}</span>`).join('')}</div><div class="calendar-grid" id="calendar-grid"></div><p id="calendar-selection" role="status" class="dialog-note"></p><p class="calendar-legend">✓ 已完成 · ◐ 部分进度 · ○ 今日待完成 · — 无完成记录</p></section>
   <details class="detail-panel" id="detail-logs"><summary>打卡日志</summary><ol id="detail-log-list"></ol></details>`;
   root.querySelector('h1').textContent = habit.name;
