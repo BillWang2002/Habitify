@@ -49,6 +49,6 @@
 
 官方依据：[Edge Functions 身份校验](https://supabase.com/docs/guides/functions/auth)、[新 API key 迁移](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys)、[数据库安全](https://supabase.com/docs/guides/database/secure-data)。
 
-2026-10-04：用户授权后在 Habitify-dev 执行迁移，SQL Editor 返回 Success. No rows returned；habits 函数发布成功，legacy gateway 校验关闭，函数内 getUser 身份校验保留。线上匿名/伪造 token 实测均 401 LOGIN_REQUIRED，OPTIONS 返回 200 与允许跨域响应头。37 项本地测试与构建通过；不代表线上双账户完整业务验收。
+2026-10-04：用户授权后在 Habitify-dev 执行迁移，SQL Editor 返回 Success. No rows returned；habits 函数发布成功，legacy gateway 校验关闭，函数内 getUser 身份校验保留。线上匿名/伪造 token 实测均 401 LOGIN_REQUIRED，OPTIONS 返回 200 与允许跨域响应头。38 项本地测试与构建通过；不代表线上双账户完整业务验收。
 
 线上界面验收：使用原有测试账户会话，无读取/记录密码或令牌。新建“通信验收（可删除）”数量习惯，1/8 时行动日不成立且余额 0；8/8 时行动日成立、月历完成 1 天、余额 15；刷新后保留 15 与记录；撤销到 0 后余额 0；重新达标仍为 15。金币规则页实际返回规则版本 1。本轮测试习惯最终清零并归档，余额 0，保留操作与金币撤回流水供核对。线上双账号越权写入、真正跨设备并发、iPhone 新业务尚未验收。

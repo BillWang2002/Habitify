@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createHabitsApi } from '../web/habits-api.js';
+import { createHabitsApi, isCurrentSnapshot } from '../web/habits-api.js';
 const client={auth:{getSession:async()=>({data:{session:{access_token:'test-user-token'}}})}};
 const data={revision:1,today:'2026-10-04',habits:[],records:[]};
 test('网络重试保持相同幂等请求，使用用户token而非管理key',async()=> {
@@ -16,3 +16,5 @@ test('权限失效与数据库冲突不重试写入，不回显服务器细节',
  const absent=createHabitsApi({auth:{getSession:async()=>({data:{session:null}})}});
  await assert.rejects(absent({op:'snapshot'}),error=>error.code==='LOGIN_REQUIRED');
 });
+
+test('迟到的旧revision或旧归属日不能覆盖新快照',()=> { const current={revision:5,today:'2026-10-05'}; assert.equal(isCurrentSnapshot({revision:4,today:'2026-10-05'},current),false); assert.equal(isCurrentSnapshot({revision:5,today:'2026-10-04'},current),false); assert.equal(isCurrentSnapshot({revision:5,today:'2026-10-05'},current),true); assert.equal(isCurrentSnapshot({revision:6,today:'2026-10-06'},current),true); });

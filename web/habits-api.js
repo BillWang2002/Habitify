@@ -26,3 +26,5 @@ export function createHabitsApi(client, { fetcher=fetch, url, key, timezone=Intl
   }
  };
 }
+
+export const isCurrentSnapshot=(next,current)=>!current || (next.revision>=current.revision && next.today>=current.today);

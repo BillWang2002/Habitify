@@ -2,6 +2,7 @@ import { sampleHabits, isComplete, todaySummary, setProgress, addHabit, removeHa
 import { defaultTheme, iconChoices, iconSvg, resolveHabitIcon } from './theme.js';
 import { createNavigation } from './navigation.js';
 import { renderDetail, localDay } from './habit-details.js';
+import { isCurrentSnapshot } from './habits-api.js';
 import { coinRulesHtml } from './coin-rules.js';
 const routes = ['habits', 'rewards', 'stats', 'me'];
 export function createWorkspace(root, { onLogout = () => {}, preview = false, request = async () => { throw new Error('习惯服务尚未连接。'); } } = {}) {
@@ -123,6 +124,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     if(!loaded) { $('empty-title').textContent='等待连接你的习惯'; $('empty-note').textContent='联网读取成功后即可添加和打卡。'; }
   }
   function applySnapshot(data) {
+    if(!isCurrentSnapshot(data,snapshot)) return;
     snapshot=data; habits=data.habits; records=data.records; logs=data.logs; loaded=true;
     $('coin-balance').textContent=`${data.balance} 金币 · 今日获得 ${data.todayCoins}`;
     $('reward-balance').textContent=data.balance;
@@ -135,7 +137,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   }
   async function loadData() {
     const token=epoch; const id=owner; $('sync-status').textContent='正在读取你的习惯…';
-    try { const data=await request({op:'snapshot'}); if(token!==epoch || id!==owner) return; if(!snapshot || snapshot.today!==data.today) selectedDay=data.today; applySnapshot(data); dates(); }
+    try { const data=await request({op:'snapshot'}); if(token!==epoch || id!==owner || !isCurrentSnapshot(data,snapshot)) return; if(!snapshot || snapshot.today!==data.today) selectedDay=data.today; applySnapshot(data); dates(); }
     catch(error) { if(token!==epoch || id!==owner) return; loaded=false; $('sync-status').textContent=error.message; $('retry-data').hidden=false; renderHabits(); }
   }
   async function mutate(payload, local) {
@@ -282,7 +284,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   root.addEventListener('touchcancel',()=>{pinchActive=false; tapStart=null; previousTap=null;},{passive:true});
   for (const type of ['gesturestart','gesturechange','gestureend']) document.addEventListener(type,event=> { if (!root.hidden && event.cancelable) event.preventDefault(); },{passive:false});
   $('logout').onclick = onLogout;
-  $('check-data').onclick=async()=> { const token=epoch; $('check-data').disabled=true; try { if(preview) { $('data-message').textContent='公开预览不读取个人数据。'; return; } if(pending) await sendPending(); else await loadData(); if(token===epoch) $('data-message').textContent=loaded ? '习惯数据已同步。' : '连接未完成，请联网后重试。'; } catch(error) { if(token===epoch) $('data-message').textContent=error.message; } finally { $('check-data').disabled=false; } };
+  $('check-data').onclick=async()=> { if(writing) { notify('正在保存，请稍候。'); return; } const token=epoch; $('check-data').disabled=true; try { if(preview) { $('data-message').textContent='公开预览不读取个人数据。'; return; } if(pending) await sendPending(); else await loadData(); if(token===epoch) $('data-message').textContent=loaded ? '习惯数据已同步。' : '连接未完成，请联网后重试。'; } catch(error) { if(token===epoch) $('data-message').textContent=error.message; } finally { $('check-data').disabled=false; } };
   function dates() {
     const today=new Date(`${currentDay()}T12:00:00`);
     $('today-date').textContent=new Intl.DateTimeFormat('zh-CN',{month:'long',day:'numeric',weekday:'long'}).format(today);
