@@ -34,6 +34,8 @@ npm run check:backend
 4. Settings → Secrets and variables → Actions → Variables 添加 SUPABASE_URL 与 SUPABASE_PUBLISHABLE_KEY。
 5. 在 Actions 手动运行 Deploy Habitify，或推送 main。
 
+当前习惯业务还需按 [DATA.md](./DATA.md) 部署第二个迁移与 habits API；仅执行基础迁移不能提供业务保存。
+
 后端变量未齐备时，Actions 运行基础检查并跳过发布；齐备后构建校验参数并部署。
 仅发布 dist，不发布项目文档、SQL 或本地配置。
 
