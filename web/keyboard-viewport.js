@@ -7,15 +7,16 @@ export function keyboardGeometry({baseHeight,height,offsetTop=0,keyboardHeight=0
 }
 export function initKeyboardViewport() {
  const root=document.documentElement, viewport=window.visualViewport;
- let baseHeight=window.innerHeight, baseWidth=window.innerWidth, frame=0, touchY=0;
+ let baseHeight=window.innerHeight, baseWidth=window.innerWidth, frame=0, touchY=0, keyboardWasOpen=false;
  const editable=()=>document.activeElement?.matches('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]),textarea,[contenteditable="true"]');
  try { if(navigator.virtualKeyboard) navigator.virtualKeyboard.overlaysContent=true; } catch { /* Safari uses VisualViewport instead. */ }
  function update() {
   frame=0;
   const mobile=window.innerWidth<=700 || matchMedia('(pointer: coarse)').matches, focused=!!editable();
-  if(!focused || Math.abs(window.innerWidth-baseWidth)>=40) {baseHeight=window.innerHeight;baseWidth=window.innerWidth;}
-  const geometry=keyboardGeometry({baseHeight,height:viewport?.height || window.innerHeight,offsetTop:viewport?.offsetTop || 0,keyboardHeight:navigator.virtualKeyboard?.boundingRect?.height || 0,focused,width:window.innerWidth,baseWidth,scale:viewport?.scale || 1});
+  if((!focused && !keyboardWasOpen) || Math.abs(window.innerWidth-baseWidth)>=40) {baseHeight=window.innerHeight;baseWidth=window.innerWidth;}
+  const geometry=keyboardGeometry({baseHeight,height:viewport?.height || window.innerHeight,offsetTop:viewport?.offsetTop || 0,keyboardHeight:navigator.virtualKeyboard?.boundingRect?.height || 0,focused:focused || keyboardWasOpen,width:window.innerWidth,baseWidth,scale:viewport?.scale || 1});
   const open=mobile && geometry.open;
+  keyboardWasOpen=open;
   root.style.setProperty('--app-height',`${baseHeight}px`);
   root.style.setProperty('--visible-height',`${open ? geometry.height : Math.min(baseHeight,viewport?.height || baseHeight)}px`);
   root.style.setProperty('--visible-top',`${open ? geometry.top : 0}px`);
