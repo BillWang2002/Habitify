@@ -2,7 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.117.2';
 
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
-const errors: Record<string, number> = { LOGIN_REQUIRED: 401, STALE_DATA: 409, TODAY_CHANGED: 409, REQUEST_REUSED: 409, HABIT_NOT_FOUND: 404, HABIT_ARCHIVED: 409, RESTORE_EXPIRED: 409, HABIT_LIMIT: 422, INVALID_TIMEZONE: 422, INVALID_REQUEST: 422, INVALID_PROGRESS: 422 };
+const errors: Record<string, number> = { LOGIN_REQUIRED: 401, STALE_DATA: 409, TODAY_CHANGED: 409, REQUEST_REUSED: 409, HABIT_NOT_FOUND: 404, HABIT_ARCHIVED: 409, RESTORE_EXPIRED: 409, HABIT_LIMIT: 422, INVALID_TIMEZONE: 422, INVALID_REQUEST: 422, INVALID_PROGRESS: 422, DELETE_CONFIRMATION_REQUIRED: 422 };
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: cors });

@@ -1,0 +1,17 @@
+body.pwa-diagnostics { display: block; padding: 0; height: 100dvh; min-height: 0; overflow: hidden; background: var(--bg); }
+.pwa-diagnostics main { width: min(100%,720px); margin: auto; height: 100%; overflow-y: auto; overscroll-behavior: none; scrollbar-width: none; padding: max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left)); }
+.pwa-diagnostics main::-webkit-scrollbar { display: none; }
+.pwa-diagnostics .detail-header { margin: 0 0 18px; gap: 12px; }
+.pwa-diagnostics .back-link { background: transparent; border: 1px solid var(--line); border-radius: 50%; }
+.pwa-diagnostics .date-label { font-size: 11px; margin: 0 0 3px; }
+.diagnostics-intro,.diagnostics-note { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+.diagnostics-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px; }
+.diagnostics-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.diagnostics-panel h2 { font-size: 16px; margin: 0; }
+#recheck { color: var(--accent); border: 1px solid var(--line); background: transparent; padding: 8px 12px; border-radius: 10px; font-size: 12px; }
+#pwa-results { padding: 0; margin: 16px 0 0; list-style: none; font-size: 13px; }
+#pwa-results li { display: flex; gap: 16px; justify-content: space-between; padding: 14px 0; border-top: 1px solid var(--line); line-height: 1.6; }
+#pwa-results li span { color: var(--muted); flex: 0 0 42%; }
+#pwa-results li strong { font-weight: 500; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.diagnostics-note { font-size: 11px; margin-top: 18px; }
+@media(max-width:350px) { .pwa-diagnostics main { padding-left: 16px; padding-right: 16px; } .diagnostics-panel { padding: 16px; } }

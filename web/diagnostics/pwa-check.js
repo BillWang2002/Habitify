@@ -1,6 +1,7 @@
 const output = document.getElementById('pwa-results');
-const lines = [];
-const add = line => { lines.push(line); output.textContent = lines.join('\n'); };
+output.replaceChildren();
+document.getElementById('recheck').onclick=()=>location.reload();
+const add = line => { const row=document.createElement('li'), label=document.createElement('span'),value=document.createElement('strong'); const colon=line.indexOf('：'); label.textContent=colon<0 ? '提示' : line.slice(0,colon); value.textContent=colon<0 ? line : line.slice(colon+1); row.append(label,value); output.append(row); };
 try {
   add(`运行模式：${matchMedia('(display-mode: standalone)').matches || navigator.standalone === true ? '独立应用' : '浏览器网页'}`);
   const manifest = await fetch('../manifest.webmanifest', { cache: 'no-store' }).then(r => { if (!r.ok) throw Error(); return r.json(); });

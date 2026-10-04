@@ -7,10 +7,10 @@ import { renderDetail, localDay } from './habit-details.js';
 import { isCurrentSnapshot } from './habits-api.js';
 import { coinRulesHtml } from './coin-rules.js';
 const routes = ['habits', 'rewards', 'stats', 'me'];
-const accountRoutes = ['coin-rules', 'developer'];
+const accountRoutes = ['coin-rules', 'developer', 'archive'];
 const option = (tag, attrs, icon, label, description = '') => `<${tag} ${attrs} class="account-row"><span class="account-row-icon">${iconSvg(icon)}</span><span class="account-row-copy"><strong>${label}</strong>${description ? `<small>${description}</small>` : ''}</span><span class="account-row-chevron" aria-hidden="true">›</span></${tag}>`;
 export function createWorkspace(root, { onLogout = () => {}, preview = false, request = async () => { throw new Error('打卡服务尚未连接。'); } } = {}) {
-  let owner, habits = preview ? sampleHabits() : [], filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', deletedHabit, detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false, filterRevision = 0, resultAnimations = [], resultGhost;
+  let owner, habits = preview ? sampleHabits() : [], filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false, filterRevision = 0, resultAnimations = [], resultGhost;
   let account=null, snapshot=null, records=[], epoch=0, writing=false, loaded=preview, pending=null;
   const currentDay=()=>snapshot?.today || localDay();
   root.innerHTML = `<div class="app-frame">
@@ -26,7 +26,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
         <p class="habits-footnote">点击卡片查看详情 · 右侧打卡 · 长按管理打卡。</p>
       </section>
       <section data-page="detail" id="habit-detail" hidden aria-label="打卡详情"></section>
-      <section data-page="archive" id="habit-archive" hidden><div class="detail-header"><a href="#/habits" class="back-link" aria-label="返回打卡列表">‹</a><h1>已归档打卡</h1></div><p class="dialog-note">归档保留历史与已完成记录；恢复后重新加入今日列表。</p><div id="archive-list" class="habit-list"></div></section>
+      <section data-page="archive" id="habit-archive" hidden><div class="detail-header"><a href="#/me" class="back-link" aria-label="返回我的">‹</a><div><p class="date-label">我的空间</p><h1>已归档打卡</h1></div></div><p class="dialog-note">归档保留历史与已完成记录；恢复后重新加入今日列表。</p><div id="archive-list" class="habit-list"></div></section>
       <section data-page="rewards" hidden><div class="page-title"><div><p class="date-label">让努力有一点小期待</p><h1>激励</h1></div></div><div class="module-intro"><span aria-hidden="true">✦</span><h2>为你的成长，留一份奖励。</h2><p><strong id="reward-balance">0</strong> 金币 · 通过行动慢慢积累。兑换后续开放。</p></div><div class="module-item"><strong>商店与背包</strong><p>主题、奖杯、徽章、代金券与补签卡</p><span>后续开放</span></div><div class="module-item"><strong>展示墙</strong><p>摆放属于你的收藏与成长记忆</p><span>后续开放</span></div></section>
       <section data-page="stats" id="statistics-page" hidden></section>
       <section data-page="me" hidden><div class="page-title"><div><p class="date-label">照顾好自己的成长节奏</p><h1>我的</h1></div></div><section class="my-account-card" aria-label="当前账户与个人数据"><div class="profile-card"><span aria-hidden="true">${iconSvg('me')}</span><div><strong id="account-name"></strong><p id="account-email"></p></div></div><p id="profile-status" class="profile-status" role="status"></p><dl class="account-facts"><div><dt>加入日期</dt><dd id="account-created">—</dd></div><div><dt>账户时区</dt><dd id="account-timezone">—</dd></div></dl><div class="profile-metrics"><div><strong id="profile-coins">—</strong><span>金币余额</span></div><div><strong id="profile-active">—</strong><span>进行中打卡</span></div><div><strong id="profile-completed">—</strong><span>累计达标次数</span></div></div></section><div class="account-section"><h2>我的空间</h2><div class="account-list">${option('a','href="#/archive"','archive','已归档打卡','保留记录，随时恢复')}${option('a','href="#/coin-rules"','coins','金币规则','了解行动与连续奖励')}<div class="account-row is-unavailable"><span class="account-row-icon">${iconSvg('palette')}</span><span class="account-row-copy"><strong>外观与展示墙</strong><small>主题、头像与藏品陈列</small></span><span class="account-row-badge">后续开放</span></div></div></div><div class="account-section"><h2>工具与账户</h2><div class="account-list">${option('a','href="#/developer"','code','开发者模式','连接与应用诊断')}${option('button','id="logout" type="button"','logout',preview ? '返回登录页' : '退出登录')}</div></div></section>
@@ -34,9 +34,9 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
       <section data-page="coin-rules" hidden><div class="detail-header"><a href="#/me" class="back-link" aria-label="返回我的">‹</a><h1>金币规则</h1></div><div id="coin-rules-content"></div></section>
     </div>
     <nav class="app-nav" aria-label="主要导航"><span class="nav-slider" aria-hidden="true"></span><a href="#/habits" data-route="habits" aria-current="page"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.habits)}</span>打卡</a><a href="#/rewards" data-route="rewards"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.rewards)}</span>激励</a><a href="#/stats" data-route="stats"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.stats)}</span>统计</a><a href="#/me" data-route="me"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.me)}</span>我的</a></nav>
-    <div class="app-toast" id="workspace-toast" hidden><span id="toast-text" role="status" aria-live="polite"></span><button id="undo-delete" hidden>撤回</button></div>
+    <div class="app-toast" id="workspace-toast" hidden><span id="toast-text" role="status" aria-live="polite"></span></div>
     <dialog id="manage-dialog" class="habit-dialog manage-dialog" aria-labelledby="manage-title"><div class="dialog-heading"><h2 id="manage-title" tabindex="-1" autofocus></h2><button id="close-manage" aria-label="关闭管理菜单">×</button></div><p class="dialog-note">长按与更多按钮均可进入此菜单。</p><div class="manage-actions"><button id="move-up">上移一位</button><button id="move-down">下移一位</button><button id="archive-habit">归档打卡</button><button id="delete-managed" class="danger-text">删除打卡</button></div></dialog>
-    <dialog id="habit-dialog" class="habit-dialog" aria-labelledby="dialog-title"><div class="dialog-heading"><h2 id="dialog-title" tabindex="-1" autofocus></h2><button id="close-dialog" aria-label="关闭">×</button></div><form id="habit-form" novalidate><div id="create-fields"><label for="habit-name">打卡名称</label><input id="habit-name" maxlength="30" placeholder="例如：睡前读书" aria-describedby="habit-name-error"><p id="habit-name-error" class="field-error" role="status" hidden></p><fieldset class="icon-picker"><legend>打卡图标</legend><div id="icon-options"></div><p class="dialog-note">基础图标免费；更多个性图案后续开放。</p></fieldset><label id="kind-label">记录方式</label><input id="habit-kind" type="hidden" value="complete"><div class="kind-select"><button id="kind-trigger" type="button" aria-labelledby="kind-label kind-value" aria-haspopup="listbox" aria-expanded="false"><span id="kind-value">完成型 · 做完就打卡</span><span aria-hidden="true">⌄</span></button><div id="kind-options" role="listbox" aria-labelledby="kind-label" hidden><button type="button" role="option" data-kind="complete" aria-selected="true">完成型 · 做完就打卡</button><button type="button" role="option" data-kind="quantity" aria-selected="false">数量型 · 达到目标才完成</button></div></div><div id="quantity-fields" hidden><label for="habit-goal">每日目标</label><input id="habit-goal" type="number" inputmode="numeric" min="1" max="100000" step="1" value="8" aria-describedby="habit-goal-error"><p id="habit-goal-error" class="field-error" role="status" hidden></p><label for="habit-unit">单位</label><input id="habit-unit" maxlength="6" placeholder="杯、分钟、页" aria-describedby="habit-unit-error"><p id="habit-unit-error" class="field-error" role="status" hidden></p></div><label for="habit-note">备注（可选）</label><input id="habit-note" maxlength="200" placeholder="给这项打卡留一句提醒" aria-describedby="habit-note-error"><p id="habit-note-error" class="field-error" role="status" hidden></p><p class="dialog-note">当前按每天计划；达标奖励统一由金币规则规定。</p></div><div id="progress-fields" hidden><label for="habit-progress">今日累计进度</label><input id="habit-progress" type="number" inputmode="numeric" min="0" step="1" aria-describedby="habit-progress-error"><p id="habit-progress-error" class="field-error" role="status" hidden></p><p id="progress-note" class="dialog-note"></p></div><p id="dialog-error" role="status" class="message"></p><button class="primary" id="save-habit" type="submit"></button></form></dialog>
+    <dialog id="habit-dialog" class="habit-dialog" aria-labelledby="dialog-title"><div class="dialog-heading"><h2 id="dialog-title" tabindex="-1" autofocus></h2><button id="close-dialog" aria-label="关闭">×</button></div><form id="habit-form" novalidate><div id="create-fields"><label for="habit-name">打卡名称</label><input id="habit-name" maxlength="30" placeholder="例如：睡前读书" aria-describedby="habit-name-error"><p id="habit-name-error" class="field-error" role="status" hidden></p><fieldset class="icon-picker"><legend>打卡图标</legend><div id="icon-options"></div><p class="dialog-note">基础图标免费；更多个性图案后续开放。</p></fieldset><label id="kind-label">记录方式</label><input id="habit-kind" type="hidden" value="complete"><div class="kind-select"><button id="kind-trigger" type="button" aria-labelledby="kind-label kind-value" aria-haspopup="listbox" aria-expanded="false"><span id="kind-value">完成型 · 做完就打卡</span><span aria-hidden="true">⌄</span></button><div id="kind-options" role="listbox" aria-labelledby="kind-label" hidden><button type="button" role="option" data-kind="complete" aria-selected="true">完成型 · 做完就打卡</button><button type="button" role="option" data-kind="quantity" aria-selected="false">数量型 · 达到目标才完成</button></div></div><div id="quantity-fields" hidden><label for="habit-goal">每日目标</label><input id="habit-goal" type="number" inputmode="numeric" min="1" max="100000" step="1" value="8" aria-describedby="habit-goal-error"><p id="habit-goal-error" class="field-error" role="status" hidden></p><label for="habit-unit">单位</label><input id="habit-unit" maxlength="6" placeholder="杯、分钟、页" aria-describedby="habit-unit-error"><p id="habit-unit-error" class="field-error" role="status" hidden></p></div><label for="habit-note">备注（可选）</label><input id="habit-note" maxlength="200" placeholder="给这项打卡留一句提醒" aria-describedby="habit-note-error"><p id="habit-note-error" class="field-error" role="status" hidden></p><p class="dialog-note">当前按每天计划；达标奖励统一由金币规则规定。</p></div><div id="delete-fields" hidden><p class="dialog-note">删除后无法撤回。今日进度及失效金币奖励会清除，历史记录保留。若只是暂时停止，建议使用归档。</p><label for="delete-name">输入打卡名称确认</label><p id="delete-expected" class="delete-expected"></p><input id="delete-name" maxlength="30" autocomplete="off" spellcheck="false" aria-describedby="delete-name-error"><p id="delete-name-error" class="field-error" role="status" hidden></p></div><div id="progress-fields" hidden><label for="habit-progress">今日累计进度</label><input id="habit-progress" type="number" inputmode="numeric" min="0" step="1" aria-describedby="habit-progress-error"><p id="habit-progress-error" class="field-error" role="status" hidden></p><p id="progress-note" class="dialog-note"></p></div><p id="dialog-error" role="status" class="message"></p><button class="primary" id="save-habit" type="submit"></button></form></dialog>
   </div>`;
   const $ = id => root.querySelector(`#${id}`);
   const statistics = createStatistics($('statistics-page'), {onHabit:id=>navigation.navigate(`habit/${id}`)});
@@ -60,7 +60,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     event.preventDefault();
     if (link.classList.contains('back-link')) navigation.back(link.getAttribute('href').slice(2)); else navigation.navigate(link.getAttribute('href').slice(2));
   });
-  function notify(text) { clearTimeout(toastTimer); $('toast-text').textContent = text; $('undo-delete').hidden = !deletedHabit; $('workspace-toast').hidden = false; toastTimer = setTimeout(() => { $('workspace-toast').hidden = true; deletedHabit = null; }, deletedHabit ? 8000 : 3500); }
+  function notify(text) { clearTimeout(toastTimer); $('toast-text').textContent = text; $('workspace-toast').hidden = false; toastTimer = setTimeout(() => { $('workspace-toast').hidden = true; }, 3500); }
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const slideDuration = () => parseFloat(getComputedStyle(root).getPropertyValue('--slide-duration')) || 480;
   const slideEasing = 'cubic-bezier(.22,.8,.28,1)';
@@ -90,8 +90,8 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   function renderArchive() {
     $('archive-list').replaceChildren();
     const archived=habits.filter(item=>item.archived);
-    for (const habit of archived) { const card=document.createElement('article'); card.className='archive-card'; const link=document.createElement('a'); link.href=`#/habit/${habit.id}`; link.textContent=habit.name; const restore=document.createElement('button'); restore.textContent='恢复'; restore.onclick=async()=>{ try { await mutate({op:'archive',habitId:habit.id,archived:false},()=>{habits=archiveHabit(habits,habit.id,false);}); deletedHabit=null; renderArchive(); notify('已恢复打卡。'); } catch {} }; card.append(link,restore); $('archive-list').append(card); }
-    if (!archived.length) $('archive-list').textContent='暂无已归档打卡。';
+    for (const habit of archived) { const card=document.createElement('article'); card.className='archive-card'; const link=document.createElement('a'); link.href=`#/habit/${habit.id}`; link.textContent=habit.name; const restore=document.createElement('button'); restore.textContent='恢复'; restore.onclick=async()=>{ try { await mutate({op:'archive',habitId:habit.id,archived:false},()=>{habits=archiveHabit(habits,habit.id,false);}); renderArchive(); notify('已恢复打卡。'); } catch {} }; card.append(link,restore); $('archive-list').append(card); }
+    if (!archived.length) $('archive-list').innerHTML=`<div class="archive-empty"><span>${iconSvg('archive')}</span><h2>暂时没有归档打卡</h2><p>不再进行的打卡可以先归档，<br>历史记录会留在这里，随时都能恢复。</p><a href="#/habits">看看今日打卡 ${iconSvg('checkin')}</a></div>`;
   }
   function renderHabits() {
     const summary = todaySummary(habits); if(snapshot) summary.actionDay=snapshot.actionDay;
@@ -184,20 +184,20 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     const token=epoch; const previous=habits.find(item=>item.id===id); if(!previous) return;
     const wasComplete=isComplete(previous), before=todaySummary(habits).actionDay;
     await mutate({op:'progress',habitId:id,value},()=>{habits=setProgress(habits,id,value); if(previous.progress!==value) logs.push({habitId:id,from:previous.progress,to:value,at:new Date().toISOString(),day:currentDay()});});
-    if(token!==epoch) return; deletedHabit=null;
+    if(token!==epoch) return;
     const habit=habits.find(item=>item.id===id); if(!habit) return;
     const card=[...root.querySelectorAll('.habit-card')].find(item=>item.dataset.habitId===id);
     card?.classList.add(!wasComplete && isComplete(habit) ? 'celebrate' : 'progress-feedback');
     if(!reducedMotion() && !before && todaySummary(habits).actionDay) root.querySelector('.growth-card').animate([{transform:'scale(1)'},{transform:'scale(1.025)'},{transform:'scale(1)'}],{duration:450});
     notify(!before && todaySummary(habits).actionDay ? '已保存，今天成为行动日。' : '进度已保存。');
   }
-  const fieldIds=['habit-name','habit-goal','habit-unit','habit-note','habit-progress'];
+  const fieldIds=['delete-name','habit-name','habit-goal','habit-unit','habit-note','habit-progress'];
   for(const id of fieldIds) $(id).addEventListener('input',()=>showFieldErrors(root,{},[id],{focus:false}));
   function openDialog(habit, mode = 'create') {
     showFieldErrors(root,{},fieldIds,{focus:false});
     activeHabit = habit ? { id: habit.id, mode } : { mode }; lastFocus = document.activeElement;
     $('habit-form').reset(); $('dialog-error').textContent = ''; selectedIcon = 'leaf'; renderIconPicker(); setKind('complete');
-    $('create-fields').hidden = mode !== 'create'; $('progress-fields').hidden = mode !== 'progress'; $('quantity-fields').hidden = true;
+    $('create-fields').hidden = mode !== 'create'; $('progress-fields').hidden = mode !== 'progress'; $('delete-fields').hidden = mode !== 'delete'; $('delete-name').disabled = mode !== 'delete'; if(mode==='delete') $('delete-expected').textContent=habit.name; $('quantity-fields').hidden = true;
     $('habit-name').required = mode === 'create'; $('habit-progress').required = mode === 'progress';
     $('habit-progress').disabled = mode !== 'progress'; $('habit-goal').disabled = true; $('habit-unit').disabled = true;
     $('dialog-title').textContent = mode === 'create' ? '添加一项打卡' : mode === 'delete' ? `删除“${habit.name}”？` : mode === 'undo' ? '撤销这次完成？' : habit.name;
@@ -205,7 +205,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     if (mode === 'progress') { $('habit-progress').value = habit.progress; $('habit-progress').max = habit.goal; $('progress-note').textContent = `目标 ${habit.goal} ${habit.unit}；达到目标才算完成。输入 0 可清除今日进度。`; }
     if (mode === 'undo') $('dialog-error').textContent = '撤销后重新计算今日完成数；没有其他完成打卡时，今天不再是行动日。不再成立的金币奖励将同步撤回。';
     $('save-habit').classList.toggle('danger', mode === 'delete');
-    if (mode === 'delete') $('dialog-error').textContent = '打卡将移出列表、今日进度清零，并撤回失效奖励。历史记录保留。删除后 8 秒内可撤回。';
+
     dialog.showModal(); $('dialog-title').focus({preventScroll:true});
   }
   function closeDialog() { $('kind-options').hidden=true; dialog.close(); if (lastFocus?.isConnected) lastFocus.focus({preventScroll:true}); }
@@ -225,7 +225,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   $('habit-form').onsubmit = async event => {
     event.preventDefault(); if(writing) return;
     const token=epoch, action={...activeHabit};
-    const errors=checkinErrors(action.mode,{name:$('habit-name').value,kind:$('habit-kind').value,goal:$('habit-goal').value,unit:$('habit-unit').value,note:$('habit-note').value,progress:$('habit-progress').value},habits.find(h=>h.id===action.id)?.goal || 0);
+    const errors=checkinErrors(action.mode,{name:$('habit-name').value,kind:$('habit-kind').value,goal:$('habit-goal').value,unit:$('habit-unit').value,note:$('habit-note').value,progress:$('habit-progress').value,confirmationName:$('delete-name').value,expectedName:habits.find(h=>h.id===action.id)?.name},habits.find(h=>h.id===action.id)?.goal || 0);
     if(!showFieldErrors(root,errors,fieldIds)) return;
     $('dialog-error').textContent=''; $('save-habit').disabled=true;
     try {
@@ -233,11 +233,10 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
         const values={name:$('habit-name').value.trim(),kind:$('habit-kind').value,goal:Number($('habit-goal').value),unit:$('habit-unit').value.trim(),icon:selectedIcon,note:$('habit-note').value.trim()};
         addHabit([],values,'validate');
         await mutate({op:'create',...values},()=>{habits=addHabit(habits,values,crypto.randomUUID());});
-        if(token!==epoch) return; filter='all'; selectedDay=currentDay(); dates(); updateFilters(); renderHabits(); deletedHabit=null; $('habit-list').lastElementChild?.classList.add('habit-added'); notify('新打卡已保存，迈出第一步吧。');
+        if(token!==epoch) return; filter='all'; selectedDay=currentDay(); dates(); updateFilters(); renderHabits(); $('habit-list').lastElementChild?.classList.add('habit-added'); notify('新打卡已保存，迈出第一步吧。');
       } else if(action.mode==='delete') {
-        const index=habits.findIndex(item=>item.id===action.id), old=habits[index];
-        await mutate({op:'delete',habitId:action.id},()=>{habits=removeHabit(habits,action.id);});
-        if(token!==epoch) return; deletedHabit={habit:old,index}; if(route==='detail') navigation.navigate('habits',{replace:true}); if(route==='archive') renderArchive(); notify('打卡已删除。');
+        await mutate({op:'delete',habitId:action.id,confirmationName:$('delete-name').value},()=>{habits=removeHabit(habits,action.id);});
+        if(token!==epoch) return; if(route==='detail') navigation.navigate('habits',{replace:true}); if(route==='archive') renderArchive(); notify('打卡已删除。');
       } else await updateProgress(action.id,action.mode==='undo' ? 0 : Number($('habit-progress').value));
       if(token!==epoch) return; closeDialog();
       if(action.mode==='create') { const card=$('habit-list').lastElementChild; if(card) { card.tabIndex=-1; card.focus({preventScroll:true}); card.scrollIntoView({block:'nearest',behavior:reducedMotion() ? 'instant' : 'smooth'}); } }
@@ -285,7 +284,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     $('icon-options').replaceChildren();
     for (const choice of iconChoices) { const button = document.createElement('button'); button.type = 'button'; button.innerHTML = iconSvg(choice.id); button.setAttribute('aria-label', choice.name + '图标'); button.setAttribute('aria-pressed', String(choice.id === selectedIcon)); button.onclick = () => { selectedIcon = choice.id; renderIconPicker(); }; $('icon-options').append(button); }
   }
-  $('undo-delete').onclick=async()=> { if(!deletedHabit) return; const saved=deletedHabit, token=epoch; try { await mutate({op:'restore',habitId:saved.habit.id},()=>{habits=[...habits.slice(0,saved.index),saved.habit,...habits.slice(saved.index)];}); if(token!==epoch) return; deletedHabit=null; if(route==='archive') renderArchive(); notify('已恢复打卡与今日进度。'); } catch(error) { if(token===epoch) notify(error.message); } };
+
   const manage=$('manage-dialog'); let managedId;
   function cancelHold() { clearTimeout(holdTimer); holdStart=null; }
   function openManage(habit) {
@@ -296,8 +295,8 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   }
   $('close-manage').onclick=()=>manage.close();
   manage.addEventListener('close',()=>{ cancelHold(); setTimeout(()=>{suppressClick=false;},0); });
-  for(const [id,amount] of [['move-up',-1],['move-down',1]]) $(id).onclick=async()=> { const token=epoch; try { await mutate({op:'move',habitId:managedId,direction:amount},()=>{habits=moveHabit(habits,managedId,amount);}); if(token!==epoch) return; deletedHabit=null; manage.close(); notify('顺序已保存。'); } catch(error) { if(token===epoch) notify(error.message); } };
-  $('archive-habit').onclick=async()=> { const habit=habits.find(item=>item.id===managedId), token=epoch; try { await mutate({op:'archive',habitId:habit.id,archived:!habit.archived},()=>{habits=archiveHabit(habits,habit.id,!habit.archived);}); if(token!==epoch) return; deletedHabit=null; if(route==='detail') refreshDetail(); if(route==='archive') renderArchive(); manage.close(); notify(habit.archived ? '已恢复打卡。' : '已归档，记录保留；可从“我的”恢复。'); } catch(error) { if(token===epoch) notify(error.message); } };
+  for(const [id,amount] of [['move-up',-1],['move-down',1]]) $(id).onclick=async()=> { const token=epoch; try { await mutate({op:'move',habitId:managedId,direction:amount},()=>{habits=moveHabit(habits,managedId,amount);}); if(token!==epoch) return; manage.close(); notify('顺序已保存。'); } catch(error) { if(token===epoch) notify(error.message); } };
+  $('archive-habit').onclick=async()=> { const habit=habits.find(item=>item.id===managedId), token=epoch; try { await mutate({op:'archive',habitId:habit.id,archived:!habit.archived},()=>{habits=archiveHabit(habits,habit.id,!habit.archived);}); if(token!==epoch) return; if(route==='detail') refreshDetail(); if(route==='archive') renderArchive(); manage.close(); notify(habit.archived ? '已恢复打卡。' : '已归档，记录保留；可从“我的”恢复。'); } catch(error) { if(token===epoch) notify(error.message); } };
   $('delete-managed').onclick=()=>{ const habit=habits.find(item=>item.id===managedId); manage.close(); openDialog(habit,'delete'); };
   // Block page pinch gestures and stationary double taps; retain single-finger scrolling and editing.
   let tapStart, previousTap, pinchActive = false;
@@ -323,7 +322,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
       const requested=location.hash.slice(2); navigation.start(requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive',...accountRoutes].includes(requested) ? requested : 'habits');
       if(!preview) loadData();
     },
-    leave(reset = false) { statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); account=null; renderProfile(); $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
+    leave(reset = false) { statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); account=null; renderProfile(); $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
     isEditing() { return writing || !!pending || dialog.open || manage.open; }
   };
 }

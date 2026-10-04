@@ -9,6 +9,8 @@ export function checkinErrors(mode, values, maxProgress=0) {
    else if(values.unit.trim().length>6) errors['habit-unit']='单位最多 6 个字。';
   }
   if(values.note.trim().length>200) errors['habit-note']='备注最多 200 个字。';
+ } else if(mode==='delete') {
+  if(!values.expectedName || values.confirmationName!==values.expectedName) errors['delete-name']='请重新输入完整的打卡名称，需完全一致。';
  } else if(mode==='progress') {
   if(!values.progress.trim() || !Number.isSafeInteger(Number(values.progress)) || Number(values.progress)<0 || Number(values.progress)>maxProgress) errors['habit-progress']=`请输入 0 到 ${maxProgress} 之间的整数进度。`;
  }

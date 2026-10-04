@@ -13,3 +13,8 @@ test('数量与进度必须为范围内整数，空输入不能当作合法零�
  assert.deepEqual(checkinErrors('progress',values,8),{});assert.deepEqual(checkinErrors('progress',{...values,progress:'8'},8),{});
  assert.deepEqual(checkinErrors('undo',{...values,name:''}),{});
 });
+test('删除需完整名称一致，空值、部分名称和额外空格不能确认',()=>{
+ for(const confirmationName of ['', '喝', '喝水 ', ' 喝水']) assert.ok(checkinErrors('delete',{confirmationName,expectedName:'喝水'})['delete-name']);
+ assert.deepEqual(checkinErrors('delete',{confirmationName:'喝水',expectedName:'喝水'}),{});
+ assert.ok(checkinErrors('delete',{confirmationName:'',expectedName:undefined})['delete-name']);
+});
