@@ -52,3 +52,7 @@
 2026-10-04：用户授权后在 Habitify-dev 执行迁移，SQL Editor 返回 Success. No rows returned；habits 函数发布成功，legacy gateway 校验关闭，函数内 getUser 身份校验保留。线上匿名/伪造 token 实测均 401 LOGIN_REQUIRED，OPTIONS 返回 200 与允许跨域响应头。38 项本地测试与构建通过；不代表线上双账户完整业务验收。
 
 线上界面验收：使用原有测试账户会话，无读取/记录密码或令牌。新建“通信验收（可删除）”数量习惯，1/8 时行动日不成立且余额 0；8/8 时行动日成立、月历完成 1 天、余额 15；刷新后保留 15 与记录；撤销到 0 后余额 0；重新达标仍为 15。金币规则页实际返回规则版本 1。本轮测试习惯最终清零并归档，余额 0，保留操作与金币撤回流水供核对。线上双账号越权写入、真正跨设备并发、iPhone 新业务尚未验收。
+
+补充线上数据库权限验证：在 SQL Editor 的可回滚事务内设定 authenticated 角色与第二个测试账户的 claims，断言其快照为空/金币为 0、对第一个账户 habitId 的 progress 请求返回 HABIT_NOT_FOUND、直接业务表 SELECT 和私有 snapshot helper 均 permission denied。断言全部通过，SQL 返回 Success. No rows returned，随后事务回滚；未保留第二账户初始化或写入。这是线上数据库权限测试，不等于第二账户经 Auth 登录后的 HTTP 集成验收。
+
+最终前端补充：金币规则页选中“我的”导航并正确返回；个人数据按钮刷新真实习惯快照，不再读取测试探针。客户端丢弃迟到的较旧 revision/归属日快照，防止读取/保存响应顺序导致回退。38 项测试与 Pages 自动发布通过。
