@@ -11,6 +11,13 @@ const paths = {
   rewards: '<path d="M4 10h16v11H4Zm-1-4h18v4H3Zm9 0v15M12 6C5 7 5 1 8 2c3 0 4 4 4 4Zm0 0c7 1 7-5 4-4-3 0-4 4-4 4Z"/>',
   stats: '<path d="M4 20h17M7 16v-5m5 5V5m5 11V8"/>',
   me: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>',
+  archive: '<rect x="3" y="3" width="18" height="5" rx="2"/><path d="M5 8v13h14V8M10 12h4"/>',
+  coins: '<circle cx="12" cy="12" r="9"/><path d="m9 7 3 4 3-4M8 12h8m-8 3h8m-4-4v7"/>',
+  palette: '<path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1-4c-1-1 0-3 2-3h2c4 0 3-11-6-11Z"/><path d="M7 9h.01M10 6h.01M15 7h.01M6 14h.01"/>',
+  code: '<path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-14-2 16"/>',
+  refresh: '<path d="M20 8a8 8 0 0 0-14-3L3 8m0-5v5h5M4 16a8 8 0 0 0 14 3l3-3m0 5v-5h-5"/>',
+  diagnostics: '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M6 12h3l2-5 3 10 2-5h2"/>',
+  logout: '<path d="M10 3H4v18h6m4-15 6 6-6 6m-7-6h13"/>',
   trash: '<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>'
 };
 export const defaultTheme = Object.freeze({ id: 'growth', navigation: { habits: 'checkin', rewards: 'rewards', stats: 'stats', me: 'me' }, habitIcons: ['leaf', 'book', 'water', 'walk', 'target', 'sun'] });

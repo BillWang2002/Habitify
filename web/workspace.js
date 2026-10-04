@@ -7,9 +7,11 @@ import { renderDetail, localDay } from './habit-details.js';
 import { isCurrentSnapshot } from './habits-api.js';
 import { coinRulesHtml } from './coin-rules.js';
 const routes = ['habits', 'rewards', 'stats', 'me'];
+const accountRoutes = ['coin-rules', 'developer'];
+const option = (tag, attrs, icon, label, description = '') => `<${tag} ${attrs} class="account-row"><span class="account-row-icon">${iconSvg(icon)}</span><span class="account-row-copy"><strong>${label}</strong>${description ? `<small>${description}</small>` : ''}</span><span class="account-row-chevron" aria-hidden="true">›</span></${tag}>`;
 export function createWorkspace(root, { onLogout = () => {}, preview = false, request = async () => { throw new Error('打卡服务尚未连接。'); } } = {}) {
   let owner, habits = preview ? sampleHabits() : [], filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', deletedHabit, detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false, filterRevision = 0, resultAnimations = [], resultGhost;
-  let snapshot=null, records=[], epoch=0, writing=false, loaded=preview, pending=null;
+  let account=null, snapshot=null, records=[], epoch=0, writing=false, loaded=preview, pending=null;
   const currentDay=()=>snapshot?.today || localDay();
   root.innerHTML = `<div class="app-frame">
 
@@ -27,7 +29,8 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
       <section data-page="archive" id="habit-archive" hidden><div class="detail-header"><a href="#/habits" class="back-link" aria-label="返回打卡列表">‹</a><h1>已归档打卡</h1></div><p class="dialog-note">归档保留历史与已完成记录；恢复后重新加入今日列表。</p><div id="archive-list" class="habit-list"></div></section>
       <section data-page="rewards" hidden><div class="page-title"><div><p class="date-label">让努力有一点小期待</p><h1>激励</h1></div></div><div class="module-intro"><span aria-hidden="true">✦</span><h2>为你的成长，留一份奖励。</h2><p><strong id="reward-balance">0</strong> 金币 · 通过行动慢慢积累。兑换后续开放。</p></div><div class="module-item"><strong>商店与背包</strong><p>主题、奖杯、徽章、代金券与补签卡</p><span>后续开放</span></div><div class="module-item"><strong>展示墙</strong><p>摆放属于你的收藏与成长记忆</p><span>后续开放</span></div></section>
       <section data-page="stats" id="statistics-page" hidden></section>
-      <section data-page="me" hidden><div class="page-title"><div><p class="date-label">照顾好自己的成长节奏</p><h1>我的</h1></div></div><div class="profile-card"><span aria-hidden="true">✦</span><div><strong>${preview ? '预览访客' : '当前账户'}</strong><p id="account-email"></p></div></div><div class="module-item"><strong>外观与展示墙</strong><p>主题、头像与藏品陈列</p><span>后续开放</span></div><div class="module-item"><strong>个人数据</strong><p>导出与资料设置</p><span>后续开放</span></div><div class="account-tools"><button id="check-data">刷新我的数据</button><p id="data-message" role="status"></p><a href="#/archive">已归档打卡</a><a href="#/coin-rules">金币规则</a><p id="coin-balance"></p><details class="detail-panel"><summary>最近金币明细</summary><ol id="coin-ledger"></ol></details><button id="logout">${preview ? '返回登录页' : '退出登录'}</button><a href="./diagnostics/pwa.html">应用检查</a></div></section>
+      <section data-page="me" hidden><div class="page-title"><div><p class="date-label">照顾好自己的成长节奏</p><h1>我的</h1></div></div><section class="my-account-card" aria-label="当前账户与个人数据"><div class="profile-card"><span aria-hidden="true">${iconSvg('me')}</span><div><strong id="account-name"></strong><p id="account-email"></p></div></div><p id="profile-status" class="profile-status" role="status"></p><dl class="account-facts"><div><dt>加入日期</dt><dd id="account-created">—</dd></div><div><dt>账户时区</dt><dd id="account-timezone">—</dd></div></dl><div class="profile-metrics"><div><strong id="profile-coins">—</strong><span>金币余额</span></div><div><strong id="profile-active">—</strong><span>进行中打卡</span></div><div><strong id="profile-completed">—</strong><span>累计达标次数</span></div></div></section><div class="account-section"><h2>我的空间</h2><div class="account-list">${option('a','href="#/archive"','archive','已归档打卡','保留记录，随时恢复')}${option('a','href="#/coin-rules"','coins','金币规则','了解行动与连续奖励')}<div class="account-row is-unavailable"><span class="account-row-icon">${iconSvg('palette')}</span><span class="account-row-copy"><strong>外观与展示墙</strong><small>主题、头像与藏品陈列</small></span><span class="account-row-badge">后续开放</span></div></div></div><div class="account-section"><h2>工具与账户</h2><div class="account-list">${option('a','href="#/developer"','code','开发者模式','连接与应用诊断')}${option('button','id="logout" type="button"','logout',preview ? '返回登录页' : '退出登录')}</div></div></section>
+      <section data-page="developer" hidden><div class="detail-header"><a href="#/me" class="back-link" aria-label="返回我的">‹</a><h1>开发者模式</h1></div><p class="dialog-note">检查连接与应用状态。</p><div class="account-section"><h2>数据连接</h2><div class="account-list">${option('button','id="check-data" type="button"','refresh','刷新我的数据','重新读取当前账户的云端记录')}</div><p id="data-message" class="account-feedback" role="status"></p></div><div class="account-section"><h2>应用检查</h2><div class="account-list">${option('a','href="./diagnostics/pwa.html"','diagnostics','PWA 应用检查','安装、版本与缓存状态')}</div></div></section>
       <section data-page="coin-rules" hidden><div class="detail-header"><a href="#/me" class="back-link" aria-label="返回我的">‹</a><h1>金币规则</h1></div><div id="coin-rules-content"></div></section>
     </div>
     <nav class="app-nav" aria-label="主要导航"><span class="nav-slider" aria-hidden="true"></span><a href="#/habits" data-route="habits" aria-current="page"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.habits)}</span>打卡</a><a href="#/rewards" data-route="rewards"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.rewards)}</span>激励</a><a href="#/stats" data-route="stats"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.stats)}</span>统计</a><a href="#/me" data-route="me"><span aria-hidden="true">${iconSvg(defaultTheme.navigation.me)}</span>我的</a></nav>
@@ -39,7 +42,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   const statistics = createStatistics($('statistics-page'), {onHabit:id=>navigation.navigate(`habit/${id}`)});
   const dialog = $('habit-dialog');
   const navigation = createNavigation({
-    normalize: next => next.startsWith('habit/') && habits.some(item=>item.id===next.slice(6)) ? next : [...routes,'archive','coin-rules'].includes(next) ? next : 'habits',
+    normalize: next => next.startsWith('habit/') && habits.some(item=>item.id===next.slice(6)) ? next : [...routes,'archive',...accountRoutes].includes(next) ? next : 'habits',
     readView: () => ({ statistics:statistics.getView(), filter, selectedDay, scroll: $('workspace-content').scrollTop, detailMonth: [...detailMonth], filterHeight: $('filter-results').style.minHeight, logsOpen: !!$('habit-detail').querySelector('#detail-logs')?.open }),
     onChange: (next, { source, view }) => {
       cancelHold(); cancelResultsTransition(); $('filter-results').style.minHeight=view?.filterHeight || '';
@@ -68,12 +71,12 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   function setRoute(next, { animate = true, view = null } = {}) {
     const oldRoute = route;
     if (next.startsWith('habit/')) { const id = next.slice(6); if (habits.some(item=>item.id===id)) { detailId=id; route='detail'; detailMonth=view?.detailMonth || [new Date().getFullYear(),new Date().getMonth()]; refreshDetail(); if(view?.logsOpen) $('habit-detail').querySelector('#detail-logs').open=true; } else route='habits'; }
-    else route = [...routes,'archive','coin-rules'].includes(next) ? next : 'habits';
+    else route = [...routes,'archive',...accountRoutes].includes(next) ? next : 'habits';
     if (route === 'archive') renderArchive();
-    root.querySelector('.app-nav').style.setProperty('--nav-index', Math.max(0,routes.indexOf(route==='coin-rules' ? 'me' : route)));
+    root.querySelector('.app-nav').style.setProperty('--nav-index', Math.max(0,routes.indexOf(accountRoutes.includes(route) ? 'me' : route)));
     for (const page of root.querySelectorAll('[data-page]')) page.hidden = page.dataset.page !== route;
     if(route==='stats' && view?.statistics) statistics.setView(view.statistics);
-    for (const link of root.querySelectorAll('[data-route]')) { if (link.dataset.route === (route==='coin-rules' ? 'me' : ['detail','archive'].includes(route) ? 'habits' : route)) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); }
+    for (const link of root.querySelectorAll('[data-route]')) { if (link.dataset.route === (accountRoutes.includes(route) ? 'me' : ['detail','archive'].includes(route) ? 'habits' : route)) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); }
     $('workspace-content').scrollTop = view?.scroll || 0;
     if (animate && oldRoute !== route) { slide(root.querySelector(`[data-page="${route}"]`), (routes.includes(route) ? routes.indexOf(route) : 4) < (routes.includes(oldRoute) ? routes.indexOf(oldRoute) : 4) ? -1 : 1); }
   }
@@ -131,19 +134,28 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     if(!isCurrentSnapshot(data,snapshot)) return;
     statistics.update(data);
     snapshot=data; habits=data.habits; records=data.records; logs=data.logs; loaded=true;
-    $('coin-balance').textContent=`${data.balance} 金币 · 今日获得 ${data.todayCoins}`;
+    renderProfile();
     $('reward-balance').textContent=data.balance;
     $('coin-rules-content').innerHTML=coinRulesHtml(data.rules);
-    $('coin-ledger').replaceChildren();
-    for(const entry of data.ledger) { const li=document.createElement('li'); const kind=entry.node.startsWith('habit:') ? '打卡达标' : entry.node.startsWith('first:') ? '首次达标' : entry.node.startsWith('seven:') ? '连续7日' : '连续30日'; li.textContent=`${entry.day} · ${kind} · ${entry.delta>0 ? '+' : ''}${entry.delta} 金币`; $('coin-ledger').append(li); }
-    if(!data.ledger.length) $('coin-ledger').textContent='还没有金币记录。';
     $('sync-status').textContent=`已同步 · 账户时区 ${data.timezone}`; $('retry-data').hidden=true;
     renderHabits(); if(route==='detail') refreshDetail(); if(route==='archive') renderArchive();
+  }
+  function renderProfile() {
+    $('account-name').textContent=preview ? '预览访客' : account?.user_metadata?.display_name || account?.user_metadata?.nickname || '当前账户';
+    $('account-email').textContent=preview ? '公开预览，不使用真实账户' : account?.email || '已登录';
+    const created=account?.created_at ? new Date(account.created_at) : null;
+    $('account-created').textContent=!preview && created && !Number.isNaN(created.getTime()) ? new Intl.DateTimeFormat('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit'}).format(created) : '—';
+    const ready=!preview && loaded && snapshot;
+    $('account-timezone').textContent=ready ? snapshot.timezone : '—';
+    $('profile-coins').textContent=ready ? snapshot.balance : '—';
+    $('profile-active').textContent=ready ? habits.filter(h=>!h.archived).length : '—';
+    $('profile-completed').textContent=ready ? records.filter(r=>r.progress>=r.goal).length : '—';
+    $('profile-status').textContent=preview ? '个人数据在登录后展示。' : ready ? '个人数据已同步至当前账户' : snapshot ? '连接未完成，请在开发者模式重试同步。' : '等待连接个人数据…';
   }
   async function loadData() {
     const token=epoch; const id=owner; $('sync-status').textContent='正在读取你的打卡…';
     try { const data=await request({op:'snapshot'}); if(token!==epoch || id!==owner || !isCurrentSnapshot(data,snapshot)) return; if(!snapshot || snapshot.today!==data.today) selectedDay=data.today; applySnapshot(data); dates(); }
-    catch(error) { if(token!==epoch || id!==owner) return; loaded=false; $('sync-status').textContent=error.message; $('retry-data').hidden=false; renderHabits(); }
+    catch(error) { if(token!==epoch || id!==owner) return; loaded=false; renderProfile(); $('profile-status').textContent='连接未完成，请在开发者模式重试同步。'; $('sync-status').textContent=error.message; $('retry-data').hidden=false; renderHabits(); }
   }
   async function mutate(payload, local) {
     if(writing) throw new Error('正在保存，请稍候。');
@@ -306,12 +318,12 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     enter(user) {
       ++epoch; writing=false; pending=null; root.removeAttribute('aria-busy');
       if(owner!==user.id) { statistics.clear(); snapshot=null; habits=preview ? sampleHabits() : []; logs=[]; records=[]; loaded=preview; selectedDay=localDay(); filter='all'; updateFilters(); }
-      owner=user.id; $('account-email').textContent=preview ? '公开预览，不使用真实账户' : user.email || '已登录'; $('data-message').textContent=''; dates(); renderHabits(); root.hidden=false;
+      owner=user.id; account=user; renderProfile(); $('data-message').textContent=''; dates(); renderHabits(); root.hidden=false;
       document.body.classList.add('workspace-active'); document.documentElement.classList.add('workspace-active');
-      const requested=location.hash.slice(2); navigation.start(requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive','coin-rules'].includes(requested) ? requested : 'habits');
+      const requested=location.hash.slice(2); navigation.start(requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive',...accountRoutes].includes(requested) ? requested : 'habits');
       if(!preview) loadData();
     },
-    leave(reset = false) { statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); $('coin-ledger').replaceChildren(); $('coin-balance').textContent=''; $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
+    leave(reset = false) { statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); account=null; renderProfile(); $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
     isEditing() { return writing || !!pending || dialog.open || manage.open; }
   };
 }
