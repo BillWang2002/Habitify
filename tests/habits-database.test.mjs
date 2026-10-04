@@ -12,6 +12,7 @@ before(async()=> {
  grant usage on schema auth to authenticated,anon; grant execute on function auth.uid() to authenticated,anon;
  insert into auth.users values('${a}'),('${b}');`);
  await db.exec(await readFile(new URL('../supabase/migrations/202610040002_habits.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../supabase/migrations/202610040003_statistics.sql',import.meta.url),'utf8'));
 });
 after(async()=>db?.close());
 async function rpc(p, uid=a) {

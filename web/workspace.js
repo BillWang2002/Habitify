@@ -1,3 +1,4 @@
+import { createStatistics } from './statistics.js';
 import { sampleHabits, isComplete, todaySummary, setProgress, addHabit, removeHabit, archiveHabit, moveHabit } from './habits-model.js';
 import { defaultTheme, iconChoices, iconSvg, resolveHabitIcon } from './theme.js';
 import { createNavigation } from './navigation.js';
@@ -24,7 +25,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
       <section data-page="detail" id="habit-detail" hidden aria-label="习惯详情"></section>
       <section data-page="archive" id="habit-archive" hidden><div class="detail-header"><a href="#/habits" class="back-link" aria-label="返回习惯列表">‹</a><h1>已归档习惯</h1></div><p class="dialog-note">归档保留历史与已完成记录；恢复后重新加入今日列表。</p><div id="archive-list" class="habit-list"></div></section>
       <section data-page="rewards" hidden><div class="page-title"><div><p class="date-label">让努力有一点小期待</p><h1>激励</h1></div></div><div class="module-intro"><span aria-hidden="true">✦</span><h2>为你的成长，留一份奖励。</h2><p><strong id="reward-balance">0</strong> 金币 · 通过行动慢慢积累。兑换后续开放。</p></div><div class="module-item"><strong>商店与背包</strong><p>主题、奖杯、徽章、代金券与补签卡</p><span>后续开放</span></div><div class="module-item"><strong>展示墙</strong><p>摆放属于你的收藏与成长记忆</p><span>后续开放</span></div></section>
-      <section data-page="stats" hidden><div class="page-title"><div><p class="date-label">看见每一步的积累</p><h1>统计</h1></div></div><div class="module-intro"><span aria-hidden="true">▥</span><h2>你的行动，会慢慢连成一条路。</h2><p>习惯详情已提供历史日历；完整趋势统计后续开放。</p></div><div class="module-item"><strong>行动日历</strong><p>区分日常完成与补签</p><span>后续开放</span></div><div class="module-item"><strong>习惯趋势</strong><p>计划完成率与连续记录</p><span>后续开放</span></div></section>
+      <section data-page="stats" id="statistics-page" hidden></section>
       <section data-page="me" hidden><div class="page-title"><div><p class="date-label">照顾好自己的成长节奏</p><h1>我的</h1></div></div><div class="profile-card"><span aria-hidden="true">✦</span><div><strong>${preview ? '预览访客' : '当前账户'}</strong><p id="account-email"></p></div></div><div class="module-item"><strong>外观与展示墙</strong><p>主题、头像与藏品陈列</p><span>后续开放</span></div><div class="module-item"><strong>个人数据</strong><p>导出与资料设置</p><span>后续开放</span></div><div class="account-tools"><button id="check-data">刷新我的数据</button><p id="data-message" role="status"></p><a href="#/archive">已归档习惯</a><a href="#/coin-rules">金币规则</a><p id="coin-balance"></p><details class="detail-panel"><summary>最近金币明细</summary><ol id="coin-ledger"></ol></details><button id="logout">${preview ? '返回登录页' : '退出登录'}</button><a href="./diagnostics/pwa.html">应用检查</a></div></section>
       <section data-page="coin-rules" hidden><div class="detail-header"><a href="#/me" class="back-link" aria-label="返回我的">‹</a><h1>金币规则</h1></div><div id="coin-rules-content"></div></section>
     </div>
@@ -34,15 +35,17 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     <dialog id="habit-dialog" class="habit-dialog" aria-labelledby="dialog-title"><div class="dialog-heading"><h2 id="dialog-title" tabindex="-1" autofocus></h2><button id="close-dialog" aria-label="关闭">×</button></div><form id="habit-form"><div id="create-fields"><label for="habit-name">习惯名称</label><input id="habit-name" maxlength="30" placeholder="例如：睡前读书"><fieldset class="icon-picker"><legend>习惯图标</legend><div id="icon-options"></div><p class="dialog-note">基础图标免费；更多个性图案后续开放。</p></fieldset><label id="kind-label">记录方式</label><input id="habit-kind" type="hidden" value="complete"><div class="kind-select"><button id="kind-trigger" type="button" aria-labelledby="kind-label kind-value" aria-haspopup="listbox" aria-expanded="false"><span id="kind-value">完成型 · 做完就打卡</span><span aria-hidden="true">⌄</span></button><div id="kind-options" role="listbox" aria-labelledby="kind-label" hidden><button type="button" role="option" data-kind="complete" aria-selected="true">完成型 · 做完就打卡</button><button type="button" role="option" data-kind="quantity" aria-selected="false">数量型 · 达到目标才完成</button></div></div><div id="quantity-fields" hidden><label for="habit-goal">每日目标</label><input id="habit-goal" type="number" inputmode="numeric" min="1" max="100000" step="1" value="8"><label for="habit-unit">单位</label><input id="habit-unit" maxlength="6" placeholder="杯、分钟、页"></div><label for="habit-note">备注（可选）</label><input id="habit-note" maxlength="200" placeholder="给这个习惯留一句提醒"><p class="dialog-note">当前按每天计划；达标奖励统一由金币规则规定。</p></div><div id="progress-fields" hidden><label for="habit-progress">今日累计进度</label><input id="habit-progress" type="number" inputmode="numeric" min="0" step="1"><p id="progress-note" class="dialog-note"></p></div><p id="dialog-error" role="status" class="message"></p><button class="primary" id="save-habit" type="submit"></button></form></dialog>
   </div>`;
   const $ = id => root.querySelector(`#${id}`);
+  const statistics = createStatistics($('statistics-page'), {onHabit:id=>navigation.navigate(`habit/${id}`)});
   const dialog = $('habit-dialog');
   const navigation = createNavigation({
     normalize: next => next.startsWith('habit/') && habits.some(item=>item.id===next.slice(6)) ? next : [...routes,'archive','coin-rules'].includes(next) ? next : 'habits',
-    readView: () => ({ filter, selectedDay, scroll: $('workspace-content').scrollTop, detailMonth: [...detailMonth], filterHeight: $('filter-results').style.minHeight, logsOpen: !!$('habit-detail').querySelector('#detail-logs')?.open }),
+    readView: () => ({ statistics:statistics.getView(), filter, selectedDay, scroll: $('workspace-content').scrollTop, detailMonth: [...detailMonth], filterHeight: $('filter-results').style.minHeight, logsOpen: !!$('habit-detail').querySelector('#detail-logs')?.open }),
     onChange: (next, { source, view }) => {
       cancelHold(); cancelResultsTransition(); $('filter-results').style.minHeight=view?.filterHeight || '';
       root.querySelectorAll('[data-page], #filter-results').forEach(element=>element.getAnimations().forEach(animation=>animation.cancel()));
       if (dialog.open) dialog.close(); if ($('manage-dialog').open) $('manage-dialog').close();
       if (view) { filter=view.filter; selectedDay=view.selectedDay; detailMonth=[...view.detailMonth]; }
+      statistics.setView(view?.statistics);
       updateFilters(); dates(); renderHabits();
       setRoute(next, { animate: source==='navigate', view });
     }
@@ -125,6 +128,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   }
   function applySnapshot(data) {
     if(!isCurrentSnapshot(data,snapshot)) return;
+    statistics.update(data);
     snapshot=data; habits=data.habits; records=data.records; logs=data.logs; loaded=true;
     $('coin-balance').textContent=`${data.balance} 金币 · 今日获得 ${data.todayCoins}`;
     $('reward-balance').textContent=data.balance;
@@ -294,13 +298,13 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   return {
     enter(user) {
       ++epoch; writing=false; pending=null; root.removeAttribute('aria-busy');
-      if(owner!==user.id) { snapshot=null; habits=preview ? sampleHabits() : []; logs=[]; records=[]; loaded=preview; selectedDay=localDay(); filter='all'; updateFilters(); }
+      if(owner!==user.id) { statistics.clear(); snapshot=null; habits=preview ? sampleHabits() : []; logs=[]; records=[]; loaded=preview; selectedDay=localDay(); filter='all'; updateFilters(); }
       owner=user.id; $('account-email').textContent=preview ? '公开预览，不使用真实账户' : user.email || '已登录'; $('data-message').textContent=''; dates(); renderHabits(); root.hidden=false;
       document.body.classList.add('workspace-active'); document.documentElement.classList.add('workspace-active');
       const requested=location.hash.slice(2); navigation.start(requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive','coin-rules'].includes(requested) ? requested : 'habits');
       if(!preview) loadData();
     },
-    leave(reset = false) { ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); $('coin-ledger').replaceChildren(); $('coin-balance').textContent=''; $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
+    leave(reset = false) { statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); $('coin-ledger').replaceChildren(); $('coin-balance').textContent=''; $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); deletedHabit = null; $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
     isEditing() { return writing || !!pending || dialog.open || manage.open; }
   };
 }
