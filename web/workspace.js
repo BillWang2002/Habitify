@@ -45,7 +45,6 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
       root.querySelectorAll('[data-page], #filter-results').forEach(element=>element.getAnimations().forEach(animation=>animation.cancel()));
       if (dialog.open) dialog.close(); if ($('manage-dialog').open) $('manage-dialog').close();
       if (view) { filter=view.filter; selectedDay=view.selectedDay; detailMonth=[...view.detailMonth]; }
-      statistics.setView(view?.statistics);
       updateFilters(); dates(); renderHabits();
       setRoute(next, { animate: source==='navigate', view });
     }
@@ -72,6 +71,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     if (route === 'archive') renderArchive();
     root.querySelector('.app-nav').style.setProperty('--nav-index', Math.max(0,routes.indexOf(route==='coin-rules' ? 'me' : route)));
     for (const page of root.querySelectorAll('[data-page]')) page.hidden = page.dataset.page !== route;
+    if(route==='stats' && view?.statistics) statistics.setView(view.statistics);
     for (const link of root.querySelectorAll('[data-route]')) { if (link.dataset.route === (route==='coin-rules' ? 'me' : ['detail','archive'].includes(route) ? 'habits' : route)) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); }
     $('workspace-content').scrollTop = view?.scroll || 0;
     if (animate && oldRoute !== route) { slide(root.querySelector(`[data-page="${route}"]`), (routes.includes(route) ? routes.indexOf(route) : 4) < (routes.includes(oldRoute) ? routes.indexOf(oldRoute) : 4) ? -1 : 1); }
