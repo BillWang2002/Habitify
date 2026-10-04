@@ -90,8 +90,28 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   function renderArchive() {
     $('archive-list').replaceChildren();
     const archived=habits.filter(item=>item.archived);
-    for (const habit of archived) { const card=document.createElement('article'); card.className='archive-card'; const link=document.createElement('a'); link.href=`#/habit/${habit.id}`; link.textContent=habit.name; const restore=document.createElement('button'); restore.textContent='恢复'; restore.onclick=async()=>{ try { await mutate({op:'archive',habitId:habit.id,archived:false},()=>{habits=archiveHabit(habits,habit.id,false);}); renderArchive(); notify('已恢复打卡。'); } catch {} }; card.append(link,restore); $('archive-list').append(card); }
+    for (const habit of archived) $('archive-list').append(createHabitCard(habit,{archived:true}));
     if (!archived.length) $('archive-list').innerHTML=`<div class="archive-empty"><span>${iconSvg('archive')}</span><h2>暂时没有归档打卡</h2><p>不再进行的打卡可以先归档，<br>历史记录会留在这里，随时都能恢复。</p><a href="#/habits">看看今日打卡 ${iconSvg('checkin')}</a></div>`;
+  }
+  function createHabitCard(habit, {archived=false,isToday=true}={}) {
+      const done = isComplete(habit), card = document.createElement('article'); card.className = `habit-card ${archived ? 'is-archived' : done ? 'is-complete' : ''}`;
+      card.innerHTML = `<span class="habit-icon ${resolveHabitIcon(habit.icon)}" aria-hidden="true">${iconSvg(resolveHabitIcon(habit.icon))}</span><div class="habit-info"><button class="habit-open"><h3></h3><span class="habit-description"></span></button><progress></progress><div class="recent-days" aria-label="最近七天的记录"></div></div><div class="habit-controls"><button class="habit-action"></button><button class="habit-more" aria-label="更多操作">•••</button></div>`;
+      card.dataset.habitId = habit.id; card.querySelector('h3').textContent=habit.name;
+      const open=card.querySelector('.habit-open'); open.setAttribute('aria-label', `查看${habit.name}详情`); open.onclick=()=>navigation.navigate(`habit/${habit.id}`);
+      card.querySelector('.habit-description').textContent = `${habit.progress} / ${habit.goal} ${habit.unit} · ${archived ? '已归档' : done ? '已完成' : '待完成'}`;
+      const more=card.querySelector('.habit-more'); more.setAttribute('aria-label', `${habit.name}更多操作`); more.onclick=()=>openManage(habit);
+      const action=card.querySelector('.habit-action'); action.textContent = archived ? '已归档' : !isToday ? '仅查看' : done ? '✓ 完成' : habit.kind==='quantity' ? `＋${habit.step} ${habit.unit}` : '打卡'; action.disabled=(!archived && !isToday) || writing || !loaded;
+      action.setAttribute('aria-label', `${habit.name}：${archived ? '归档管理' : done ? '修改或撤销完成' : habit.kind==='quantity' ? `增加 ${habit.step} ${habit.unit}` : '打卡'}`);
+      action.onclick=()=> { if (archived) openManage(habit); else if (done) openDialog(habit,habit.kind==='complete' ? 'undo' : 'progress'); else updateProgress(habit.id,Math.min(habit.goal,habit.progress+habit.step)).catch(()=>{}); };
+      const progress=card.querySelector('progress'); progress.max=habit.goal; progress.value=habit.progress; progress.setAttribute('aria-label', `${habit.name}进度`);
+      for (let i=6;i>=0;i--) { const date=new Date(`${currentDay()}T12:00:00`); date.setDate(date.getDate()-i); const key=localDay(date), r=records.find(item=>item.habitId===habit.id && item.day===key); const marker=document.createElement('span'); marker.textContent=date.getDate(); const state=r?.progress>=r?.goal ? '已完成' : r?.progress ? '部分进度' : key===currentDay() ? '待完成' : '无完成记录'; marker.className=state==='已完成' ? 'recent-done' : state==='部分进度' ? 'recent-partial' : i===0 ? 'recent-today' : 'recent-unknown'; marker.setAttribute('aria-label',`${key}：${state}`); card.querySelector('.recent-days').append(marker); }
+      card.addEventListener('pointerdown',event=> { if (event.button!==0 || event.target.closest('.habit-controls') || !event.isPrimary) return; cancelHold(); holdStart={x:event.clientX,y:event.clientY}; holdTimer=setTimeout(()=> { suppressClick=true; openManage(habit); },550); });
+      card.addEventListener('pointermove',event=> { if (holdStart && Math.hypot(event.clientX-holdStart.x,event.clientY-holdStart.y)>10) cancelHold(); });
+      for (const event of ['pointerup','pointercancel','pointerleave']) card.addEventListener(event,cancelHold);
+      card.addEventListener('click',event=> { if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); suppressClick=false; } },true);
+      card.addEventListener('contextmenu',event=> { if (!event.target.closest('.habit-controls')) { event.preventDefault(); openManage(habit); } });
+      card.addEventListener('click',event=> { if (!event.target.closest('button')) navigation.navigate(`habit/${habit.id}`); });
+      return card;
   }
   function renderHabits() {
     const summary = todaySummary(habits); if(snapshot) summary.actionDay=snapshot.actionDay;
@@ -105,26 +125,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
     $('selected-day-note').textContent = isToday ? '完成至少一项打卡，今天就成为行动日。' : `${selectedDay} · 历史日期仅查看，补签后续开放。`;
     const shown = active.map(item=>isToday ? item : {...item,progress:records.find(r=>r.habitId===item.id && r.day===selectedDay)?.progress || 0,goal:records.find(r=>r.habitId===item.id && r.day===selectedDay)?.goal || item.goal}).filter(item => filter === 'all' || (filter === 'done' ? isComplete(item) : !isComplete(item)));
     $('habit-list').replaceChildren();
-    for (const habit of shown) {
-      const done = isComplete(habit), card = document.createElement('article'); card.className = `habit-card ${done ? 'is-complete' : ''}`;
-      card.innerHTML = `<span class="habit-icon ${resolveHabitIcon(habit.icon)}" aria-hidden="true">${iconSvg(resolveHabitIcon(habit.icon))}</span><div class="habit-info"><button class="habit-open"><h3></h3><span class="habit-description"></span></button><progress></progress><div class="recent-days" aria-label="最近七天的记录"></div></div><div class="habit-controls"><button class="habit-action"></button><button class="habit-more" aria-label="更多操作">•••</button></div>`;
-      card.dataset.habitId = habit.id; card.querySelector('h3').textContent=habit.name;
-      const open=card.querySelector('.habit-open'); open.setAttribute('aria-label', `查看${habit.name}详情`); open.onclick=()=>navigation.navigate(`habit/${habit.id}`);
-      card.querySelector('.habit-description').textContent = `${habit.progress} / ${habit.goal} ${habit.unit} · ${done ? '已完成' : '待完成'}`;
-      const more=card.querySelector('.habit-more'); more.setAttribute('aria-label', `${habit.name}更多操作`); more.onclick=()=>openManage(habit);
-      const action=card.querySelector('.habit-action'); action.textContent = !isToday ? '仅查看' : done ? '✓ 完成' : habit.kind==='quantity' ? `＋${habit.step} ${habit.unit}` : '打卡'; action.disabled=!isToday || writing || !loaded;
-      action.setAttribute('aria-label', `${habit.name}：${done ? '修改或撤销完成' : habit.kind==='quantity' ? `增加 ${habit.step} ${habit.unit}` : '打卡'}`);
-      action.onclick=()=> { if (done) openDialog(habit,habit.kind==='complete' ? 'undo' : 'progress'); else updateProgress(habit.id,Math.min(habit.goal,habit.progress+habit.step)).catch(()=>{}); };
-      const progress=card.querySelector('progress'); progress.max=habit.goal; progress.value=habit.progress; progress.setAttribute('aria-label', `${habit.name}进度`);
-      for (let i=6;i>=0;i--) { const date=new Date(`${currentDay()}T12:00:00`); date.setDate(date.getDate()-i); const key=localDay(date), r=records.find(item=>item.habitId===habit.id && item.day===key); const marker=document.createElement('span'); marker.textContent=date.getDate(); const state=r?.progress>=r?.goal ? '已完成' : r?.progress ? '部分进度' : key===currentDay() ? '待完成' : '无完成记录'; marker.className=state==='已完成' ? 'recent-done' : state==='部分进度' ? 'recent-partial' : i===0 ? 'recent-today' : 'recent-unknown'; marker.setAttribute('aria-label',`${key}：${state}`); card.querySelector('.recent-days').append(marker); }
-      card.addEventListener('pointerdown',event=> { if (event.button!==0 || event.target.closest('.habit-controls') || !event.isPrimary) return; cancelHold(); holdStart={x:event.clientX,y:event.clientY}; holdTimer=setTimeout(()=> { suppressClick=true; openManage(habit); },550); });
-      card.addEventListener('pointermove',event=> { if (holdStart && Math.hypot(event.clientX-holdStart.x,event.clientY-holdStart.y)>10) cancelHold(); });
-      for (const event of ['pointerup','pointercancel','pointerleave']) card.addEventListener(event,cancelHold);
-      card.addEventListener('click',event=> { if (suppressClick) { event.preventDefault(); event.stopImmediatePropagation(); suppressClick=false; } },true);
-      card.addEventListener('contextmenu',event=> { if (!event.target.closest('.habit-controls')) { event.preventDefault(); openManage(habit); } });
-      card.addEventListener('click',event=> { if (!event.target.closest('button')) navigation.navigate(`habit/${habit.id}`); });
-      $('habit-list').append(card);
-    }
+    for (const habit of shown) $('habit-list').append(createHabitCard(habit,{isToday}));
     $('habit-empty').hidden = shown.length > 0;
     $('empty-title').textContent = !isToday ? '该日期没有符合筛选的打卡' : !active.length ? '从你的第一项打卡开始' : filter === 'done' ? '今天的第一步，等你出发' : '今天的计划，都完成了';
     $('empty-note').textContent = !isToday ? '返回今天可继续打卡；补签后续开放。' : !active.length ? '点击右上角 ＋，添加一件想坚持的小事。' : filter === 'done' ? '完成型打卡或数量达到目标后，会出现在这里。' : '按自己的节奏，明天继续。';
@@ -155,7 +156,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   async function loadData() {
     const token=epoch; const id=owner; $('sync-status').textContent='正在读取你的打卡…';
     try { const data=await request({op:'snapshot'}); if(token!==epoch || id!==owner || !isCurrentSnapshot(data,snapshot)) return; if(!snapshot || snapshot.today!==data.today) selectedDay=data.today; applySnapshot(data); dates(); }
-    catch(error) { if(token!==epoch || id!==owner) return; loaded=false; renderProfile(); $('profile-status').textContent='连接未完成，请在开发者模式重试同步。'; $('sync-status').textContent=error.message; $('retry-data').hidden=false; renderHabits(); }
+    catch(error) { if(token!==epoch || id!==owner) return; loaded=false; renderProfile(); $('profile-status').textContent='连接未完成，请在开发者模式重试同步。'; $('sync-status').textContent=error.message; $('retry-data').hidden=false; renderHabits(); if(route==='archive') renderArchive(); }
   }
   async function mutate(payload, local) {
     if(writing) throw new Error('正在保存，请稍候。');
@@ -167,7 +168,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
   }
   async function sendPending() {
     if(writing || !pending) return;
-    const token=epoch; writing=true; root.setAttribute('aria-busy','true'); $('sync-status').textContent='正在保存…'; renderHabits();
+    const token=epoch; writing=true; root.setAttribute('aria-busy','true'); $('sync-status').textContent='正在保存…'; renderHabits(); if(route==='archive') renderArchive();
     try {
       const data=await request(pending); if(token!==epoch) return;
       pending=null; applySnapshot(data); return data;
@@ -177,7 +178,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, re
       $('sync-status').textContent=error.message; $('retry-data').hidden=false; notify(error.message);
       if(['STALE_DATA','TODAY_CHANGED','HABIT_NOT_FOUND'].includes(error.code)) await loadData();
       throw error;
-    } finally { if(token===epoch) { writing=false; root.removeAttribute('aria-busy'); renderHabits(); if(route==='detail') refreshDetail(); } }
+    } finally { if(token===epoch) { writing=false; root.removeAttribute('aria-busy'); renderHabits(); if(route==='detail') refreshDetail(); if(route==='archive') renderArchive(); } }
   }
   $('retry-data').onclick=async()=>{ try { if(pending) await sendPending(); else await loadData(); } catch {} };
   async function updateProgress(id, value) {

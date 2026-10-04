@@ -239,9 +239,6 @@ html.workspace-active body { position: fixed; inset: 0; width: 100%; }
 .calendar-legend { font-size: 10px; color: var(--muted); }
 #detail-logs summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
 #detail-log-list { padding-left: 20px; font-size: 12px; color: var(--muted); line-height: 2; }
-.archive-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; }
-.archive-card a { overflow-wrap: anywhere; }
-.archive-card button { border: 1px solid var(--line); color: var(--accent); background: var(--field); border-radius: 10px; padding: 8px 14px; flex-shrink: 0; }
 @media(max-width:350px) { .habit-card { gap: 9px; padding: 12px; } .habit-icon { width: 36px; height: 36px; } .habit-controls, .habit-controls .habit-action { width: 62px; } .recent-days { gap: 2px; } .detail-panel { padding: 14px; } .calendar-grid { gap: 3px; } }
 @media(prefers-reduced-motion:reduce) { #workspace *, #workspace *::before, #workspace *::after { animation: none !important; transition: none !important; } }
 
