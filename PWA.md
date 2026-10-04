@@ -78,3 +78,7 @@
 ## 今日打卡名称（2026-10-04）
 
 manifest名称为 Habitify · 今日打卡，short_name及apple-mobile-web-app-title为“今日打卡”，应用ID、启动地址、scope延续。名称配置已更新；已有iOS主屏幕图标名称的显示变化需要真机确认。用户选择 B 嫩芽勾选，已应用于 PWA、登录标识和底部打卡导航；候选稿留存于 docs/design/checkin-icons/options.png。
+
+## 键盘布局后续优化（2026-10-04）
+
+用户报告上一轮前端优化验收完成。当前固定应用底层并约束键盘上方输入区域，隐藏页面滚动条；实现、平台边界、模拟验证及真机清单见 [KEYBOARD.md](./KEYBOARD.md)。本轮真实系统键盘待用户复测。

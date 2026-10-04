@@ -1,3 +1,4 @@
+import { initKeyboardViewport } from './keyboard-viewport.js';
 import { showFieldErrors } from './form-validation.js';
 import { createWorkspace } from './workspace.js';
 import { createHabitsApi } from './habits-api.js';
@@ -6,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import { AuthController, loginError } from './auth.js';
 const $ = id => document.getElementById(id);
 let habitRequest, controller, busy = false, logoutFailed = false;
+initKeyboardViewport();
 const workspace = createWorkspace($('workspace'), { request: payload => habitRequest(payload), onLogout: logout });
 const views = ['restoring', 'login-view', 'unavailable'];
 function render(state) {

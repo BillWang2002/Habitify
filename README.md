@@ -60,3 +60,5 @@ npm run check:backend
 统计第一版：行动概览、月历、打卡统计和柱形/累计折线；口径、部署及验收见 [STATS.md](./STATS.md)。
 
 当前前端优化与“今日打卡”名称、嫩芽勾选图标说明见 [UI-POLISH.md](./UI-POLISH.md)。
+
+登录与弹窗的键盘布局适配见 [KEYBOARD.md](./KEYBOARD.md)。
