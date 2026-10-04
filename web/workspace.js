@@ -51,7 +51,7 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     const link=event.target.closest('a[href^="#/"]');
     if (!link || event.defaultPrevented || event.button!==0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    if (link.classList.contains('back-link')) navigation.back('habits'); else navigation.navigate(link.getAttribute('href').slice(2));
+    if (link.classList.contains('back-link')) navigation.back(link.getAttribute('href').slice(2)); else navigation.navigate(link.getAttribute('href').slice(2));
   });
   function notify(text) { clearTimeout(toastTimer); $('toast-text').textContent = text; $('undo-delete').hidden = !deletedHabit; $('workspace-toast').hidden = false; toastTimer = setTimeout(() => { $('workspace-toast').hidden = true; deletedHabit = null; }, deletedHabit ? 8000 : 3500); }
   const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -66,7 +66,7 @@ export function createWorkspace(root, { onLogout = () => {}, onCheck = async () 
     if (next.startsWith('habit/')) { const id = next.slice(6); if (habits.some(item=>item.id===id)) { detailId=id; route='detail'; detailMonth=view?.detailMonth || [new Date().getFullYear(),new Date().getMonth()]; refreshDetail(); if(view?.logsOpen) $('habit-detail').querySelector('#detail-logs').open=true; } else route='habits'; }
     else route = [...routes,'archive','coin-rules'].includes(next) ? next : 'habits';
     if (route === 'archive') renderArchive();
-    root.querySelector('.app-nav').style.setProperty('--nav-index', Math.max(0,routes.indexOf(route)));
+    root.querySelector('.app-nav').style.setProperty('--nav-index', Math.max(0,routes.indexOf(route==='coin-rules' ? 'me' : route)));
     for (const page of root.querySelectorAll('[data-page]')) page.hidden = page.dataset.page !== route;
     for (const link of root.querySelectorAll('[data-route]')) { if (link.dataset.route === (route==='coin-rules' ? 'me' : ['detail','archive'].includes(route) ? 'habits' : route)) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); }
     $('workspace-content').scrollTop = view?.scroll || 0;
