@@ -1,5 +1,6 @@
 // Bundled, trusted SVG assets only. Future inventory supplies owned IDs, never arbitrary markup.
 const paths = {
+  back: '<path d="m15 6-6 6 6 6"/>',
   book: '<path d="M12 6c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1Z"/><path d="M12 6v14"/>',
   water: '<path d="M12 3s-7 8-7 12a7 7 0 0 0 14 0c0-4-7-12-7-12Z"/><path d="M8 15a4 4 0 0 0 4 4"/>',
   walk: '<path d="M5 20c-2-10 3-16 15-16 0 12-6 17-15 16Z"/><path d="m4 21 11-11M9 16v-5m0 5h5"/>',

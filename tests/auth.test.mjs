@@ -42,7 +42,7 @@ test('退出过程中刷新事件不能启动身份验证', async () => {
   const exit = deferred();
   const { controller, emit, scheduled } = setup({ auth: { signOut: () => exit.promise } });
   await controller.start(); const operation = controller.logout(); emit('TOKEN_REFRESHED');
-  assert.equal(scheduled.length, 0); exit.resolve({ error: null }); await operation;
+  assert.equal(scheduled.length, 0); assert.equal(controller.state.phase, 'signingOut'); assert.equal(controller.state.user, null); exit.resolve({ error: null }); await operation;
   assert.equal(controller.state.phase, 'signedOut');
 });
 test('A 的数据迟到时不会返回给退出后的界面', async () => {

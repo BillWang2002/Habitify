@@ -211,8 +211,10 @@ html.workspace-active body { position: fixed; inset: 0; width: 100%; }
 .manage-actions .danger-text { color: var(--error); }
 .detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
 .detail-header h1 { flex: 1; min-width: 0; font-size: 23px; margin: 0; overflow-wrap: anywhere; }
-.back-link { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); text-decoration: none; font-size: 26px; }
-#detail-menu { display: grid; place-items: center; flex-shrink: 0; width: 44px; min-height: 44px; border: 0; border-radius: 12px; background: var(--panel); color: var(--ink); text-decoration: none; font-size: 26px; }
+.back-link { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); text-decoration: none; padding: 0; line-height: 1; }
+.back-link svg { display: block; width: 22px; height: 22px; }
+#detail-menu { display: grid; place-items: center; flex-shrink: 0; width: 44px; min-height: 44px; border: 0; border-radius: 12px; background: var(--panel); color: var(--ink); text-decoration: none; padding: 0; line-height: 1; }
+.back-link svg { display: block; width: 22px; height: 22px; }
 #detail-menu { font-size: 16px; }
 .detail-profile { display: flex; gap: 16px; align-items: center; padding: 20px; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); }
 .detail-profile div { min-width: 0; }

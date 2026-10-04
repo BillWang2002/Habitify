@@ -68,7 +68,7 @@ export class AuthController {
   async logout() {
     this.signingOut = true;
     ++this.epoch;
-    this.publish('restoring', null, '正在退出登录…');
+    this.publish('signingOut', null, '正在退出登录…');
     let error;
     try { ({ error } = await this.client.auth.signOut({ scope: 'local' })); }
     catch (failure) { error = failure; }

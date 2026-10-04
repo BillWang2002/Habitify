@@ -2,7 +2,7 @@ import { isComplete } from './habits-model.js';
 import { iconSvg, resolveHabitIcon } from './theme.js';
 export const localDay = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 export function renderDetail(root, habit, logs, month, { onMenu, onProgress, records=[], busy=false, today:todayKey=localDay() }) {
-  root.innerHTML = `<div class="detail-header"><a href="#/habits" class="back-link" aria-label="返回上一页">‹</a><h1></h1><button id="detail-menu" aria-label="打卡管理菜单">•••</button></div>
+  root.innerHTML = `<div class="detail-header"><a href="#/habits" class="back-link" aria-label="返回上一页">${iconSvg('back')}</a><h1></h1><button id="detail-menu" aria-label="打卡管理菜单">•••</button></div>
   <div class="detail-profile"><span class="habit-icon"></span><div><strong id="detail-plan"></strong><p id="detail-note"></p></div></div>
   <div class="detail-today"><div><h2>今日进度</h2><p id="detail-progress"></p></div><button id="detail-check" class="habit-action"></button></div>
   <section class="detail-panel"><h2>打卡概览</h2><div class="detail-metrics"><div><strong id="detail-days"></strong><span>完成天数</span></div><div><strong id="detail-month-days">0</strong><span>本月完成</span></div><div><strong id="detail-log-count"></strong><span>操作日志</span></div></div><p class="dialog-note">累计完成按保存的每日目标计算；最多展示最近 200 条操作日志。</p></section>
