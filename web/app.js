@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { AuthController, loginError } from './auth.js';
 const $ = id => document.getElementById(id);
 let habitRequest, controller, busy = false, logoutFailed = false;
-const workspace = createWorkspace($('workspace'), { request: payload => habitRequest(payload), onLogout: logout, onCheck: async () => { const count = await controller.readOwnProbes(); return count === null ? '' : `数据连接已通过：${count} 条测试记录均属于当前账户。`; } });
+const workspace = createWorkspace($('workspace'), { request: payload => habitRequest(payload), onLogout: logout });
 const views = ['restoring', 'login-view', 'unavailable'];
 function render(state) {
   const view = { restoring: 'restoring', signedOut: 'login-view', unavailable: 'unavailable', verified: 'account-view' }[state.phase];
