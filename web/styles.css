@@ -211,7 +211,8 @@ html.workspace-active body { position: fixed; inset: 0; width: 100%; }
 .manage-actions .danger-text { color: var(--error); }
 .detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
 .detail-header h1 { flex: 1; min-width: 0; font-size: 23px; margin: 0; overflow-wrap: anywhere; }
-.back-link, #detail-menu { display: grid; place-items: center; flex-shrink: 0; width: 44px; min-height: 44px; border: 0; border-radius: 12px; background: var(--panel); color: var(--ink); text-decoration: none; font-size: 26px; }
+.back-link { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); text-decoration: none; font-size: 26px; }
+#detail-menu { display: grid; place-items: center; flex-shrink: 0; width: 44px; min-height: 44px; border: 0; border-radius: 12px; background: var(--panel); color: var(--ink); text-decoration: none; font-size: 26px; }
 #detail-menu { font-size: 16px; }
 .detail-profile { display: flex; gap: 16px; align-items: center; padding: 20px; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); }
 .detail-profile div { min-width: 0; }
@@ -393,8 +394,7 @@ input[aria-invalid="true"] { border-color:var(--error); }
 /* Archive is part of the account space, with a calm empty state. */
 #habit-archive .detail-header { gap: 12px; margin-bottom: 18px; }
 #habit-archive .detail-header .date-label { margin: 0 0 3px; font-size: 11px; }
-#habit-archive .back-link { border-radius: 50%; background: transparent; border: 1px solid var(--line); }
-.archive-empty { margin-top: 8px; padding: 38px 20px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: 22px; }
+.archive-empty { grid-column: 1 / -1; width: min(100%, 560px); margin: 8px auto 0; padding: 38px 20px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: 22px; }
 .archive-empty > span { display: grid; place-items: center; margin: 0 auto 18px; width: 62px; height: 62px; color: var(--accent); border-radius: 20px; background: color-mix(in srgb,var(--accent) 10%,transparent); }
 .archive-empty > span svg { width: 30px; height: 30px; }
 .archive-empty h2 { font-size: 18px; margin: 0 0 10px; }
