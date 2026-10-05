@@ -24,7 +24,7 @@ export function initKeyboardViewport() {
   // Root never owns scrolling. WebKit focus panning can still occur; correct its document offset.
   if(mobile && window.scrollY!==0) window.scrollTo(0,0);
   if(open) {
-   const field=document.activeElement, container=field?.closest('.habit-dialog[open],#auth-shell .panel');
+   const field=document.activeElement, container=field?.closest('.habit-dialog[open],#auth-shell .panel,#admin-page .admin-login-card,.admin-active .app-content');
    if(container) {
     const fieldRect=field.getBoundingClientRect(), box=container.getBoundingClientRect();
     const bottom=Math.min(box.bottom,geometry.top+geometry.height)-16;
@@ -44,7 +44,7 @@ export function initKeyboardViewport() {
   if(!root.classList.contains('keyboard-open') || event.touches.length!==1) return;
   const y=event.touches[0].clientY, delta=y-touchY;touchY=y;
   if(event.target.closest('input,textarea,[contenteditable="true"]')) return;
-  const container=event.target.closest('.habit-dialog[open],#auth-shell .panel');
+  const container=event.target.closest('.habit-dialog[open],#auth-shell .panel,#admin-page .admin-login-card,.admin-active .app-content');
   const canScroll=container && (delta>0 ? container.scrollTop>1 : container.scrollTop+container.clientHeight<container.scrollHeight-1);
   if(!canScroll && event.cancelable) event.preventDefault();
  },{passive:false});

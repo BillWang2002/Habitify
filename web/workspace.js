@@ -10,7 +10,7 @@ import { renderDetail, localDay } from './habit-details.js';
 import { isCurrentSnapshot } from './habits-api.js';
 import { coinRulesHtml } from './coin-rules.js';
 const routes = ['habits', 'rewards', 'stats', 'me'];
-const accountRoutes = ['coin-rules', 'developer', 'archive', 'inbox', 'feedback', 'admin-login'];
+const accountRoutes = ['coin-rules', 'developer', 'archive', 'inbox', 'feedback', 'admin-login','admin/overview','admin/members','admin/announcements','admin/feedback','admin/audit'];
 const option = (tag, attrs, icon, label, description = '') => `<${tag} ${attrs} class="account-row"><span class="account-row-icon">${iconSvg(icon)}</span><span class="account-row-copy"><strong>${label}</strong>${description ? `<small>${description}</small>` : ''}</span><span class="account-row-chevron" aria-hidden="true">›</span></${tag}>`;
 export function createWorkspace(root, { onLogout = () => {}, preview = false, adminApi, request = async () => { throw new Error('打卡服务尚未连接。'); } } = {}) {
   let owner, habits = preview ? sampleHabits() : [], filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false, filterRevision = 0, resultAnimations = [], resultGhost;
@@ -44,7 +44,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
     <dialog id="habit-dialog" class="habit-dialog" aria-labelledby="dialog-title"><div class="dialog-heading"><h2 id="dialog-title" tabindex="-1" autofocus></h2><button id="close-dialog" aria-label="关闭">×</button></div><form id="habit-form" novalidate><div id="create-fields"><label for="habit-name">打卡名称</label><input id="habit-name" maxlength="30" placeholder="例如：睡前读书" aria-describedby="habit-name-error"><p id="habit-name-error" class="field-error" role="status" hidden></p><fieldset class="icon-picker"><legend>打卡图标</legend><div id="icon-options"></div><p class="dialog-note">基础图标免费；更多个性图案后续开放。</p></fieldset><label id="kind-label">记录方式</label><input id="habit-kind" type="hidden" value="complete"><div class="kind-select"><button id="kind-trigger" type="button" aria-labelledby="kind-label kind-value" aria-haspopup="listbox" aria-expanded="false"><span id="kind-value">完成型 · 做完就打卡</span><span aria-hidden="true">⌄</span></button><div id="kind-options" role="listbox" aria-labelledby="kind-label" hidden><button type="button" role="option" data-kind="complete" aria-selected="true">完成型 · 做完就打卡</button><button type="button" role="option" data-kind="quantity" aria-selected="false">数量型 · 达到目标才完成</button></div></div><div id="quantity-fields" hidden><label for="habit-goal">每日目标</label><input id="habit-goal" type="number" inputmode="numeric" min="1" max="100000" step="1" value="8" aria-describedby="habit-goal-error"><p id="habit-goal-error" class="field-error" role="status" hidden></p><label for="habit-unit">单位</label><input id="habit-unit" maxlength="6" placeholder="杯、分钟、页" aria-describedby="habit-unit-error"><p id="habit-unit-error" class="field-error" role="status" hidden></p></div><label for="habit-note">备注（可选）</label><input id="habit-note" maxlength="200" placeholder="给这项打卡留一句提醒" aria-describedby="habit-note-error"><p id="habit-note-error" class="field-error" role="status" hidden></p><p class="dialog-note">当前按每天计划；达标奖励统一由金币规则规定。</p></div><div id="delete-fields" hidden><p class="dialog-note">删除后无法撤回。今日进度及失效金币奖励会清除，历史记录保留。若只是暂时停止，建议使用归档。</p><label for="delete-name">输入打卡名称确认</label><p id="delete-expected" class="delete-expected"></p><input id="delete-name" maxlength="30" autocomplete="off" spellcheck="false" aria-describedby="delete-name-error"><p id="delete-name-error" class="field-error" role="status" hidden></p></div><div id="progress-fields" hidden><label for="habit-progress">今日累计进度</label><input id="habit-progress" type="number" inputmode="numeric" min="0" step="1" aria-describedby="habit-progress-error"><p id="habit-progress-error" class="field-error" role="status" hidden></p><p id="progress-note" class="dialog-note"></p></div><p id="dialog-error" role="status" class="message"></p><button class="primary" id="save-habit" type="submit"></button></form></dialog>
   </div>`;
   const $ = id => root.querySelector(`#${id}`);
-  const admin = createAdminPage(root,{api:adminApi,preview});
+  const admin = createAdminPage(root,{api:adminApi,preview,onNavigate:(path,options)=>navigation.navigate(path,options)});
   const statistics = createStatistics($('statistics-page'), {onHabit:id=>navigation.navigate(`habit/${id}`)});
   const dialog = $('habit-dialog');
   const navigation = createNavigation({
@@ -77,15 +77,18 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
   function setRoute(next, { animate = true, view = null } = {}) {
     const oldRoute = route;
     if (next.startsWith('habit/')) { const id = next.slice(6); if (habits.some(item=>item.id===id)) { detailId=id; route='detail'; detailMonth=view?.detailMonth || [new Date().getFullYear(),new Date().getMonth()]; refreshDetail(); if(view?.logsOpen) $('habit-detail').querySelector('#detail-logs').open=true; } else route='habits'; }
+    else if(next.startsWith('admin/')) route='admin';
     else route = [...routes,'archive',...accountRoutes].includes(next) ? next : 'habits';
     if (route === 'archive') renderArchive();
-    if(route==='admin-login') admin.show(); else admin.hide();
-    root.querySelector('.app-nav').style.setProperty('--nav-index', Math.max(0,routes.indexOf(accountRoutes.includes(route) ? 'me' : route)));
+    root.classList.toggle('admin-active',route==='admin');
+    $('sync-status').hidden=route==='admin';
+    if(route==='admin-login' || route==='admin') admin.show(route==='admin' ? next.slice(6) : null); else admin.hide();
+    root.querySelector('.app-nav').style.setProperty('--nav-index', Math.max(0,routes.indexOf((accountRoutes.includes(route) || route==='admin') ? 'me' : route)));
     for (const page of root.querySelectorAll('[data-page]')) page.hidden = page.dataset.page !== route;
     if(route==='stats' && view?.statistics) statistics.setView(view.statistics);
-    for (const link of root.querySelectorAll('[data-route]')) { if (link.dataset.route === (accountRoutes.includes(route) ? 'me' : ['detail','archive'].includes(route) ? 'habits' : route)) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); }
+    for (const link of root.querySelectorAll('[data-route]')) { if (link.dataset.route === ((accountRoutes.includes(route) || route==='admin') ? 'me' : ['detail','archive'].includes(route) ? 'habits' : route)) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); }
     $('workspace-content').scrollTop = view?.scroll || 0;
-    if (animate && oldRoute !== route) { slide(root.querySelector(`[data-page="${route}"]`), (routes.includes(route) ? routes.indexOf(route) : 4) < (routes.includes(oldRoute) ? routes.indexOf(oldRoute) : 4) ? -1 : 1); }
+    if (animate && oldRoute !== route) { slide(route==='admin' ? root.querySelector('.admin-content') : root.querySelector(`[data-page="${route}"]`), (routes.includes(route) ? routes.indexOf(route) : 4) < (routes.includes(oldRoute) ? routes.indexOf(oldRoute) : 4) ? -1 : 1); }
   }
   function refreshDetail() {
     const habit = habits.find(item=>item.id===detailId); if (!habit) return;
@@ -331,7 +334,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
       const requested=location.hash.slice(2); navigation.start(requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive',...accountRoutes].includes(requested) ? requested : 'habits');
       if(!preview) loadData();
     },
-    leave(reset = false) { admin.clear(); statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); account=null; renderProfile(); $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
+    leave(reset = false) { root.classList.remove('admin-active'); admin.clear(); statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); account=null; renderProfile(); $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
     isEditing() { return admin.busy() || writing || !!pending || dialog.open || manage.open; }
   };
 }
