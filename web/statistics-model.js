@@ -34,7 +34,7 @@ export function createStatisticsModel(snapshot) {
    let bucket=buckets.at(-1); if(bucket?.key!==key) { bucket={key,start:day,end:day,count:0,cumulative,future:day>today,inProgress:false};buckets.push(bucket); }
    bucket.end=day; bucket.count+=byDay.get(day)?.completed || 0; bucket.inProgress ||=day===today; cumulative+=byDay.get(day)?.completed || 0; bucket.cumulative=cumulative;
   }
-  const list=habits.filter(h=>actual.some(d=>d.items.some(i=>i.habit.id===h.id && (i.planned || i.progress)))).map(h=> {
+  const list=habits.filter(h=>!h.deleted && actual.some(d=>d.items.some(i=>i.habit.id===h.id && (i.planned || i.progress)))).map(h=> {
    const items=actual.flatMap(d=>d.items.filter(i=>i.habit.id===h.id).map(i=>({...i,day:d.day})));
    const expected=items.filter(i=>i.planned && i.day<today), done=items.filter(i=>i.done).length;
    const history=days.flatMap(d=>d.items.filter(i=>i.habit.id===h.id && i.planned).map(i=>({day:d.day,done:i.done})));

@@ -15,9 +15,9 @@ test('部分进度不形成行动日；今日完成不混入截至昨天的完�
 });
 test('归档次日起停计划，恢复当天开始；删除元数据和历史达标保留',()=>{
  const m=model([record('a','2026-09-28'),record('a','2026-09-29'),record('a','2026-10-02')],[{habitId:'a',day:'2026-09-28',active:true,goal:8},{habitId:'a',day:'2026-09-30',active:false,goal:8},{habitId:'a',day:'2026-10-02',active:true,goal:8},{habitId:'a',day:'2026-10-04',active:false,goal:8}],[habit('a',{deleted:true})]);
- const p=m.period('week');assert.equal(p.denominator,4);assert.equal(p.numerator,3);assert.equal(p.count,3);assert.equal(p.list[0].habit.deleted,true);
+ const p=m.period('week');assert.equal(p.denominator,4);assert.equal(p.numerator,3);assert.equal(p.count,3);assert.deepEqual(p.list,[]);
  assert.equal(m.byDay.get('2026-09-30').planned,0);assert.equal(m.byDay.get('2026-10-02').planned,1);
- assert.equal(m.account.longest,2);assert.equal(p.list[0].longest,3);
+ assert.equal(m.account.longest,2);
 });
 test('今天尚未完成保留昨日前连续，今日达标延长；空计划不显示0%误导',()=>{
  const m=model([record('a','2026-10-02'),record('a','2026-10-03')]);assert.equal(m.account.current,2);
@@ -30,4 +30,17 @@ test('记录目标快照优先，重复记录不重复计数；全部按范围�
  assert.equal(m.period('all').grain,'day');
  const long=model([], [{habitId:'a',day:'2026-08-01',active:true,goal:8}]);assert.equal(long.period('all').grain,'week');
  const year=model([record('a','2026-01-01')],[{habitId:'a',day:'2026-01-01',active:true,goal:8}]);assert.equal(year.period('all').grain,'month');assert.equal(year.period('all').buckets.at(-1).cumulative,1);
+});
+
+test('打卡统计排除已删除项，保留正在执行和已归档项，历史概览与趋势不改写',()=>{
+ const habits=[habit('active'),habit('archived',{archived:true}),habit('deleted',{deleted:true,archived:true})];
+ const plans=habits.map(h=>({habitId:h.id,day:'2026-10-01',active:true,goal:8}));
+ const m=model(habits.map(h=>record(h.id,'2026-10-02')),plans,habits);
+ for(const type of ['week','month','all']) {
+  const p=m.period(type);
+  assert.deepEqual(p.list.map(i=>i.habit.id),['active','archived']);
+  assert.equal(p.list[1].completed,1);assert.equal(p.list[1].lifetime,1);
+  assert.equal(p.count,3);assert.equal(p.buckets.at(-1).cumulative,3);
+ }
+ assert.equal(m.byDay.get('2026-10-02').completed,3);
 });
