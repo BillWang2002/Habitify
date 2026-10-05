@@ -44,3 +44,8 @@
 - [Supabase Auth Admin createUser](https://supabase.com/docs/reference/javascript/auth-admin-createuser)：创建用户只应在服务端执行，不能向浏览器暴露管理凭据。
 - [Supabase用户管理](https://supabase.com/docs/guides/auth/users)：邀请接口及管理密钥的服务端使用边界。
 - [角色与权限控制](https://supabase.com/docs/guides/api/custom-claims-and-role-based-access-control-rbac)：角色权限可结合数据库策略实施。
+
+
+## 前端入口（2026-10-05）
+
+用户确认先实施入口与页面设计：我的 → 开发者模式 → 后台管理 → 开发人员登录。当前仅为明确尚未开放的入口页，不执行认证或授予后台权限。后续收件箱接收公告/账户通知/反馈回复，意见反馈独立入口位于工具与账户；消息范围、反馈处理权限与实际接口在后续接入时落实。

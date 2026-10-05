@@ -402,3 +402,11 @@ input[aria-invalid="true"] { border-color:var(--error); }
 .archive-empty a { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; padding: 10px 16px; border: 1px solid var(--line); border-radius: 12px; color: var(--accent); text-decoration: none; font-size: 13px; }
 .archive-empty a svg { width: 18px; height: 18px; }
 .delete-expected { margin: 8px 0 12px; padding: 12px 14px; border: 1px solid var(--line); background: var(--bg); border-radius: 12px; font-weight: 650; overflow-wrap: anywhere; }
+
+/* Account service entry pages share the established theme and spacing. */
+.account-feature-page .detail-header .date-label { margin: 0 0 3px; font-size: 11px; }
+.account-feature-state { width: min(100%,560px); margin: 24px auto; padding: 36px 24px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); text-align: center; }
+.account-feature-icon { display: grid; place-items: center; width: 62px; height: 62px; margin: 0 auto 14px; border-radius: 20px; color: var(--accent); background: color-mix(in srgb,var(--accent) 10%,transparent); }
+.account-feature-icon svg { width: 30px; height: 30px; }
+.account-feature-state h2 { font-size: 18px; margin: 12px 0; }
+.account-feature-state p { max-width: 360px; margin: 0 auto; color: var(--muted); font-size: 13px; line-height: 1.8; overflow-wrap: anywhere; }
