@@ -19,6 +19,8 @@ Deno.serve(createAdminHandler({
   return valid;
  },
  issue:(requester:string,admin:string,hash:string)=>rpc('admin_session_open',{p_requester:requester,p_admin:admin,p_hash:hash}),
+ members:(requester:string,hash:string,page:number,search:string)=>rpc('admin_members',{p_requester:requester,p_hash:hash,p_page:page,p_search:search}),
+ memberStatistics:(requester:string,hash:string,member:string)=>rpc('admin_member_statistics',{p_requester:requester,p_hash:hash,p_member:member}),
  check:(requester:string,hash:string)=>rpc('admin_session_check',{p_requester:requester,p_hash:hash}),
  close:(requester:string,hash:string)=>rpc('admin_session_close',{p_requester:requester,p_hash:hash}),
 }));

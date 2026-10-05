@@ -426,3 +426,24 @@ input[aria-invalid="true"] { border-color:var(--error); }
 .admin-session-actions { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin-top:20px; }
 .admin-session-actions button { min-height:44px; padding:10px 16px; background:var(--bg); color:var(--accent); border:1px solid var(--line); border-radius:12px; }
 @media(max-width:350px) { .admin-login-card { padding:20px; } }
+
+/* Administrator read-only member workspace shares the existing theme and statistics. */
+#admin-verified-view {display:grid;gap:20px;}
+#admin-verified-view[hidden] {display:none;}
+.admin-members-panel {margin-top:0;}
+.admin-search {margin:18px 0 8px;}
+.admin-search>div {display:flex;gap:10px;margin-top:8px;}
+.admin-search input {flex:1;min-width:0;}
+.admin-search button,.admin-pagination button,.admin-members-panel .stats-heading button,.admin-member-identity button {flex-shrink:0;min-height:44px;border-radius:14px;padding:8px 14px;}
+.admin-pagination {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;color:var(--muted);}
+.admin-member-row {width:100%;text-align:left;}
+.admin-member-row .account-row-copy {min-width:0;overflow-wrap:anywhere;}
+.admin-member-row[aria-pressed="true"] {background:color-mix(in srgb,var(--accent) 9%,var(--panel));}
+.admin-member-identity strong {overflow-wrap:anywhere;}
+
+@media(max-width:420px){.admin-search>div {gap:8px;}.admin-pagination {font-size:.85rem;}.admin-pagination button {padding:8px 10px;}}
+
+.admin-search input {min-height:48px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--field);color:var(--ink);font-size:16px;}
+.admin-members-panel .stats-heading button,.admin-member-identity .stats-heading button {width:auto;}
+
+#admin-verified-view,#admin-verified-view>* ,#admin-members-root,#admin-members-root [data-detail],#admin-members-root [data-statistics-root] {min-width:0;max-width:100%;}

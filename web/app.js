@@ -9,7 +9,7 @@ import { AuthController, loginError } from './auth.js';
 const $ = id => document.getElementById(id);
 let habitRequest, adminApi, controller, busy = false, logoutFailed = false;
 initKeyboardViewport();
-const adminProxy={active:()=>!!adminApi?.active(),login:password=>adminApi.login(password),verify:()=>adminApi.verify(),logout:()=>adminApi.logout(),clear:()=>adminApi?.clear()};
+const adminProxy={active:()=>!!adminApi?.active(),login:password=>adminApi.login(password),verify:()=>adminApi.verify(),members:(page,search)=>adminApi.members(page,search),memberStatistics:id=>adminApi.memberStatistics(id),logout:()=>adminApi.logout(),clear:()=>adminApi?.clear()};
 const workspace = createWorkspace($('workspace'), { request: payload => habitRequest(payload), onLogout: logout, adminApi: adminProxy });
 const views = ['restoring', 'login-view', 'unavailable'];
 function render(state) {
