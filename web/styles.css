@@ -415,3 +415,14 @@ input[aria-invalid="true"] { border-color:var(--error); }
 .detail-header.account-header { gap: 12px; margin-bottom: 18px; }
 .account-header-copy { flex: 1; min-width: 0; }
 .account-header .date-label { margin: 0 0 3px; font-size: 11px; }
+
+.admin-login-card { width:min(100%,480px); margin:24px auto; padding:28px; border:1px solid var(--line); border-radius:22px; background:var(--panel); }
+.admin-login-card h2,.admin-session-card h2 { font-size:20px; margin:0 0 12px; text-align:center; }
+.admin-login-card > .dialog-note { text-align:center; }
+.admin-login-card form label { display:block; font-size:13px; margin:20px 0 10px; }
+.admin-login-card input { width:100%; min-height:48px; font-size:16px; }
+.admin-login-card .primary { width:100%; margin-top:12px; }
+.admin-session-card { width:min(100%,560px); margin:24px auto; text-align:center; }
+.admin-session-actions { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin-top:20px; }
+.admin-session-actions button { min-height:44px; padding:10px 16px; background:var(--bg); color:var(--accent); border:1px solid var(--line); border-radius:12px; }
+@media(max-width:350px) { .admin-login-card { padding:20px; } }

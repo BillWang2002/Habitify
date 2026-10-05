@@ -1,3 +1,4 @@
+import { createAdminApi } from './admin-api.js';
 import { initKeyboardViewport } from './keyboard-viewport.js';
 import { showFieldErrors } from './form-validation.js';
 import { createWorkspace } from './workspace.js';
@@ -6,9 +7,10 @@ import { initPwa } from './pwa.js';
 import { createClient } from '@supabase/supabase-js';
 import { AuthController, loginError } from './auth.js';
 const $ = id => document.getElementById(id);
-let habitRequest, controller, busy = false, logoutFailed = false;
+let habitRequest, adminApi, controller, busy = false, logoutFailed = false;
 initKeyboardViewport();
-const workspace = createWorkspace($('workspace'), { request: payload => habitRequest(payload), onLogout: logout });
+const adminProxy={active:()=>!!adminApi?.active(),login:password=>adminApi.login(password),verify:()=>adminApi.verify(),logout:()=>adminApi.logout(),clear:()=>adminApi?.clear()};
+const workspace = createWorkspace($('workspace'), { request: payload => habitRequest(payload), onLogout: logout, adminApi: adminProxy });
 const views = ['restoring', 'login-view', 'unavailable'];
 function render(state) {
   const view = { restoring: 'restoring', signingOut: 'restoring', signedOut: 'login-view', unavailable: 'unavailable', verified: 'account-view' }[state.phase];
@@ -66,6 +68,7 @@ try {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: `habitify-${url.hostname}-auth` },
     global: { fetch: (input, init = {}) => fetch(input, { ...init, signal: init.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000) }) }
   });
+  adminApi = createAdminApi(client,{url:url.origin,key:config.supabasePublishableKey});
   habitRequest = createHabitsApi(client,{url:url.origin,key:config.supabasePublishableKey});
   controller = new AuthController(client, render);
   $('submit').disabled = false;

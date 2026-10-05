@@ -1,3 +1,7 @@
 [functions.habits]
 # getUser verifies the actual user token inside the handler; publishable keys are not JWTs.
 verify_jwt = false
+
+[functions.admin]
+# Handler verifies the ordinary account token and opaque admin grant itself.
+verify_jwt = false
