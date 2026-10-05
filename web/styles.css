@@ -301,8 +301,9 @@ html.workspace-active, #workspace { touch-action: pan-x pan-y; }
 .stats-line { fill:none; stroke:var(--accent); stroke-width:2.5; stroke-linejoin:round; }
 .stats-dot { fill:var(--accent); }
 .stats-hit { fill:transparent; cursor:pointer; touch-action:pan-x; }
-.stats-hit[aria-pressed="true"] { fill:var(--accent); fill-opacity:.07; }
-.stats-hit:focus-visible { outline:none; stroke:var(--accent); stroke-width:1; }
+#workspace .stats-chart .stats-hit,
+#workspace .stats-chart .stats-hit:focus,
+#workspace .stats-chart .stats-hit:focus-visible { fill:transparent; stroke:none; outline:none; }
 .stats-selection { background:var(--bg); border-radius:12px; padding:12px; font-size:.82rem; overflow-wrap:anywhere; }
 .stats-calendar { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
 .stats-weekday { color:var(--muted); text-align:center; font-size:.8rem; padding:8px 0; }
