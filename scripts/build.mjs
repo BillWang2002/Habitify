@@ -1,4 +1,4 @@
-import { iconSvg } from '../web/theme.js';
+import { accountHeader } from '../web/account-header.js';
 import { mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { build } from 'esbuild';
@@ -39,7 +39,7 @@ for (const [name, size] of [['icon-192.png', 192], ['icon-512.png', 512], ['icon
 }
 await mkdir('dist/diagnostics', { recursive: true });
 for (const name of ['index.html', 'app.js', 'styles.css', 'pwa.html', 'pwa-check.js', 'pwa.css']) await copyFile(`web/diagnostics/${name}`, `dist/diagnostics/${name}`);
-await writeFile('dist/diagnostics/pwa.html', (await readFile('web/diagnostics/pwa.html','utf8')).replace('../styles.css', `../${cssName}`).replace('__BACK_ICON__', iconSvg('back')));
+await writeFile('dist/diagnostics/pwa.html', (await readFile('web/diagnostics/pwa.html','utf8')).replace('../styles.css', `../${cssName}`).replace('__ACCOUNT_HEADER__', accountHeader({group:'应用检查',title:'PWA 应用检查',parentLabel:'开发者模式',href:'../#/developer'})));
 await writeFile('dist/config.json', JSON.stringify(config));
 const files = ['index.html', appName, cssName, 'config.json', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 const revision = hash(Buffer.concat(await Promise.all(files.map(file => readFile(`dist/${file}`)))));
