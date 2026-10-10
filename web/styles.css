@@ -577,3 +577,8 @@ input[aria-invalid="true"] { border-color:var(--error); }
 :root.is-standalone{background:var(--app-scene,var(--bg));background-size:cover;background-position:center 44%;background-repeat:no-repeat}
 body.is-standalone.workspace-active{background:transparent}
 :root.is-standalone .app-frame{background:transparent}
+
+/* WebKit can exclude safe insets from innerHeight/svh in installed apps.
+   Legacy vh covers the whole standalone screen and stays stable under the keyboard. */
+:root.is-standalone{height:100vh;overflow:hidden}
+:root.is-standalone body.is-standalone{height:100vh;min-height:0;bottom:auto}
