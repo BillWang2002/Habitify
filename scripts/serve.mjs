@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 await import('./build.mjs');
 const root = resolve('dist');
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.png': 'image/png' };
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.webp':'image/webp' };
 createServer(async (req, res) => {
   const pathname = new URL(req.url, 'http://localhost').pathname;
   // Exercise the exact production /Habitify/ subpath as well as localhost root.

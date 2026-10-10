@@ -22,7 +22,7 @@ Deno.serve(async (req: Request) => {
     let p;
     try { p = JSON.parse(body); } catch { return reply({ code: 'INVALID_REQUEST' }, 422); }
     if (!p || Array.isArray(p) || typeof p !== 'object') return reply({ code: 'INVALID_REQUEST' }, 422);
-    const { data, error } = await client.rpc('habitify_request', { p });
+    const { data, error } = await client.rpc(['appearance-get','appearance-set'].includes(p.op) ? 'appearance_request' : 'habitify_request', { p });
     if (error) {
       const code = Object.keys(errors).find(key => error.message === key);
       return reply({ code: code || (['23514','23502','22P02','22003'].includes(error.code) ? 'INVALID_REQUEST' : 'BACKEND_ERROR') }, code ? errors[code] : ['23514','23502','22P02','22003'].includes(error.code) ? 422 : 500);
