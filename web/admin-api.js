@@ -1,4 +1,4 @@
-const messages={LOGIN_REQUIRED:'请先登录普通账户，再进入后台。',ADMIN_PASSWORD_INVALID:'后台密码不正确，请重新输入。',ADMIN_SESSION_EXPIRED:'后台会话已失效，请重新输入密码。',ADMIN_FORBIDDEN:'当前后台权限不可用，请联系管理员。',ADMIN_NOT_CONFIGURED:'后台尚未完成配置，请稍后再试。',ADMIN_RATE_LIMITED:'尝试次数较多，请稍后再试。',MEMBER_NOT_FOUND:'该成员已不可用，请刷新列表。',INVALID_REQUEST:'请检查填写内容。',NETWORK_ERROR:'暂时无法连接后台，请检查网络后重试。',BACKEND_ERROR:'后台服务暂不可用，请稍后再试。',ADMIN_CANCELLED:'后台请求已取消。'};
+const messages={LOGIN_REQUIRED:'请先在应用中登录管理员账户，再进入后台。',ADMIN_PASSWORD_INVALID:'后台密码不正确，请重新输入。',ADMIN_SESSION_EXPIRED:'后台会话已失效，请重新输入密码。',ADMIN_FORBIDDEN:'当前账户没有后台权限，请使用管理员账户登录。',ADMIN_NOT_CONFIGURED:'后台尚未完成配置，请稍后再试。',ADMIN_RATE_LIMITED:'尝试次数较多，请稍后再试。',MEMBER_NOT_FOUND:'该成员已不可用，请刷新列表。',INVALID_REQUEST:'请检查填写内容。',NETWORK_ERROR:'暂时无法连接后台，请检查网络后重试。',BACKEND_ERROR:'后台服务暂不可用，请稍后再试。',ADMIN_CANCELLED:'后台请求已取消。'};
 const failure=code=>Object.assign(new Error(messages[code] || messages.BACKEND_ERROR),{code});
 export function createAdminApi(client,{url,key,fetcher=fetch,now=()=>Date.now()}={}) {
  let token=null,expiry=0,epoch=0;

@@ -25,6 +25,7 @@ export function createAdminHandler({verifyRequester,reserveAttempt,authenticate,
     if(Object.keys(p).some(k=>!['op','password'].includes(k)) || typeof p.password!=='string' || !p.password || p.password.length>256)throw new Error('INVALID_REQUEST');
     const identity=await reserveAttempt(requester);if(identity?.code)throw new Error(identity.code);
     if(!identity?.adminId || !identity.email)throw new Error('ADMIN_NOT_CONFIGURED');
+    if(requester!==identity.adminId)throw new Error('ADMIN_FORBIDDEN');
     if(!await authenticate(identity,p.password))throw new Error('ADMIN_PASSWORD_INVALID');
     const token=newToken(),data=await issue(requester,identity.adminId,await tokenHash(token));
     return reply({data:{sessionToken:token,expiresAt:data.expiresAt}});
