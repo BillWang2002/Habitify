@@ -493,3 +493,20 @@ input[aria-invalid="true"] { border-color:var(--error); }
 .admin-icon-button[data-refresh]:disabled svg {animation:admin-refresh 900ms linear infinite;}
 @keyframes admin-refresh {to {transform:rotate(360deg);}}
 @media(prefers-reduced-motion:reduce){.admin-statistics-toggle svg {transition:none;}.admin-icon-button[data-refresh]:disabled svg {animation:none;}}
+
+/* Keep both member headers on the same right-hand action axis. */
+#admin-members-root>.admin-members-panel,#admin-members-root>[data-detail]>.admin-member-identity {padding:20px;width:100%;box-sizing:border-box;}
+#admin-members-root .stats-heading {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;}
+.admin-members-toolbar {display:flex;align-items:center;gap:10px;}
+.admin-content .stats-heading .admin-add-member {font-size:13px;min-height:40px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--accent);}
+.admin-member-actions {display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:16px;padding-top:16px;}
+.admin-member-actions[hidden] {display:none;}
+.admin-member-actions button {font:inherit;font-size:13px;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--accent) 8%,var(--panel));color:var(--accent);}
+.admin-member-actions button.danger-text {color:var(--error);background:var(--panel);}
+.admin-member-dialog .dialog-heading>button {border:0!important;background:transparent!important;box-shadow:none!important;color:var(--muted);outline:none!important;}
+.admin-member-dialog .admin-danger-note {color:var(--error);font-size:14px;line-height:1.7;}
+.admin-member-dialog .admin-danger-button {background:var(--error);color:white;}
+.admin-pending-writes {border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:14px;margin:14px 0;font-size:12px;}
+.admin-pending-writes h3 {font-size:14px;margin:0 0 8px;}
+.admin-pending-writes button {display:block;width:100%;text-align:left;font:inherit;border:0;border-radius:10px;margin-top:8px;padding:12px;background:var(--panel);color:var(--accent);overflow-wrap:anywhere;}
+@media(max-width:350px){#admin-members-root>.admin-members-panel,#admin-members-root>[data-detail]>.admin-member-identity {padding:14px;}.admin-members-toolbar {gap:6px;}}

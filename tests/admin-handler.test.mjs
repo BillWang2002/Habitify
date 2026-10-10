@@ -15,3 +15,12 @@ test('成员读取严格限制操作和参数，每次携带绑定会话哈希�
 });
 
 test('普通成员即使提交正确后台密码也不能进入，且不执行密码认证或发放会话',async()=>{let authenticated=0,issued=0;const f=fixture({reserveAttempt:async()=>({adminId:'other-admin',email:'private@example.test'}),authenticate:async()=>{authenticated++;return true;},issue:async()=>{issued++;}});const response=await f.handler(req({op:'login',password:'test-password'}));assert.equal(response.status,403);assert.deepEqual(await response.json(),{code:'ADMIN_FORBIDDEN'});assert.equal(authenticated,0);assert.equal(issued,0);});
+test('成员管理接口严格参数和会话授权，密码错误不回显',async()=>{
+ const id='00000000-0000-4000-8000-000000000001',rid='00000000-0000-4000-8000-000000000002',token='a'.repeat(64),calls=[];
+ const f=fixture({memberWrite:async(u,h,p)=>{calls.push({u,h,p});return {completed:true};},memberCoins:async(u,h,p)=>{calls.push({u,h,p});return {completed:true};}}),headers={'X-Admin-Session':token};
+ const create={op:'member-create',requestId:rid,email:'new@example.test',password:'test-password'};
+ assert.equal((await f.handler(req(create))).status,401);assert.equal(calls.length,0);
+ assert.equal((await f.handler(req(create,headers))).status,200);assert.equal(calls[0].h,await tokenHash(token));
+ for(const invalid of [{...create,role:'admin'},{...create,password:'short'},{...create,email:'bad'},{op:'member-delete',memberId:id,requestId:rid},{op:'member-coins',memberId:id,requestId:rid,balance:-1,expectedBalance:0,reason:'x'},{op:'member-coins',memberId:id,requestId:rid,balance:10,expectedBalance:0,reason:''}])assert.ok((await f.handler(req(invalid,headers))).status>=400);
+ const forbidden=fixture({memberWrite:async()=>{throw new Error('ADMIN_FORBIDDEN');}});assert.equal((await forbidden.handler(req(create,headers))).status,403);
+});
