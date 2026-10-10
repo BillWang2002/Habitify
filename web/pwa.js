@@ -4,6 +4,7 @@ export async function initPwa({ isBusy }) {
   const setMode = () => {
     const standalone = display.matches || navigator.standalone === true;
     document.body.classList.toggle('is-standalone', standalone);
+    document.documentElement.classList.toggle('is-standalone', standalone);
     mode.textContent = standalone ? '应用模式' : '网页模式';
   };
   setMode(); display.addEventListener('change', setMode);

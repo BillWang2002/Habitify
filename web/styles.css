@@ -516,8 +516,9 @@ input[aria-invalid="true"] { border-color:var(--error); }
 :root[data-theme-mode=dark]{color-scheme:dark}
 :root[data-theme-mode=system]{color-scheme:light dark}
 :root[data-theme=lumi]{--bg:light-dark(#edf1f8,#111a30);--panel:light-dark(#fffdf7,#1c2842);--ink:light-dark(#273b60,#eef2ff);--muted:light-dark(#596b86,#b3c0da);--line:light-dark(#d6dfed,#405375);--accent:light-dark(#385e94,#adcbff);--button-ink:light-dark(#fff,#172949);--field:light-dark(#fffefa,#152139);--error:light-dark(#a5372d,#ffc1b0);--theme-soft:light-dark(#e8edf9,#2a3c5a);--theme-gold:light-dark(#9d701f,#edd098);--theme-overlay:light-dark(#eff3f8b8,#111a30c4)}
-:root[data-theme=lumi] .app-frame{background:radial-gradient(ellipse at 80% 10%,light-dark(#fff7df,#233253),transparent 50%),var(--bg)}
-:root[data-theme=lumi][data-theme-background=garden] .app-frame{background-image:linear-gradient(var(--theme-overlay),var(--theme-overlay)),url('../themes/lumi/garden.webp');background-size:cover;background-position:center 44%}
+:root[data-theme=lumi]{--app-scene:radial-gradient(ellipse at 80% 10%,light-dark(#fff7df,#233253),transparent 50%),var(--bg);--status-bar-tint:light-dark(#273b60e8,#111a30de)}
+:root[data-theme=lumi] .app-frame{background:var(--app-scene);background-size:cover;background-position:center 44%}
+:root[data-theme=lumi][data-theme-background=garden]{--app-scene:linear-gradient(var(--theme-overlay),var(--theme-overlay)),url('../themes/lumi/garden.webp')}
 :root[data-theme=lumi] .growth-card{background:linear-gradient(115deg,#213655,#486998);border:1px solid #c6a56970;color:#fff6e4;box-shadow:0 8px 24px #1f355018}
 :root[data-theme=lumi] .growth-eyebrow,:root[data-theme=lumi] .growth-card p{color:#e6eafa}
 :root[data-theme=lumi] .growth-card::after{content:'✦';position:absolute;right:26px;top:18px;color:#efd499;font-size:52px;opacity:.4;pointer-events:none}
@@ -571,3 +572,10 @@ input[aria-invalid="true"] { border-color:var(--error); }
 .appearance-note{font-size:12px;color:var(--muted);line-height:1.7;text-align:center}
 @media(max-width:350px){.appearance-themes{gap:10px}.theme-cover{height:120px}.theme-choice-copy{padding:11px}.theme-choice-copy strong{font-size:13px}.appearance-settings,.appearance-preview{padding:16px}.appearance-options button{padding:9px 12px}.appearance-avatars button{min-width:74px}}
 @media(prefers-reduced-motion:reduce){:root[data-theme=lumi] .habit-card.celebrate{animation:none}}
+
+/* In installed iOS apps, paint behind the status bar while content keeps its safe insets. */
+:root:not([data-theme=lumi]){--status-bar-tint:light-dark(#245b43e8,#111e18de)}
+:root.is-standalone{background:var(--app-scene,var(--bg));background-size:cover;background-position:center 44%;background-repeat:no-repeat}
+body.is-standalone.workspace-active{background:transparent}
+:root.is-standalone .app-frame{background:transparent}
+body.is-standalone::before{content:'';position:fixed;z-index:30;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:linear-gradient(to bottom,var(--status-bar-tint) 0%,var(--status-bar-tint) 65%,transparent 100%);pointer-events:none}
