@@ -515,11 +515,14 @@ input[aria-invalid="true"] { border-color:var(--error); }
 :root[data-theme-mode=light]{color-scheme:light}
 :root[data-theme-mode=dark]{color-scheme:dark}
 :root[data-theme-mode=system]{color-scheme:light dark}
-:root[data-theme=lumi]{--bg:light-dark(#edf1f8,#111a30);--panel:light-dark(#fffdf7,#1c2842);--ink:light-dark(#273b60,#eef2ff);--muted:light-dark(#596b86,#b3c0da);--line:light-dark(#d6dfed,#405375);--accent:light-dark(#385e94,#adcbff);--button-ink:light-dark(#fff,#172949);--field:light-dark(#fffefa,#152139);--error:light-dark(#a5372d,#ffc1b0);--theme-soft:light-dark(#e8edf9,#2a3c5a);--theme-gold:light-dark(#9d701f,#edd098);--theme-overlay:light-dark(#eff3f8b8,#111a30c4)}
+:root[data-theme=lumi]{--bg:light-dark(#edf1f8,#111a30);--panel:light-dark(#fffdf7,#1c2842);--ink:light-dark(#273b60,#eef2ff);--muted:light-dark(#596b86,#b3c0da);--line:light-dark(#d6dfed,#405375);--accent:light-dark(#385e94,#adcbff);--button-ink:light-dark(#fff,#172949);--field:light-dark(#fffefa,#152139);--error:light-dark(#a5372d,#ffc1b0);--theme-soft:light-dark(#e8edf9,#2a3c5a);--theme-gold:light-dark(#9d701f,#edd098);--theme-overlay:light-dark(#eff3f875,#111a3070)}
 :root[data-theme=lumi]{--app-scene:radial-gradient(ellipse at 80% 10%,light-dark(#fff7df,#233253),transparent 50%),var(--bg)}
 :root[data-theme=lumi] .app-frame{background:var(--app-scene);background-size:cover;background-position:center 44%}
 :root[data-theme=lumi][data-theme-background=garden]{--app-scene:linear-gradient(var(--theme-overlay),var(--theme-overlay)),url('../themes/lumi/garden.webp')}
-:root[data-theme=lumi] .growth-card{background:linear-gradient(115deg,#213655,#486998);border:1px solid #c6a56970;color:#fff6e4;box-shadow:0 8px 24px #1f355018}
+:root[data-theme=lumi][data-theme-background=meadow]{--app-scene:linear-gradient(var(--theme-overlay),var(--theme-overlay)),url('../themes/lumi/meadow.webp')}
+:root[data-theme=lumi][data-theme-background=harbor]{--app-scene:linear-gradient(var(--theme-overlay),var(--theme-overlay)),url('../themes/lumi/harbor.webp')}
+:root[data-theme=lumi][data-theme-background=library]{--app-scene:linear-gradient(var(--theme-overlay),var(--theme-overlay)),url('../themes/lumi/library.webp')}
+:root[data-theme=lumi] .growth-card{background:linear-gradient(115deg,#213655d6,#486998bf);border:1px solid #c6a56970;color:#fff6e4;box-shadow:0 8px 24px #1f355018}
 :root[data-theme=lumi] .growth-eyebrow,:root[data-theme=lumi] .growth-card p{color:#e6eafa}
 :root[data-theme=lumi] .growth-card::after{content:'✦';position:absolute;right:26px;top:18px;color:#efd499;font-size:52px;opacity:.4;pointer-events:none}
 :root[data-theme=lumi] .growth-seed{display:none}
@@ -535,7 +538,7 @@ input[aria-invalid="true"] { border-color:var(--error); }
 :root[data-theme=lumi] .add-habit{border-radius:16px 16px 16px 5px;border:1px solid #d6b87870;box-shadow:0 4px 14px #243d6525}
 :root[data-theme=lumi] :is(.back-link,.habit-more){color:var(--accent)}
 :root[data-theme=lumi] input:focus{box-shadow:0 0 0 3px light-dark(#385e9420,#adcbff22)}
-:root[data-theme=lumi][data-theme-surface=glass] :is(.habit-card,.habit-empty,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview,.habit-dialog){background-color:light-dark(#f8fbffe8,#18263ce8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-color:light-dark(#ffffff,#a8c3ed35)}
+:root[data-theme=lumi][data-theme-surface=glass] :is(.habit-card,.habit-empty,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview,.habit-dialog){background-color:light-dark(#f8fbff99,#18263ca6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-color:light-dark(#ffffff,#a8c3ed35)}
 :root[data-theme=lumi] .admin-member-row:nth-child(odd){background:var(--theme-soft)}
 :root[data-theme=lumi] .admin-member-row[aria-pressed=true]{background:light-dark(#dce5f6,#31466b)}
 :root[data-theme=lumi] .habit-card.is-complete{border-color:light-dark(#aec0dd,#6b89b7)}
@@ -586,3 +589,11 @@ body.is-standalone.workspace-active{background:transparent}
 /* Loading uses the same scene and crop as the installed app, without a separate overlay. */
 #restoring{background:var(--app-scene,var(--bg));background-size:cover;background-position:center 44%;background-repeat:no-repeat}
 :root.is-standalone #restoring{height:100vh;bottom:auto}
+
+/* Both surfaces reveal scenery; glass retains more detail with a lighter blur. */
+:root[data-theme=lumi][data-theme-surface=paper] :is(.habit-card,.habit-empty,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview,.habit-dialog){background-color:light-dark(#fffdf7c7,#1c2842cc)}
+#appearance-backgrounds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#appearance-backgrounds button{padding:6px;display:flex;flex-direction:column;gap:8px;min-width:0;font-size:12px}
+.appearance-bg-thumb{display:block;width:100%;height:96px;border-radius:9px;overflow:hidden;background:linear-gradient(145deg,#ccdeef,#5a779f)}
+.appearance-bg-thumb img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 40%}
+@media(max-width:480px){#appearance-backgrounds{grid-template-columns:repeat(2,minmax(0,1fr))}.appearance-bg-thumb{height:100px}}

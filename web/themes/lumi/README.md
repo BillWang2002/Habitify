@@ -11,3 +11,7 @@ Use case: illustration-story. Asset type: original character artwork for a Chine
 Use case: identity-preserve. Create a square avatar portrait of the same entirely original character Lumi in the reference artwork. Keep identical midnight-blue short hair, golden four-point star hairpin, warm eyes and ivory dusty-blue cape. Head and shoulders close-up, smiling gently facing viewer, centered with generous margin safe for a circular avatar crop. Background is a simple powder-blue and ivory soft gradient with two tiny gold stars. Same painterly polished anime style. No text, no frame, no logo. Reference image is only an identity/style reference; output is a new avatar composition.
 
 参考素材为同轮原创背景图；没有使用其他作品图片。公开优化素材为 garden.webp 与 avatar.webp。
+
+## 第二版扩展
+
+2026-10-11新增meadow/harbor/library背景及avatar-meadow/avatar-harbor/avatar-library头像。最终英文提示与生成方式见[PROMPTS-v2.md](./PROMPTS-v2.md)。所有交付素材均为公开WebP，背景900px宽、头像256px，头像限定露米主题。

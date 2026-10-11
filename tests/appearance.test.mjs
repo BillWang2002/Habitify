@@ -2,9 +2,10 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {normalizeAppearance,selectTheme,defaultAppearance} from '../web/appearance-model.js';
 import {iconSvg,setIconTheme,resolveHabitIcon} from '../web/theme.js';
 import {createAppearanceApi} from '../web/appearance-api.js';
-test('外观清单限制资源与搭配，换套装保留独立头像及显示模式',()=>{
+test('外观清单限制资源与搭配，头像限定主题且保留显示模式',()=>{
  assert.deepEqual(normalizeAppearance({theme:'untrusted',background:'https://evil.test',avatar:'<svg>',mode:'bad'}),defaultAppearance);
  const a=selectTheme({...defaultAppearance,avatar:'lumi',mode:'dark'},'lumi');assert.equal(a.background,'garden');assert.equal(a.avatar,'lumi');assert.equal(a.mode,'dark');assert.equal(normalizeAppearance({...a,background:'plain'}).background,'garden');
+ assert.equal(selectTheme({...a,avatar:'lumi-harbor'},'growth').avatar,'growth');assert.equal(normalizeAppearance({theme:'lumi',avatar:'star'}).avatar,'lumi');assert.equal(normalizeAppearance({theme:'growth',avatar:'lumi-library'}).avatar,'growth');assert.equal(normalizeAppearance({...a,background:'library',avatar:'lumi-library'}).avatar,'lumi-library');
  setIconTheme('growth');const plain=iconSvg('book');setIconTheme('lumi');assert.notEqual(iconSvg('book'),plain);assert.equal(resolveHabitIcon('book'),'book');assert.equal(iconSvg('<script>').includes('<script>'),false);setIconTheme('growth');
 });
 test('外观接口只转发本人令牌、不自动重试写入，并报告并发与网络失败',async()=>{

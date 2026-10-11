@@ -47,7 +47,9 @@ await writeFile('dist/diagnostics/pwa.html', (await readFile('web/diagnostics/pw
 await writeFile('dist/config.json', JSON.stringify(config));
 await mkdir('dist/themes/lumi',{recursive:true});
 for(const name of ['garden.webp','avatar.webp']) await copyFile(`web/themes/lumi/${name}`,`dist/themes/lumi/${name}`);
-const files = ['themes/lumi/garden.webp','themes/lumi/avatar.webp','index.html', startupName, appName, cssName, 'config.json', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
+const extraThemeAssets=['meadow.webp','harbor.webp','library.webp','avatar-meadow.webp','avatar-harbor.webp','avatar-library.webp'];
+for(const name of extraThemeAssets)await copyFile(`web/themes/lumi/${name}`,`dist/themes/lumi/${name}`);
+const files = [...extraThemeAssets.map(name=>`themes/lumi/${name}`),'themes/lumi/garden.webp','themes/lumi/avatar.webp','index.html', startupName, appName, cssName, 'config.json', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 const revision = hash(Buffer.concat(await Promise.all(files.map(file => readFile(`dist/${file}`)))));
 const worker = (await readFile('web/sw.js', 'utf8')).replace('__REVISION__', revision).replace('__PRECACHE__', JSON.stringify(files));
 await writeFile('dist/sw.js', worker);
