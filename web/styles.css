@@ -582,3 +582,7 @@ body.is-standalone.workspace-active{background:transparent}
    Legacy vh covers the whole standalone screen and stays stable under the keyboard. */
 :root.is-standalone{height:100vh;overflow:hidden}
 :root.is-standalone body.is-standalone{height:100vh;min-height:0;bottom:auto}
+
+/* Loading uses the same scene and crop as the installed app, without a separate overlay. */
+#restoring{background:var(--app-scene,var(--bg));background-size:cover;background-position:center 44%;background-repeat:no-repeat}
+:root.is-standalone #restoring{height:100vh;bottom:auto}

@@ -1,3 +1,4 @@
+import {readLoadingAppearance,writeLoadingAppearance,clearLoadingAppearance} from './appearance-loading.js';
 import {accountHeader} from './account-header.js';
 import {iconSvg,setIconTheme,refreshThemeIcons} from './theme.js';
 import {themes,avatars,defaultAppearance,normalizeAppearance,sameAppearance,selectTheme} from './appearance-model.js';
@@ -11,7 +12,7 @@ export function createAppearance(root,{request,preview=false,onChange=()=>{}}={}
  root.addEventListener('error',event=>{const img=event.target;if(img?.tagName!=='IMG')return;if(img.getAttribute('src')==='./themes/lumi/avatar.webp')img.outerHTML=iconSvg('me');else if(img.getAttribute('src')==='./themes/lumi/garden.webp')img.hidden=true;},true);
  const key=id=>`habitify-appearance:${location.pathname}:${id}`;
  const cacheRead=id=>{try{const v=JSON.parse(localStorage.getItem(key(id)));return v&&v.version===1?normalizeAppearance(v.settings):null;}catch{return null;}};
- const cacheWrite=()=>{if(!preview&&owner)try{localStorage.setItem(key(owner),JSON.stringify({version:1,settings:saved}));}catch{}};
+ const cacheWrite=()=>{if(!preview&&owner){writeLoadingAppearance(saved);try{localStorage.setItem(key(owner),JSON.stringify({version:1,settings:saved}));}catch{}}};
  const dirty=()=>!sameAppearance(saved,draft);
  function paint(){applyAppearance(draft,root);onChange(draft);}
  function render(){
@@ -34,7 +35,7 @@ export function createAppearance(root,{request,preview=false,onChange=()=>{}}={}
   enter(user){if(owner===user.id&&loaded){if(!dirty()&&!writing)load();return;}++epoch;owner=user.id;writing=false;pending=null;revision=0;loaded=preview;saved=preview?{...defaultAppearance}:cacheRead(owner)||{...defaultAppearance};draft={...saved};paint();render();message(preview?'公开预览 · 不保存个人数据':'正在读取账户外观…');load();},
   show(){visible=true;render();},
   hide(){if(!visible)return;visible=false;if(!writing){draft={...saved};pending=null;paint();render();}},
-  clear(reset=false){++epoch;if(reset&&owner&&!preview)try{localStorage.removeItem(key(owner));}catch{}owner=null;writing=false;loaded=preview;pending=null;visible=false;saved={...defaultAppearance};draft={...saved};applyAppearance(saved,root);render();message('');},
+  clear(reset=false){const visual=reset?{...defaultAppearance}:owner?{...saved}:readLoadingAppearance();if(reset&&!preview)clearLoadingAppearance();++epoch;if(reset&&owner&&!preview)try{localStorage.removeItem(key(owner));}catch{}owner=null;writing=false;loaded=preview;pending=null;visible=false;saved={...defaultAppearance};draft={...saved};applyAppearance(visual,root);render();message('');},
   busy:()=>writing||(visible&&dirty()),
   refresh:()=>{if(!writing&&!dirty())load();}
  };
