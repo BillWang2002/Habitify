@@ -527,7 +527,7 @@ input[aria-invalid="true"] { border-color:var(--error); }
 :root[data-theme=lumi] .growth-card::after{content:'✦';position:absolute;right:26px;top:18px;color:#efd499;font-size:52px;opacity:.4;pointer-events:none}
 :root[data-theme=lumi] .growth-seed{display:none}
 :root[data-theme=lumi] .growth-meter span{background:#e9c77e}
-:root[data-theme=lumi] :is(.habit-card,.habit-empty,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview){border-color:var(--line);box-shadow:0 5px 18px #20345508}
+:root[data-theme=lumi] :is(.habit-card,.habit-empty,.archive-empty,.account-feature-state,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview){border-color:var(--line);box-shadow:0 5px 18px #20345508}
 :root[data-theme=lumi] :is(.habit-icon,.account-row-icon,.recent-partial,.is-complete .habit-action,#kind-options button[aria-selected=true],#icon-options button[aria-pressed=true]){background:var(--theme-soft);color:var(--accent)}
 :root[data-theme=lumi] :is(.app-nav,.habit-filters,.admin-task-nav){background:light-dark(#edf2ffb8,#1d2c46de);border-color:light-dark(#ffffffde,#879cc440)}
 :root[data-theme=lumi] :is(.nav-slider,.filter-slider,.admin-task-slider){background:light-dark(#fffdf6d9,#5878a85e);border-color:light-dark(#fff,#c0d6ff35)}
@@ -537,7 +537,7 @@ input[aria-invalid="true"] { border-color:var(--error); }
 :root[data-theme=lumi] .primary:not(.danger){background:linear-gradient(130deg,var(--accent),light-dark(#294870,#8eafe3));box-shadow:inset 0 1px 0 #ffffff25}
 :root[data-theme=lumi] :is(.back-link,.habit-more){color:var(--accent)}
 :root[data-theme=lumi] input:focus{box-shadow:0 0 0 3px light-dark(#385e9420,#adcbff22)}
-:root[data-theme=lumi][data-theme-surface=glass] :is(.habit-card,.habit-empty,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview){background-color:light-dark(#f8fbff73,#18263c85);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-color:light-dark(#ffffff,#a8c3ed35)}
+:root[data-theme=lumi][data-theme-surface=glass] :is(.habit-card,.habit-empty,.archive-empty,.account-feature-state,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview){background-color:light-dark(#f8fbff73,#18263c85);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-color:light-dark(#ffffff,#a8c3ed35)}
 :root[data-theme=lumi] .admin-member-row:nth-child(odd){background:var(--theme-soft)}
 :root[data-theme=lumi] .admin-member-row[aria-pressed=true]{background:light-dark(#dce5f6,#31466b)}
 :root[data-theme=lumi] .habit-card.is-complete{border-color:light-dark(#aec0dd,#6b89b7)}
@@ -590,7 +590,7 @@ body.is-standalone.workspace-active{background:transparent}
 :root.is-standalone #restoring{height:100vh;bottom:auto}
 
 /* Both surfaces reveal scenery; glass retains more detail with a lighter blur. */
-:root[data-theme=lumi][data-theme-surface=paper] :is(.habit-card,.habit-empty,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview){background-color:light-dark(#fffdf7ad,#1c2842b8)}
+:root[data-theme=lumi][data-theme-surface=paper] :is(.habit-card,.habit-empty,.archive-empty,.account-feature-state,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview){background-color:light-dark(#fffdf7ad,#1c2842b8)}
 #appearance-backgrounds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 #appearance-backgrounds button{padding:6px;display:flex;flex-direction:column;gap:8px;min-width:0;font-size:12px}
 .appearance-bg-thumb{display:block;width:100%;height:96px;border-radius:9px;overflow:hidden;background:linear-gradient(145deg,#ccdeef,#5a779f)}
