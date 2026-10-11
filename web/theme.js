@@ -29,7 +29,7 @@ export const defaultTheme = Object.freeze({ id: 'growth', navigation: { habits: 
 export const iconChoices = [{id:'leaf',name:'成长'},{id:'book',name:'阅读'},{id:'water',name:'喝水'},{id:'walk',name:'自然'},{id:'target',name:'目标'},{id:'sun',name:'阳光'}];
 const lumiPaths={
  checkin:'<path d="M7 3h11v16H7a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Zm0 0v13H4m3 3h13v-3h-2"/><path d="m10 10 2 2 4-4"/>',
- rewards:'<path d="M3 11V8a9 9 0 0 1 18 0v3H3Zm0 0v10h18V11M3 15h7m4 0h7"/><rect x="10" y="13" width="4" height="5" rx="1"/>',
+ rewards:'<path d="M4 11V9a8 6 0 0 1 16 0v2H4Zm0 0v9h16v-9M4 15h6m4 0h6"/><rect x="10" y="13" width="4" height="5" rx="1"/>',
  stats:'<path d="M3 3v18h18M6 16l5-5 4 2 5-8m-5 0h5v5"/><circle cx="11" cy="11" r="1"/>',
  me:'<path d="M5 14V9a7 7 0 0 1 14 0v5M5 14l-3 7h20l-3-7"/><circle cx="12" cy="10" r="3"/><path d="m8 15 4 3 4-3M12 18v3"/>',
  leaf:'<path d="M7 15h10l-1 6H8l-1-6Zm5 0V8m0 3C7 11 5 8 5 5c5 0 7 2 7 6Zm0-3c0-4 3-6 7-6 0 4-3 6-7 6Z"/>',
