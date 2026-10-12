@@ -1,0 +1,42 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {randomUUID} from 'node:crypto';
+import {PGlite} from '@electric-sql/pglite';
+test('公告SQL：收件隔离、持续注册投递、停止/撤回、回收站、幂等与管理员门禁',async()=>{
+ const db=new PGlite(),admin=randomUUID(),a=randomUUID(),b=randomUUID(),hash='a'.repeat(64);
+ try{
+ await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,banned_until timestamptz,created_at timestamptz default now());create function auth.uid() returns uuid language sql as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql as $$select jsonb_build_object('iat',nullif(current_setting('request.jwt.claim.iat',true),'')::bigint)$$;grant usage on schema auth to anon,authenticated;`);
+ for(const f of ['202610030001_infrastructure.sql','202610040002_habits.sql','202610040003_statistics.sql','202610040004_delete_confirmation.sql','202610050005_admin_sessions.sql','202610050006_admin_members.sql','202610100007_admin_identity.sql','202610100008_admin_member_management.sql','202610120011_announcements.sql'])await db.exec(await readFile(new URL('../supabase/migrations/'+f,import.meta.url),'utf8'));
+ const add=async id=>db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())',[id,id+'@test.example']);
+ await add(admin);await add(a);await add(b);
+ await db.query('insert into habitify_admin.principals(user_id,expected_email) values($1,$2)',[admin,admin+'@test.example']);
+ await db.query('select public.admin_session_open($1,$1,$2)',[admin,hash]);
+ const manage=async p=>{await db.exec('set role service_role');try{return (await db.query('select public.admin_announcements($1,$2,$3::jsonb) as data',[admin,hash,JSON.stringify(p)])).rows[0].data;}finally{await db.exec('reset role');}};
+ const inbox=async(p,uid=a)=>{await db.query("select set_config('request.jwt.claim.sub',$1,false),set_config('request.jwt.claim.iat','100',false)",[uid]);await db.exec('set role authenticated');try{return(await db.query('select public.inbox_request($1::jsonb) as data',[JSON.stringify(p)])).rows[0].data;}finally{await db.exec('reset role');}};
+ const create=async(continuous=false,audience='all',recipientId=null)=>manage({op:'announcement-save',id:null,expectedRevision:0,requestId:randomUUID(),title:'欢迎',body:'# 欢迎\n请继续成长',audience,recipientId,continuous});
+ const publish=async row=>{const p={op:'announcement-publish',id:row.id,expectedRevision:row.revision,requestId:randomUUID()};const result=await manage(p);assert.deepEqual(await manage(p),result);return result;};
+ let normal=await publish(await create());let welcome=await publish(await create(true));
+ assert.equal((await inbox({op:'inbox-count'})).unread,2);assert.equal((await inbox({op:'inbox-count'},admin)).unread,0);
+ const c=randomUUID();await add(c);const list=await inbox({op:'inbox-list',page:1,view:'inbox'},c);assert.equal(list.total,1);
+ const id=list.items[0].id;await assert.rejects(inbox({op:'inbox-open',id},b),/MESSAGE_NOT_FOUND/);
+ assert.equal((await inbox({op:'inbox-trash',id},c)).unread,0);assert.equal((await inbox({op:'inbox-restore',id},c)).unread,1);
+ assert.equal((await inbox({op:'inbox-open',id},c)).message.body,welcome.body);assert.equal((await inbox({op:'inbox-count'},c)).unread,0);
+ await assert.rejects(manage({op:'announcement-save',id:welcome.id,expectedRevision:welcome.revision,requestId:randomUUID(),title:'偷偷改',body:'new',audience:'all',recipientId:null,continuous:true}),/ANNOUNCEMENT_IMMUTABLE/);
+ await assert.rejects(manage({op:'announcement-stop',id:welcome.id,expectedRevision:1,requestId:randomUUID()}),/STALE_DATA/);
+ welcome=await manage({op:'announcement-stop',id:welcome.id,expectedRevision:welcome.revision,requestId:randomUUID()});
+ const d=randomUUID();await add(d);assert.equal((await inbox({op:'inbox-count'},d)).unread,0);
+ await manage({op:'announcement-withdraw',id:welcome.id,expectedRevision:welcome.revision,requestId:randomUUID()});assert.equal((await inbox({op:'inbox-open',id},c)).message.body,null);
+ const single=await publish(await create(false,'member',b));assert.equal((await inbox({op:'inbox-count'})).unread,1);assert.equal((await inbox({op:'inbox-count'},b)).unread,2);
+ const replacement=await manage({op:'announcement-save',id:null,expectedRevision:0,requestId:randomUUID(),title:'更新版',body:'正文',audience:'all',recipientId:null,continuous:false,sourceId:normal.id});
+ await assert.rejects(manage({op:'announcement-publish',id:replacement.id,expectedRevision:replacement.revision,requestId:randomUUID()}),/REPLACEMENT_REQUIRES_WITHDRAWAL/);
+ await manage({op:'announcement-withdraw',id:normal.id,expectedRevision:normal.revision,requestId:randomUUID()});await publish(replacement);
+ await assert.rejects(inbox({op:'inbox-list',page:1}),/INVALID_REQUEST/);
+ await inbox({op:'inbox-read-all'},b);assert.equal((await inbox({op:'inbox-count'},b)).unread,0);
+ await db.query('insert into habitify_admin.member_access(user_id,revoked_before) values($1,100)',[a]);await assert.rejects(inbox({op:'inbox-count'}),/LOGIN_REQUIRED/);
+ await db.exec('set role anon');await assert.rejects(db.query("select public.inbox_request('{\"op\":\"inbox-count\"}')"),/permission denied/);await db.exec('reset role');
+ await db.exec('set role authenticated');await assert.rejects(db.query('select * from habitify_messages.deliveries'),/permission denied/);await assert.rejects(db.query('select public.admin_announcements($1,$2,$3)',[admin,hash,'{"op":"announcement-list","page":1}']),/permission denied/);await db.exec('reset role');
+ await db.query('update habitify_admin.sessions set revoked_at=now() where token_hash=$1',[hash]);await assert.rejects(manage({op:'announcement-list',page:1}),/ADMIN_SESSION_EXPIRED/);
+ await db.query('delete from auth.users where id=$1',[b]);assert.equal((await db.query('select count(*)::int n from habitify_messages.deliveries where user_id=$1',[b])).rows[0].n,0);
+ }finally{await db.close();}
+});

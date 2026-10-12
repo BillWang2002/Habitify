@@ -35,6 +35,7 @@ Deno.serve(createAdminHandler({
  },
  issue:(requester:string,admin:string,hash:string)=>rpc('admin_session_open',{p_requester:requester,p_admin:admin,p_hash:hash}),
  members:(requester:string,hash:string,page:number,search:string)=>rpc('admin_members',{p_requester:requester,p_hash:hash,p_page:page,p_search:search}),
+ announcements:(requester:string,hash:string,p:any)=>rpc('admin_announcements',{p_requester:requester,p_hash:hash,p}),
  memberWrite:writeMember,
  memberPending:(requester:string,hash:string)=>rpc('admin_member_pending',{p_requester:requester,p_hash:hash}),
  memberCoins:(requester:string,hash:string,p:any)=>rpc('admin_member_coins',{p_requester:requester,p_hash:hash,p_request:p.requestId,p_member:p.memberId,p_balance:p.balance,p_expected:p.expectedBalance,p_reason:p.reason}),

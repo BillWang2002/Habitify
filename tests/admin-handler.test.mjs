@@ -24,3 +24,13 @@ test('成员管理接口严格参数和会话授权，密码错误不回显',asy
  for(const invalid of [{...create,role:'admin'},{...create,password:'short'},{...create,email:'bad'},{op:'member-delete',memberId:id,requestId:rid},{op:'member-coins',memberId:id,requestId:rid,balance:-1,expectedBalance:0,reason:'x'},{op:'member-coins',memberId:id,requestId:rid,balance:10,expectedBalance:0,reason:''}])assert.ok((await f.handler(req(invalid,headers))).status>=400);
  const forbidden=fixture({memberWrite:async()=>{throw new Error('ADMIN_FORBIDDEN');}});assert.equal((await forbidden.handler(req(create,headers))).status,403);
 });
+
+test('公告接口要求管理员会话，限制收件人/持续选项与正文，重试原请求可保留ID',async()=>{
+ const id='00000000-0000-4000-8000-000000000001',token='a'.repeat(64),calls=[];
+ const f=fixture({announcements:async(u,h,p)=>{calls.push({u,h,p});return {id,revision:1};}}),headers={'X-Admin-Session':token};
+ const p={op:'announcement-save',id:null,requestId:id,expectedRevision:0,title:'更新',body:'## 新版本\n'+ '内容'.repeat(2000),audience:'all',recipientId:null,continuous:true,sourceId:null};
+ assert.equal((await f.handler(req(p))).status,401);assert.equal(calls.length,0);
+ assert.equal((await f.handler(req(p,headers))).status,200);assert.equal(calls[0].h,await tokenHash(token));assert.equal(calls[0].p.requestId,id);
+ for(const invalid of [{...p,audience:'member',recipientId:id},{...p,recipientId:id},{...p,body:'x'.repeat(10001)},{...p,isAdmin:true},{op:'announcement-list',page:0},{op:'announcement-withdraw',id,expectedRevision:1}])assert.equal((await f.handler(req(invalid,headers))).status,422);
+ const expired=fixture({announcements:async()=>{throw new Error('ADMIN_SESSION_EXPIRED');}});assert.equal((await expired.handler(req({op:'announcement-list',page:1},headers))).status,401);
+});
