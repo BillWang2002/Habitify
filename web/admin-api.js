@@ -1,4 +1,4 @@
-const messages={REPLACEMENT_REQUIRES_WITHDRAWAL:'请先撤回原公告，再发布修改后的草稿。',ANNOUNCEMENT_NOT_FOUND:'公告已不可用，请刷新列表。',ANNOUNCEMENT_IMMUTABLE:'已发布公告不能直接修改，请另存草稿。',STALE_DATA:'公告已被其他页面修改，请重新读取后操作。',MEMBER_EXISTS:'这个邮箱已有账号，请刷新成员列表。',PASSWORD_POLICY:'密码需为8至128个字符，并满足后台密码要求。',REQUEST_REUSED:'这次操作内容已变化，请关闭弹窗后重新操作。',ADMIN_WRITE_BUSY:'该成员有操作正在处理，请稍后在待确认操作中继续。',ADMIN_WRITE_PENDING:'结果尚未确认，请稍后在待确认操作中继续；不要当作已完成。',BALANCE_CHANGED:'成员余额已变化，请重新读取后调整。',DELETE_CONFIRMATION_REQUIRED:'请重新输入完整成员邮箱，需完全一致。',LOGIN_REQUIRED:'请先在应用中登录管理员账户，再进入后台。',ADMIN_PASSWORD_INVALID:'后台密码不正确，请重新输入。',ADMIN_SESSION_EXPIRED:'后台会话已失效，请重新输入密码。',ADMIN_FORBIDDEN:'当前账户没有后台权限，请使用管理员账户登录。',ADMIN_NOT_CONFIGURED:'后台尚未完成配置，请稍后再试。',ADMIN_RATE_LIMITED:'尝试次数较多，请稍后再试。',MEMBER_NOT_FOUND:'该成员已不可用，请刷新列表。',INVALID_REQUEST:'请检查填写内容。',NETWORK_ERROR:'暂时无法连接后台，请检查网络后重试。',BACKEND_ERROR:'后台服务暂不可用，请稍后再试。',ADMIN_CANCELLED:'后台请求已取消。'};
+const messages={FEEDBACK_NOT_FOUND:'反馈已不可用，请刷新列表。',CLOSE_REASON_REQUIRED:'请填写成员可见的关闭说明。',MAIL_NOT_RETRYABLE:'当前邮件不允许重发，请刷新状态。',MAIL_CONFIRMATION_REQUIRED:'上次发送结果不明，请先核对邮件记录再确认重发。',REPLACEMENT_REQUIRES_WITHDRAWAL:'请先撤回原公告，再发布修改后的草稿。',ANNOUNCEMENT_NOT_FOUND:'公告已不可用，请刷新列表。',ANNOUNCEMENT_IMMUTABLE:'已发布公告不能直接修改，请另存草稿。',STALE_DATA:'内容已被其他页面修改，请重新读取后操作。',MEMBER_EXISTS:'这个邮箱已有账号，请刷新成员列表。',PASSWORD_POLICY:'密码需为8至128个字符，并满足后台密码要求。',REQUEST_REUSED:'这次操作内容已变化，请关闭弹窗后重新操作。',ADMIN_WRITE_BUSY:'该成员有操作正在处理，请稍后在待确认操作中继续。',ADMIN_WRITE_PENDING:'结果尚未确认，请稍后在待确认操作中继续；不要当作已完成。',BALANCE_CHANGED:'成员余额已变化，请重新读取后调整。',DELETE_CONFIRMATION_REQUIRED:'请重新输入完整成员邮箱，需完全一致。',LOGIN_REQUIRED:'请先在应用中登录管理员账户，再进入后台。',ADMIN_PASSWORD_INVALID:'后台密码不正确，请重新输入。',ADMIN_SESSION_EXPIRED:'后台会话已失效，请重新输入密码。',ADMIN_FORBIDDEN:'当前账户没有后台权限，请使用管理员账户登录。',ADMIN_NOT_CONFIGURED:'后台尚未完成配置，请稍后再试。',ADMIN_RATE_LIMITED:'尝试次数较多，请稍后再试。',MEMBER_NOT_FOUND:'该成员已不可用，请刷新列表。',INVALID_REQUEST:'请检查填写内容。',NETWORK_ERROR:'暂时无法连接后台，请检查网络后重试。',BACKEND_ERROR:'后台服务暂不可用，请稍后再试。',ADMIN_CANCELLED:'后台请求已取消。'};
 const failure=code=>Object.assign(new Error(messages[code] || messages.BACKEND_ERROR),{code});
 export function createAdminApi(client,{url,key,fetcher=fetch,now=()=>Date.now()}={}) {
  let token=null,expiry=0,epoch=0;
@@ -20,6 +20,7 @@ export function createAdminApi(client,{url,key,fetcher=fetch,now=()=>Date.now()}
  async function revoke(grant){if(!grant)return true;try{await send('logout',{},grant);return true;}catch{return false;}}
  return {
   active,
+  feedback:payload=>read(payload.op,Object.fromEntries(Object.entries(payload).filter(([k])=>k!=='op'))),
   announcements:payload=>read(payload.op,Object.fromEntries(Object.entries(payload).filter(([k])=>k!=='op'))),
   async login(password) {
    const ticket=++epoch;const old=token;token=null;expiry=0;await revoke(old);

@@ -1,4 +1,5 @@
 import {createInboxApi} from './inbox-api.js';
+import {createFeedbackApi} from './feedback-api.js';
 import {createAppearanceApi} from './appearance-api.js';
 import { createAdminApi } from './admin-api.js';
 import { initKeyboardViewport } from './keyboard-viewport.js';
@@ -9,10 +10,10 @@ import { initPwa } from './pwa.js';
 import { createClient } from '@supabase/supabase-js';
 import { AuthController, loginError } from './auth.js';
 const $ = id => document.getElementById(id);
-let inboxRequest, appearanceRequest, habitRequest, adminApi, controller, busy = false, logoutFailed = false;
+let feedbackRequest, inboxRequest, appearanceRequest, habitRequest, adminApi, controller, busy = false, logoutFailed = false;
 initKeyboardViewport();
-const adminProxy={announcements:p=>adminApi.announcements(p),active:()=>!!adminApi?.active(),login:password=>adminApi.login(password),verify:()=>adminApi.verify(),members:(page,search)=>adminApi.members(page,search),memberStatistics:id=>adminApi.memberStatistics(id),pendingMemberWrites:()=>adminApi.pendingMemberWrites(),createMember:p=>adminApi.createMember(p),changeMemberPassword:p=>adminApi.changeMemberPassword(p),deleteMember:p=>adminApi.deleteMember(p),setMemberCoins:p=>adminApi.setMemberCoins(p),logout:()=>adminApi.logout(),clear:()=>adminApi?.clear()};
-const workspace = createWorkspace($('workspace'), { request: payload => habitRequest(payload), onLogout: logout, adminApi: adminProxy, appearanceRequest:payload=>appearanceRequest(payload),inboxRequest:payload=>inboxRequest(payload) });
+const adminProxy={feedback:p=>adminApi.feedback(p),announcements:p=>adminApi.announcements(p),active:()=>!!adminApi?.active(),login:password=>adminApi.login(password),verify:()=>adminApi.verify(),members:(page,search)=>adminApi.members(page,search),memberStatistics:id=>adminApi.memberStatistics(id),pendingMemberWrites:()=>adminApi.pendingMemberWrites(),createMember:p=>adminApi.createMember(p),changeMemberPassword:p=>adminApi.changeMemberPassword(p),deleteMember:p=>adminApi.deleteMember(p),setMemberCoins:p=>adminApi.setMemberCoins(p),logout:()=>adminApi.logout(),clear:()=>adminApi?.clear()};
+const workspace = createWorkspace($('workspace'), { request: payload => habitRequest(payload), onLogout: logout, adminApi: adminProxy, appearanceRequest:payload=>appearanceRequest(payload),inboxRequest:payload=>inboxRequest(payload),feedbackRequest:payload=>feedbackRequest(payload) });
 const views = ['restoring', 'login-view', 'unavailable'];
 function render(state) {
   const view = { restoring: 'restoring', signingOut: 'restoring', signedOut: 'login-view', unavailable: 'unavailable', verified: 'account-view' }[state.phase];
@@ -71,6 +72,7 @@ try {
     global: { fetch: (input, init = {}) => fetch(input, { ...init, signal: init.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000) }) }
   });
   adminApi = createAdminApi(client,{url:url.origin,key:config.supabasePublishableKey});
+  feedbackRequest=createFeedbackApi(client,{url:url.origin,key:config.supabasePublishableKey});
   inboxRequest=createInboxApi(client,{url:url.origin,key:config.supabasePublishableKey});
   appearanceRequest=createAppearanceApi(client,{url:url.origin,key:config.supabasePublishableKey});
   habitRequest = createHabitsApi(client,{url:url.origin,key:config.supabasePublishableKey});

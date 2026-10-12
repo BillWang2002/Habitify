@@ -1,4 +1,5 @@
 import {createInbox} from './inbox.js';
+import {createFeedback} from './feedback.js';
 import {appearanceHtml,createAppearance} from './appearance.js';
 import { adminPageHtml, createAdminPage } from './admin.js';
 import { accountHeader } from './account-header.js';
@@ -14,7 +15,7 @@ import { coinRulesHtml } from './coin-rules.js';
 const routes = ['habits', 'rewards', 'stats', 'me'];
 const accountRoutes = ['appearance', 'coin-rules', 'developer', 'archive', 'inbox', 'feedback', 'admin-login','admin/overview','admin/members','admin/announcements','admin/feedback','admin/audit'];
 const option = (tag, attrs, icon, label, description = '') => `<${tag} ${attrs} class="account-row"><span class="account-row-icon">${iconSvg(icon)}</span><span class="account-row-copy"><strong>${label}</strong>${description ? `<small>${description}</small>` : ''}</span><span class="account-row-chevron" aria-hidden="true">›</span></${tag}>`;
-export function createWorkspace(root, { onLogout = () => {}, preview = false, adminApi, appearanceRequest, inboxRequest, request = async () => { throw new Error('打卡服务尚未连接。'); } } = {}) {
+export function createWorkspace(root, { onLogout = () => {}, preview = false, adminApi, appearanceRequest, inboxRequest, feedbackRequest, request = async () => { throw new Error('打卡服务尚未连接。'); } } = {}) {
   let owner, habits = preview ? sampleHabits() : [], filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false, filterRevision = 0, resultAnimations = [], resultGhost;
   let account=null, snapshot=null, records=[], epoch=0, writing=false, loaded=preview, pending=null;
   const currentDay=()=>snapshot?.today || localDay();
@@ -49,11 +50,12 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
   const $ = id => root.querySelector(`#${id}`);
   const inbox=createInbox(root,{request:inboxRequest,preview,onOpen:id=>navigation.navigate(`inbox/${id}`),onBack:()=>navigation.back('inbox'),onCount:n=>{const entry=root.querySelector('a[href="#/inbox"]');const nav=root.querySelector('[data-route="me"]');for(const el of [entry,nav])el.classList.toggle('has-unread',n>0);let badge=entry.querySelector('.inbox-entry-count');if(!badge){badge=document.createElement('span');badge.className='inbox-entry-count';entry.append(badge);}badge.hidden=!(n>0);badge.textContent=n>99?'99+':String(n||0);entry.setAttribute('aria-label',`收件箱${n>0?'，'+n+'条未读':''}`);nav.setAttribute('aria-label',`我的${n>0?'，有未读消息':''}`);}});
   const appearance=createAppearance(root,{request:appearanceRequest,preview});
+  const feedback=createFeedback(root,{request:feedbackRequest,preview,onOpen:id=>navigation.navigate(`feedback/${id}`),onBack:()=>navigation.back('feedback')});
   const admin = createAdminPage(root,{api:adminApi,preview,onNavigate:(path,options)=>navigation.navigate(path,options),onExitMessage:notify});
   const statistics = createStatistics($('statistics-page'), {onHabit:id=>navigation.navigate(`habit/${id}`)});
   const dialog = $('habit-dialog');
   const navigation = createNavigation({
-    normalize: next => /^inbox\/(?:[0-9a-f-]{36}|preview-welcome)$/.test(next) ? next : next.startsWith('habit/') && habits.some(item=>item.id===next.slice(6)) ? next : [...routes,'archive',...accountRoutes].includes(next) ? next : 'habits',
+    normalize: next => /^feedback\/[0-9a-f-]{36}$/.test(next) ? next : /^inbox\/(?:[0-9a-f-]{36}|preview-welcome)$/.test(next) ? next : next.startsWith('habit/') && habits.some(item=>item.id===next.slice(6)) ? next : [...routes,'archive',...accountRoutes].includes(next) ? next : 'habits',
     readView: () => ({ statistics:statistics.getView(), filter, selectedDay, scroll: $('workspace-content').scrollTop, detailMonth: [...detailMonth], filterHeight: $('filter-results').style.minHeight, logsOpen: !!$('habit-detail').querySelector('#detail-logs')?.open }),
     onChange: (next, { source, view }) => {
       cancelHold(); cancelResultsTransition(); $('filter-results').style.minHeight=view?.filterHeight || '';
@@ -83,9 +85,11 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
     const oldRoute = route;
     if (next.startsWith('habit/')) { const id = next.slice(6); if (habits.some(item=>item.id===id)) { detailId=id; route='detail'; detailMonth=view?.detailMonth || [new Date().getFullYear(),new Date().getMonth()]; refreshDetail(); if(view?.logsOpen) $('habit-detail').querySelector('#detail-logs').open=true; } else route='habits'; }
     else if(next.startsWith('inbox/'))route='inbox';
+    else if(next.startsWith('feedback/'))route='feedback';
     else if(next.startsWith('admin/')) route='admin';
     else route = [...routes,'archive',...accountRoutes].includes(next) ? next : 'habits';
     if (route === 'appearance') appearance.show(); else appearance.hide();
+    if(route==='feedback')feedback.show(next.startsWith('feedback/')?next.slice(9):null);else feedback.hide();
     if(route==='inbox')inbox.show(next.startsWith('inbox/')?next.slice(6):null);else {inbox.hide();if(route==='me')inbox.refresh();}
     if (route === 'archive') renderArchive();
     root.classList.toggle('admin-active',route==='admin');
@@ -337,12 +341,12 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
       ++epoch; writing=false; pending=null; root.removeAttribute('aria-busy');
       if(owner!==user.id) { statistics.clear(); snapshot=null; habits=preview ? sampleHabits() : []; logs=[]; records=[]; loaded=preview; selectedDay=localDay(); filter='all'; updateFilters(); }
       if(owner!==user.id) admin.clear();
-      owner=user.id; account=user; appearance.enter(user); inbox.enter(user); renderProfile(); $('data-message').textContent=''; dates(); renderHabits(); root.hidden=false;
+      owner=user.id; account=user; appearance.enter(user); inbox.enter(user); feedback.enter(user); renderProfile(); $('data-message').textContent=''; dates(); renderHabits(); root.hidden=false;
       document.body.classList.add('workspace-active'); document.documentElement.classList.add('workspace-active');
-      const requested=location.hash.slice(2); navigation.start(requested.startsWith('inbox/') ? requested : requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive',...accountRoutes].includes(requested) ? requested : 'habits');
+      const requested=location.hash.slice(2); navigation.start((requested.startsWith('inbox/')||requested.startsWith('feedback/')) ? requested : requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive',...accountRoutes].includes(requested) ? requested : 'habits');
       if(!preview) loadData();
     },
-    leave(reset = false) { inbox.clear(); appearance.clear(reset); root.classList.remove('admin-active'); admin.clear(); statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); account=null; renderProfile(); $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
-    isEditing() { return inbox.busy() || appearance.busy() || admin.busy() || writing || !!pending || dialog.open || manage.open; }
+    leave(reset = false) { feedback.clear(); inbox.clear(); appearance.clear(reset); root.classList.remove('admin-active'); admin.clear(); statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); account=null; renderProfile(); $('reward-balance').textContent='0'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
+    isEditing() { return feedback.busy() || inbox.busy() || appearance.busy() || admin.busy() || writing || !!pending || dialog.open || manage.open; }
   };
 }

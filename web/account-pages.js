@@ -1,8 +1,5 @@
 import {inboxHtml} from './inbox.js';
-import { accountHeader } from './account-header.js';
-import { iconSvg } from './theme.js';
-const page = (route, title, parent, group, icon, heading, description) => `<section data-page="${route}" class="account-feature-page" hidden>${accountHeader({group,title,parent,parentLabel:parent === 'developer' ? '开发者模式' : '我的'})}<div class="account-feature-state"><span class="account-feature-icon" aria-hidden="true">${iconSvg(icon)}</span><span class="account-row-badge">即将开放</span><h2>${heading}</h2><p>${description}</p></div></section>`;
+import {feedbackHtml} from './feedback.js';
 export function accountPagesHtml() {
- return inboxHtml()
-  + page('feedback','意见反馈','me','工具与账户','feedback','让今日打卡更贴近你的节奏','这里将用于提交使用建议或遇到的问题，并在收件箱查看回复。反馈提交尚未开放。');
+ return inboxHtml()+feedbackHtml();
 }
