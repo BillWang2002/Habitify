@@ -3,7 +3,7 @@ test('外观SQL：本人隔离、默认不建资料、幂等、并发拒绝、�
  const db=new PGlite(),a=randomUUID(),b=randomUUID();try{
  await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,banned_until timestamptz,created_at timestamptz default now());create function auth.uid() returns uuid language sql as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql as $$select jsonb_build_object('iat',nullif(current_setting('request.jwt.claim.iat',true),'')::bigint)$$;grant usage on schema auth to anon,authenticated;`);
  await db.query('insert into auth.users(id,email) values($1,$2),($3,$4)',[a,'a@example.test',b,'b@example.test']);
- for(const f of ['202610030001_infrastructure.sql','202610040002_habits.sql','202610040003_statistics.sql','202610040004_delete_confirmation.sql','202610050005_admin_sessions.sql','202610050006_admin_members.sql','202610100007_admin_identity.sql','202610100008_admin_member_management.sql','202610100009_appearance.sql','202610110010_appearance_catalog.sql'])await db.exec(await readFile(new URL('../supabase/migrations/'+f,import.meta.url),'utf8'));
+ for(const f of ['202610030001_infrastructure.sql','202610040002_habits.sql','202610040003_statistics.sql','202610040004_delete_confirmation.sql','202610050005_admin_sessions.sql','202610050006_admin_members.sql','202610100007_admin_identity.sql','202610100008_admin_member_management.sql','202610100009_appearance.sql','202610110010_appearance_catalog.sql','202610130014_duckyo_catalog.sql'])await db.exec(await readFile(new URL('../supabase/migrations/'+f,import.meta.url),'utf8'));
  async function rpc(p,uid=a,iat=100){await db.query("select set_config('request.jwt.claim.sub',$1,false),set_config('request.jwt.claim.iat',$2,false)",[uid,String(iat)]);await db.exec('set role authenticated');try{return(await db.query('select public.appearance_request($1::jsonb) as data',[JSON.stringify(p)])).rows[0].data;}finally{await db.exec('reset role');}}
  const start=await rpc({op:'appearance-get'});assert.equal(start.revision,0);assert.equal((await db.query('select count(*)::int as n from public.habit_profiles')).rows[0].n,0);
  const p={op:'appearance-set',settings:{theme:'lumi',background:'garden',surface:'glass',avatar:'lumi',mode:'dark'},expectedRevision:0,requestId:randomUUID()};const saved=await rpc(p);assert.equal(saved.revision,1);assert.deepEqual(await rpc(p),saved);assert.equal((await rpc({op:'appearance-get'},b)).settings.theme,'growth');
@@ -12,7 +12,17 @@ test('外观SQL：本人隔离、默认不建资料、幂等、并发拒绝、�
  await db.exec('set role authenticated');await assert.rejects(db.query('select * from public.account_appearance'),/permission denied/);await db.exec('reset role');await db.exec('set role anon');await assert.rejects(db.query("select public.appearance_request('{\"op\":\"appearance-get\"}')"),/permission denied/);await db.exec('reset role');
  const variant={...p,settings:{...p.settings,background:'library',avatar:'lumi-library'},expectedRevision:1,requestId:randomUUID()};assert.equal((await rpc(variant)).settings.avatar,'lumi-library');await assert.rejects(rpc({...variant,settings:{...variant.settings,theme:'growth',background:'plain',surface:'paper'},expectedRevision:2,requestId:randomUUID()}),/INVALID_REQUEST/);
  const legacy={...variant,settings:{...variant.settings,avatar:'star'},expectedRevision:2,requestId:randomUUID()};assert.equal((await rpc(legacy)).settings.avatar,'lumi');assert.equal((await rpc(legacy)).revision,3);
- await db.query('insert into habitify_admin.member_access(user_id,revoked_before) values($1,100)',[a]);await assert.rejects(rpc({op:'appearance-get'}),/LOGIN_REQUIRED/);assert.equal((await rpc({op:'appearance-get'},a,101)).revision,3);
+ let duckRevision=3;
+ for(const background of ['study','work','phone','snack','cake','meal'])for(const avatar of ['work','study','meal']){
+  const settings={theme:'duckyo',background:'duckyo-'+background,surface:'glass',avatar:'duckyo-'+avatar,mode:'light'};
+  const payload={op:'appearance-set',settings,expectedRevision:duckRevision,requestId:randomUUID()};
+  const result=await rpc(payload);assert.deepEqual(result.settings,settings);assert.deepEqual(await rpc(payload),result);duckRevision++;assert.equal(result.revision,duckRevision);
+ }
+ const duck=(await rpc({op:'appearance-get'})).settings;
+ for(const settings of [{...duck,avatar:'lumi'},{...duck,background:'garden'},{...duck,theme:'growth'},{...duck,background:'duckyo-external'},{...duck,avatar:'https://evil.test'}])await assert.rejects(rpc({op:'appearance-set',settings,expectedRevision:duckRevision,requestId:randomUUID()}),/INVALID_REQUEST/);
+ assert.equal((await rpc({op:'appearance-get'},b)).settings.theme,'growth');
+ await assert.rejects(rpc({op:'appearance-set',settings:duck,expectedRevision:duckRevision-1,requestId:randomUUID()}),/STALE_DATA/);
+ await db.query('insert into habitify_admin.member_access(user_id,revoked_before) values($1,100)',[a]);await assert.rejects(rpc({op:'appearance-get'}),/LOGIN_REQUIRED/);assert.equal((await rpc({op:'appearance-get'},a,101)).revision,duckRevision);
  await db.query('delete from auth.users where id=$1',[a]);assert.equal((await db.query('select count(*)::int as n from public.account_appearance')).rows[0].n,0);
  }finally{await db.close();}
 });

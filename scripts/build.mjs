@@ -1,4 +1,6 @@
 import { accountHeader } from '../web/account-header.js';
+import {backgroundAssets,avatarAssets,themeCoverAssets} from '../web/appearance-model.js';
+import {dirname} from 'node:path';
 import { mkdir, readFile, writeFile, copyFile, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { build } from 'esbuild';
@@ -45,11 +47,9 @@ await mkdir('dist/diagnostics', { recursive: true });
 for (const name of ['index.html', 'app.js', 'styles.css', 'pwa.html', 'pwa-check.js', 'pwa.css']) await copyFile(`web/diagnostics/${name}`, `dist/diagnostics/${name}`);
 await writeFile('dist/diagnostics/pwa.html', (await readFile('web/diagnostics/pwa.html','utf8')).replace('../styles.css', `../${cssName}`).replace('__ACCOUNT_HEADER__', accountHeader({group:'应用检查',title:'PWA 应用检查',parentLabel:'开发者模式',href:'../#/developer'})));
 await writeFile('dist/config.json', JSON.stringify(config));
-await mkdir('dist/themes/lumi',{recursive:true});
-for(const name of ['garden.webp','avatar.webp']) await copyFile(`web/themes/lumi/${name}`,`dist/themes/lumi/${name}`);
-const extraThemeAssets=['meadow.webp','harbor.webp','library.webp','avatar-meadow.webp','avatar-harbor.webp','avatar-library.webp'];
-for(const name of extraThemeAssets)await copyFile(`web/themes/lumi/${name}`,`dist/themes/lumi/${name}`);
-const files = [...extraThemeAssets.map(name=>`themes/lumi/${name}`),'themes/lumi/garden.webp','themes/lumi/avatar.webp','index.html', startupName, appName, cssName, 'config.json', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
+const themeAssets=[...new Set([...Object.values(backgroundAssets),...Object.values(avatarAssets),...Object.values(themeCoverAssets),...['study','work','phone','snack','cake','meal'].map(id=>`./themes/duckyo/edge-${id}.webp`)].map(path=>path.slice(2)))];
+for(const file of themeAssets){await mkdir(dirname(`dist/${file}`),{recursive:true});await copyFile(`web/${file}`,`dist/${file}`);}
+const files = [...themeAssets,'index.html', startupName, appName, cssName, 'config.json', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 const revision = hash(Buffer.concat(await Promise.all(files.map(file => readFile(`dist/${file}`)))));
 const worker = (await readFile('web/sw.js', 'utf8')).replace('__REVISION__', revision).replace('__PRECACHE__', JSON.stringify(files));
 await writeFile('dist/sw.js', worker);

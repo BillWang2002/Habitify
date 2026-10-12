@@ -15,7 +15,7 @@ import { coinRulesHtml } from './coin-rules.js';
 const routes = ['habits', 'rewards', 'stats', 'me'];
 const accountRoutes = ['appearance', 'coin-rules', 'developer', 'archive', 'inbox', 'feedback', 'admin-login','admin/overview','admin/members','admin/announcements','admin/feedback','admin/audit'];
 const option = (tag, attrs, icon, label, description = '') => `<${tag} ${attrs} class="account-row"><span class="account-row-icon">${iconSvg(icon)}</span><span class="account-row-copy"><strong>${label}</strong>${description ? `<small>${description}</small>` : ''}</span><span class="account-row-chevron" aria-hidden="true">›</span></${tag}>`;
-export function createWorkspace(root, { onLogout = () => {}, preview = false, adminApi, appearanceRequest, inboxRequest, feedbackRequest, request = async () => { throw new Error('打卡服务尚未连接。'); } } = {}) {
+export function createWorkspace(root, { onLogout = () => {}, preview = false, previewAppearance, adminApi, appearanceRequest, inboxRequest, feedbackRequest, request = async () => { throw new Error('打卡服务尚未连接。'); } } = {}) {
   let owner, habits = preview ? sampleHabits() : [], filter = 'all', route = 'habits', activeHabit, lastFocus, toastTimer, selectedIcon = 'leaf', detailId, logs = [], selectedDay = localDay(), detailMonth = [new Date().getFullYear(), new Date().getMonth()], holdTimer, holdStart, suppressClick = false, filterRevision = 0, resultAnimations = [], resultGhost;
   let account=null, snapshot=null, records=[], epoch=0, writing=false, loaded=preview, pending=null;
   const currentDay=()=>snapshot?.today || localDay();
@@ -49,7 +49,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
   </div>`;
   const $ = id => root.querySelector(`#${id}`);
   const inbox=createInbox(root,{request:inboxRequest,preview,onOpen:id=>navigation.navigate(`inbox/${id}`),onBack:()=>navigation.back('inbox'),onCount:n=>{const entry=root.querySelector('a[href="#/inbox"]');const nav=root.querySelector('[data-route="me"]');for(const el of [entry,nav])el.classList.toggle('has-unread',n>0);let badge=entry.querySelector('.inbox-entry-count');if(!badge){badge=document.createElement('span');badge.className='inbox-entry-count';entry.append(badge);}badge.hidden=!(n>0);badge.textContent=n>99?'99+':String(n||0);entry.setAttribute('aria-label',`收件箱${n>0?'，'+n+'条未读':''}`);nav.setAttribute('aria-label',`我的${n>0?'，有未读消息':''}`);}});
-  const appearance=createAppearance(root,{request:appearanceRequest,preview});
+  const appearance=createAppearance(root,{request:appearanceRequest,preview,initialPreview:previewAppearance});
   const feedback=createFeedback(root,{request:feedbackRequest,preview,onOpen:id=>navigation.navigate(`feedback/${id}`),onBack:()=>navigation.back('feedback')});
   const admin = createAdminPage(root,{api:adminApi,preview,onNavigate:(path,options)=>navigation.navigate(path,options),onExitMessage:notify});
   const statistics = createStatistics($('statistics-page'), {onHabit:id=>navigation.navigate(`habit/${id}`)});

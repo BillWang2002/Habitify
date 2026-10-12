@@ -1,0 +1,220 @@
+{
+  "processing": "User-approved non-AI original crop, resize and pixel relocation. Wallpapers use lossless WebP; decoded RGB equality verified. Edge strips only extend original background outside full-image contain layout.",
+  "assets": [
+    {
+      "id": "A",
+      "name": "写字",
+      "reference": "docs/design/duckyo/originals/A-writing.jpg",
+      "sourcePage": "https://www.goody25.com/mind2477536",
+      "originalSize": [
+        1125,
+        2436
+      ],
+      "outputSize": [
+        1125,
+        2631
+      ],
+      "insertAtY": 487,
+      "shiftPx": 195,
+      "verification": "All original decoded RGB pixels retained exactly; removing inserted background strip restores original pixel-for-pixel. No source pixels cropped, scaled or redrawn.",
+      "backgroundId": "duckyo-study",
+      "projectFile": "study.webp",
+      "edgeFile": "edge-study.webp",
+      "topColor": "#9ad7dc",
+      "ratio": 2.338667,
+      "sha256": "7adfbb5fcf6cac2c62b101d1ed555925c283884e7027ceed44bafd4eeeac75cb",
+      "avatarCrop": [
+        290,
+        1130,
+        820,
+        1660
+      ]
+    },
+    {
+      "id": "B",
+      "name": "打工",
+      "reference": "docs/design/duckyo/originals/B-work.jpg",
+      "sourcePage": "https://kknews.cc/zh-hk/comic/e3vr6pr.html",
+      "originalSize": [
+        640,
+        1138
+      ],
+      "outputSize": [
+        640,
+        1229
+      ],
+      "insertAtY": 227,
+      "shiftPx": 91,
+      "verification": "All original decoded RGB pixels retained exactly; removing inserted background strip restores original pixel-for-pixel. No source pixels cropped, scaled or redrawn.",
+      "backgroundId": "duckyo-work",
+      "projectFile": "work.webp",
+      "edgeFile": "edge-work.webp",
+      "topColor": "#c8daf0",
+      "ratio": 1.920313,
+      "sha256": "b106190dbf18ab3ea6df884927533614895d85314983b3f07ce6487847004c48",
+      "avatarCrop": [
+        74,
+        475,
+        490,
+        891
+      ]
+    },
+    {
+      "id": "C",
+      "name": "手机",
+      "reference": "docs/design/duckyo/originals/C-phone.jpg",
+      "sourcePage": "https://inf.news/en/news/8d26897989240684c176dc11fa5e6c12.html",
+      "originalSize": [
+        960,
+        2079
+      ],
+      "outputSize": [
+        960,
+        2245
+      ],
+      "insertAtY": 415,
+      "shiftPx": 166,
+      "verification": "All original decoded RGB pixels retained exactly; removing inserted background strip restores original pixel-for-pixel. No source pixels cropped, scaled or redrawn.",
+      "backgroundId": "duckyo-phone",
+      "projectFile": "phone.webp",
+      "edgeFile": "edge-phone.webp",
+      "topColor": "#ffefd6",
+      "ratio": 2.338542,
+      "sha256": "b02764fc9fef04253eaf017dd2fdbf60500019f206a4a2ab96950ec26780f1f7"
+    },
+    {
+      "id": "D",
+      "name": "零食",
+      "reference": "docs/design/duckyo/originals/D-snack.jpg",
+      "sourcePage": "https://www.goody25.com/mind2477536",
+      "originalSize": [
+        1080,
+        1920
+      ],
+      "outputSize": [
+        1080,
+        2074
+      ],
+      "insertAtY": 384,
+      "shiftPx": 154,
+      "verification": "All original decoded RGB pixels retained exactly; removing inserted background strip restores original pixel-for-pixel. No source pixels cropped, scaled or redrawn.",
+      "backgroundId": "duckyo-snack",
+      "projectFile": "snack.webp",
+      "edgeFile": "edge-snack.webp",
+      "topColor": "#a7c8cf",
+      "ratio": 1.92037,
+      "sha256": "7dea25047209dc32df2356262b6f8545ce31b8623724d4db6b4bbd10e4710967"
+    },
+    {
+      "id": "E",
+      "name": "蛋糕",
+      "reference": "docs/design/duckyo/originals/E-cake.jpg",
+      "sourcePage": "https://www.goody25.com/mind2477536",
+      "originalSize": [
+        640,
+        1136
+      ],
+      "outputSize": [
+        640,
+        1227
+      ],
+      "insertAtY": 227,
+      "shiftPx": 91,
+      "verification": "All original decoded RGB pixels retained exactly; removing inserted background strip restores original pixel-for-pixel. No source pixels cropped, scaled or redrawn.",
+      "backgroundId": "duckyo-cake",
+      "projectFile": "cake.webp",
+      "edgeFile": "edge-cake.webp",
+      "topColor": "#f8eeb1",
+      "ratio": 1.917188,
+      "sha256": "c202127bfcd9aa8e0c4168ebc2d838685aefec8405178a69b0c169546a03002b"
+    },
+    {
+      "id": "F",
+      "name": "吃饭",
+      "reference": "docs/design/duckyo/originals/F-meal.jpg",
+      "sourcePage": "https://kknews.cc/zh-hk/comic/e3vr6pr.html",
+      "originalSize": [
+        640,
+        1138
+      ],
+      "outputSize": [
+        640,
+        1262
+      ],
+      "insertAtY": 200,
+      "shiftPx": 124,
+      "verification": "All original decoded RGB pixels retained exactly; removing inserted background strip restores original pixel-for-pixel. No source pixels cropped, scaled or redrawn.",
+      "backgroundId": "duckyo-meal",
+      "projectFile": "meal.webp",
+      "edgeFile": "edge-meal.webp",
+      "topColor": "#ffffff",
+      "ratio": 1.971875,
+      "sha256": "f629738fbb7e492e0c7163fd9c929c999ff7f70d8af86913fc9b156db28250c6",
+      "avatarCrop": [
+        125,
+        430,
+        535,
+        840
+      ]
+    }
+  ],
+  "avatars": [
+    {
+      "file": "avatar-work.webp",
+      "source": "B",
+      "crop": [
+        74,
+        475,
+        490,
+        891
+      ],
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "avatar-study.webp",
+      "source": "A",
+      "crop": [
+        290,
+        1130,
+        820,
+        1660
+      ],
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "avatar-meal.webp",
+      "source": "F",
+      "crop": [
+        125,
+        430,
+        535,
+        840
+      ],
+      "size": [
+        256,
+        256
+      ]
+    }
+  ],
+  "cover": {
+    "file": "cover.webp",
+    "source": "B",
+    "crop": [
+      0,
+      330,
+      640,
+      757
+    ],
+    "size": [
+      600,
+      400
+    ]
+  },
+  "sourceStatus": "Public wallpaper reference pages; creator credit Duckyo / 小刘鸭. No claim of official partnership or independently verified redistribution license."
+}
