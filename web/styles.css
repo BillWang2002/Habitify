@@ -650,3 +650,6 @@ body.is-standalone.workspace-active{background:transparent}
 @media(min-width:1100px){.markdown-editor-grid{grid-template-columns:1fr 1fr}}
 
 .message-editor-actions button{width:auto;margin:0;flex:1 1 140px}
+.message-controls .icon-action,.stats-heading .icon-action{width:44px;height:44px;min-width:44px;min-height:44px;padding:10px;display:grid;place-items:center;flex-shrink:0;border-radius:14px;color:var(--accent)}
+.icon-action svg{width:22px;height:22px;display:block}
+#inbox-detail-close{font-size:12px;flex-shrink:0;padding:8px 12px;border:1px solid var(--line);border-radius:13px;background:var(--field)}
