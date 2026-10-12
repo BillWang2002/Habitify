@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';
 import {feedbackHtml,createFeedback} from '../web/feedback.js';import {createAdminFeedback} from '../web/admin-feedback.js';import {createFeedbackApi} from '../web/feedback-api.js';import {createInbox,inboxHtml} from '../web/inbox.js';
 const tick=()=>new Promise(r=>setImmediate(r)),id='00000000-0000-4000-8000-000000000001';
-const row={id,title:'反馈标题',body:'<img src=x onerror=alert(1)>',category:'bug',status:'pending',created_at:'2026-10-12T00:00:00Z',replies:[],email:'test@example.test',revision:1,internal_note:'',mail:{state:'uncertain',attempts:1},history:[]};
+const row={id,title:'反馈标题',body:'<img src=x onerror=alert(1)>',category:'bug',status:'pending',created_at:'2026-10-12T00:00:00Z',replies:[],email:'test@example.test',revision:1,internal_note:'',history:[]};
 function dom(){return new JSDOM('<div id="root"></div>');}
 function dialogs(d){d.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};d.window.HTMLDialogElement.prototype.close=function(){this.open=false;};}
 test('成员反馈字段内提示、一次提交、纯文字安全渲染和结果未知重试保留原请求',async()=>{
@@ -19,6 +19,7 @@ test('切换账户和退出丢弃迟到反馈数据，不带出A的原文',async
 test('管理员回复需要确认，断网后冻结原内容且同ID重试，退出清空成员信息',async()=>{
  const d=dom();dialogs(d);const root=d.window.document.querySelector('#root');let sent=[],network=true,current={...row};
  const page=createAdminFeedback(root,{api:{feedback:async p=>{if(p.op==='feedback-admin-list')return{total:1,items:[current]};if(p.op==='feedback-admin-get')return current;sent.push(p);if(network)throw Object.assign(new Error('lost'),{code:'NETWORK_ERROR'});current={...current,revision:2,replies:[{id:'reply',body:p.body,created_at:row.created_at}]};return{id,revision:2,completed:true};}}});
+ assert.equal(root.querySelector('.feedback-mail-status'),null);assert.equal(root.querySelector('#af-mail-retry'),null);
  page.show();await tick();root.querySelector('.feedback-list-item').click();await tick();await tick();root.querySelector('#af-reply').value='回复';root.querySelector('#af-send').click();await tick();assert.equal(sent.length,0);root.querySelector('dialog .primary').click();await tick();assert.equal(sent.length,1);assert.equal(root.querySelector('#af-reply').disabled,true);
  network=false;root.querySelector('#af-retry').click();await tick();assert.deepEqual(sent[1],sent[0]);assert.ok(root.querySelector('#af-content').textContent.includes('回复'));page.clear();assert.equal(root.querySelector('#af-member').textContent,'');assert.equal(root.querySelector('#af-reply').value,'');d.window.close();
 });

@@ -42,13 +42,13 @@ export function createFeedback(root,{request,preview=false,onOpen=null,onBack=nu
   const ticket=epoch,s=++sequence;reading=true;note('正在读取反馈…');layout();
   try{const data=await send(id?{op:'feedback-get',id}:{op:'feedback-list',page});if(ticket!==epoch||s!==sequence)return;
    if(id){detail=data;renderFeedbackContent($('feedback-content'),data);}else{total=data.total;renderList(data.items);}
-   note(preview?'公开预览，反馈仅保存在本页，不发送邮件。':'');
+   note(preview?'公开预览，反馈仅保存在本页。':'');
   }catch(error){if(ticket===epoch&&s===sequence)note(error.message);}
   finally{if(ticket===epoch&&s===sequence){reading=false;layout();}}
  }
  async function submit(){
   if(working)return;const ticket=epoch;working=true;layout();note('正在提交反馈…');
-  try{const result=await send(pending);if(ticket!==epoch)return;pending=null;$('feedback-form').reset();showFieldErrors(root,{},ids,{focus:false});working=false;note(preview?'预览提交完成，不发送邮件。':'反馈已提交，管理员会在后台查看。');
+  try{const result=await send(pending);if(ticket!==epoch)return;pending=null;$('feedback-form').reset();showFieldErrors(root,{},ids,{focus:false});working=false;note(preview?'预览提交完成，仅保存在本页。':'反馈已提交，管理员会在后台查看。');
    if(visible){if(onOpen)onOpen(result.id);else show(result.id);}
   }catch(error){if(ticket===epoch){if(!['NETWORK_ERROR','BACKEND_ERROR'].includes(error.code))pending=null;note(['NETWORK_ERROR','BACKEND_ERROR'].includes(error.code)?'提交结果尚未确认，请继续确认上次提交；原内容已保留，不会重新生成反馈。':error.message);}}
   finally{if(ticket===epoch){working=false;layout();}}

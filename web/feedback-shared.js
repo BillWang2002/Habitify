@@ -1,6 +1,5 @@
 export const categories={bug:'问题反馈',idea:'功能建议',other:'其他'};
 export const feedbackStates={pending:'待处理',processing:'处理中',resolved:'已解决',closed:'已关闭'};
-export const mailStates={pending:'待发送',processing:'正在发送',accepted:'邮件服务已接受',failed:'发送失败',uncertain:'发送结果待确认'};
 export const feedbackDate=value=>new Intl.DateTimeFormat('zh-CN',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));
 export function appendText(root,tag,text,className=''){
  const element=root.ownerDocument.createElement(tag);element.textContent=text;if(className)element.className=className;root.append(element);return element;

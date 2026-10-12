@@ -35,10 +35,10 @@ test('公告接口要求管理员会话，限制收件人/持续选项与正文�
  const expired=fixture({announcements:async()=>{throw new Error('ADMIN_SESSION_EXPIRED');}});assert.equal((await expired.handler(req({op:'announcement-list',page:1},headers))).status,401);
 });
 
-test('反馈管理接口绑定后台会话，严格限制状态/正文/收件字段与重发确认',async()=>{
+test('反馈管理接口绑定后台会话，严格限制状态/正文/收件字段并拒绝旧邮件操作',async()=>{
  const id='00000000-0000-4000-8000-000000000001',headers={'X-Admin-Session':'a'.repeat(64)},calls=[];
  const f=fixture({feedback:async(u,h,p)=>{calls.push({u,h,p});return{id,revision:2,completed:true};}});
  const p={op:'feedback-reply',id,requestId:id,expectedRevision:1,body:'回复'};
  assert.equal((await f.handler(req(p))).status,401);assert.equal(calls.length,0);assert.equal((await f.handler(req(p,headers))).status,200);assert.equal(calls[0].h,await tokenHash(headers['X-Admin-Session']));
- for(const invalid of [{...p,toEmail:'someone@example.test'},{...p,body:''},{...p,body:'x'.repeat(3001)},{...p,expectedRevision:0},{op:'feedback-mail-retry',id,requestId:id,expectedRevision:1},{op:'feedback-admin-list',page:1,status:'bad',search:''}])assert.equal((await f.handler(req(invalid,headers))).status,422);
+ for(const invalid of [{...p,toEmail:'someone@example.test'},{...p,body:''},{...p,body:'x'.repeat(3001)},{...p,expectedRevision:0},{op:'feedback-mail-retry',id,requestId:id,expectedRevision:1,confirmUncertain:true},{op:'feedback-admin-list',page:1,status:'bad',search:''}])assert.equal((await f.handler(req(invalid,headers))).status,422);
 });

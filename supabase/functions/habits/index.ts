@@ -27,11 +27,6 @@ Deno.serve(async (req: Request) => {
       const code = Object.keys(errors).find(key => error.message === key);
       return reply({ code: code || (['23514','23502','22P02','22003'].includes(error.code) ? 'INVALID_REQUEST' : 'BACKEND_ERROR') }, code ? errors[code] : ['23514','23502','22P02','22003'].includes(error.code) ? 422 : 500);
     }
-    if(p.op==='feedback-submit' && Deno.env.get('FEEDBACK_MAIL_WORKER_KEY')) {
-      // The durable database task is the source of truth; a scheduled worker recovers missed kicks.
-      const kick=fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/feedback-mail`,{method:'POST',headers:{Authorization:`Bearer ${Deno.env.get('FEEDBACK_MAIL_WORKER_KEY')}`},signal:AbortSignal.timeout(15000)}).then(()=>{}).catch(()=>{});
-      EdgeRuntime.waitUntil(kick);
-    }
     return reply({ data });
   } catch { return reply({ code: 'BACKEND_ERROR' }, 503); }
 });

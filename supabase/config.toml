@@ -5,7 +5,3 @@ verify_jwt = false
 [functions.admin]
 # Handler verifies the ordinary account token and opaque admin grant itself.
 verify_jwt = false
-
-[functions.feedback-mail]
-# A separate server-only worker key is verified inside the handler; never exposed to members.
-verify_jwt = false
