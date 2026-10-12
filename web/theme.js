@@ -1,6 +1,8 @@
 // Bundled, trusted SVG assets only. Future inventory supplies owned IDs, never arbitrary markup.
 let activeTheme = 'growth';
 const paths = {
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
   inbox: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 13h5l2 3h4l2-3h5M7 8h10"/>',
   feedback: '<path d="M21 11a8 8 0 0 1-8 8H7l-4 3V11a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"/><path d="M8 9h8M8 13h5"/>',
   shield: '<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m9 12 2 2 4-4"/>',
@@ -38,13 +40,13 @@ const lumiPaths={
  walk:'<path d="m8 3-5 7h3l-4 6h5v5h2v-5h5l-4-6h3L8 3Zm7 4 4 5h-2l4 5h-6m3 0v4M3 22h18"/>',
  target:'<circle cx="10" cy="14" r="7"/><circle cx="10" cy="14" r="3"/><path d="m10 14 8-8m0 0V2l-4 4v4h4l4-4h-4"/>',
  sun:'<path d="M2 16h20M5 16a7 7 0 0 1 14 0M12 3v3M3 7l2 2m14 0 2-2M5 20h14"/><path d="m9 12 3-3 3 3m-3-3v5"/>',
- back:'<path d="m14 5-7 7 7 7M7 12h13"/>',
+ back:'<path d="m14 5-7 7 7 7M7 12h10"/>',
  archive:'<path d="M3 6h18v5H3V6Zm2 5v10h14V11M9 15h6M6 3h12v3"/>',
  palette:'<path d="M4 18 17 5l2 2L6 20l-2-2ZM14 2v3m6 5h3M3 8l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z"/>',
  coins:'<circle cx="12" cy="12" r="9"/><path d="m12 5 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/>'
 };
 export function currentIconChoices(){return iconChoices;}
 export function setIconTheme(id){activeTheme=id==='lumi'?'lumi':'growth';}
-export function iconSvg(id) { return `<svg data-theme-icon="${Object.hasOwn(paths,id)?id:'leaf'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${(activeTheme==='lumi' && lumiPaths[id]) || paths[id] || paths.leaf}</svg>`; }
+export function iconSvg(id) { return `<svg data-theme-icon="${Object.hasOwn(paths,id)?id:'leaf'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${(activeTheme==='lumi' && lumiPaths[id]) || paths[id] || paths.leaf}</svg>`; }
 export function refreshThemeIcons(root){for(const svg of root.querySelectorAll('svg[data-theme-icon]'))svg.outerHTML=iconSvg(svg.dataset.themeIcon);}
 export function resolveHabitIcon(id, ownedIds = defaultTheme.habitIcons) { return defaultTheme.habitIcons.includes(id) && ownedIds.includes(id) ? id : 'leaf'; }

@@ -176,7 +176,7 @@ html.workspace-active body { position: fixed; inset: 0; width: 100%; }
 .app-content::-webkit-scrollbar, .habit-dialog::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .app-content { overflow-x: hidden; }
 [data-page] { min-width: 0; }
-.habit-card { min-height: 154px; align-items: center; gap: 12px; padding: 16px; }
+.habit-card { min-height: 136px; align-items: center; gap: 10px; padding: 12px; }
 .habit-open { display: block; width: 100%; text-align: left; min-height: 52px; padding: 0; border: 0; background: transparent; color: var(--ink); }
 .habit-open h3 { font-size: 15px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 21px; }
 .habit-description { display: block; font-size: 11px; color: var(--muted); line-height: 1.6; }
@@ -244,7 +244,7 @@ html.workspace-active body { position: fixed; inset: 0; width: 100%; }
 
 /* v4: restrict page pinch, slower transitions and a frameless management close. */
 html.workspace-active, #workspace { touch-action: pan-x pan-y; }
-#filter-results { min-height: 154px; }
+#filter-results { min-height: 136px; }
 #close-manage, #close-dialog { border: 0; background: transparent; border-radius: 0; padding: 0; box-shadow: none; outline: none; }
 #close-manage:focus-visible, #close-dialog:focus-visible { outline: none; box-shadow: none; color: var(--accent); font-weight: 800; }
 
@@ -672,3 +672,58 @@ body.is-standalone.workspace-active{background:transparent}
 @media(max-width:800px){.feedback-search{gap:8px}.feedback-form{padding:18px}.feedback-filter{gap:6px}.feedback-filter button{padding:10px 12px}}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .page-title .icon-action{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--field);color:var(--accent);flex-shrink:0}
+
+/* Visual refinement v1: action density, readable scenery and shared icon rhythm. */
+#workspace { --type-note:13px; --type-small:12px; }
+#workspace svg[data-theme-icon] { display:block; flex-shrink:0; }
+.add-habit { display:grid; place-items:center; padding:0; }
+.add-habit svg { width:24px; height:24px; }
+.habit-icon { width:40px; height:40px; border-radius:13px; }
+.habit-icon svg, #icon-options svg, .appearance-icon-sample svg { width:24px; height:24px; }
+.habit-more { display:grid; place-items:center; padding:0; letter-spacing:normal; }
+.habit-more svg, #detail-menu svg { width:24px; height:24px; }
+.account-row-icon svg { width:22px; height:22px; }
+.habit-open { min-height:49px; }
+.habit-open h3 { font-size:16px; line-height:1.4; min-height:23px; margin-bottom:4px; }
+.habit-description { font-size:var(--type-note); line-height:1.6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.habit-info progress { margin-top:6px; }
+.recent-days { margin-top:6px; gap:3px; }
+.recent-days span { max-height:22px; font-size:11px; }
+.recent-unknown { opacity:.85; border-style:solid; border-color:color-mix(in srgb,var(--muted) 22%,transparent); }
+.habit-controls { gap:2px; }
+.habit-action { font-size:var(--type-note); line-height:1.35; white-space:normal; overflow-wrap:anywhere; }
+.app-nav a { font-size:var(--type-small); }
+#workspace :is(.dialog-note,.date-label,.account-facts,.profile-status,.account-feedback) { font-size:var(--type-note); }
+#workspace .account-row-copy strong { font-size:15px; }
+#workspace .account-row-copy small, .profile-metrics span, .message-open small, .appearance-icon-item small, .habits-footnote { font-size:var(--type-small); }
+.habit-filters button { font-size:var(--type-small); padding:0 10px; }
+#selected-day-note { margin-top:0; margin-bottom:12px; line-height:1.6; }
+.week-strip button span { font-size:10px; }
+.growth-progress { position:relative; z-index:1; display:flex; align-items:baseline; flex-wrap:wrap; gap:7px; margin-top:12px; }
+#completion-count { display:inline-flex; align-items:baseline; gap:6px; font-variant-numeric:tabular-nums; font-size:20px; line-height:1.1; white-space:nowrap; }
+#completion-value { font-size:32px; font-weight:700; }
+.completion-divider { font-size:17px; opacity:.55; }
+.growth-count-label { font-size:var(--type-small); color:inherit; opacity:.88; }
+.growth-card:not(.is-compact) .growth-progress { display:none; }
+.growth-card.is-compact { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 16px; padding:16px; margin-bottom:18px; align-items:center; min-height:116px; }
+.growth-card.is-compact .growth-copy { min-width:0; position:relative; z-index:1; }
+.growth-card.is-compact .growth-eyebrow { display:none; }
+.growth-card.is-compact h2 { font-size:17px; margin:0 0 6px; line-height:1.45; letter-spacing:0; }
+.growth-card.is-compact p { font-size:var(--type-note); max-width:none; margin:0; line-height:1.6; }
+.growth-card.is-compact .growth-progress { margin:0; padding-left:14px; border-left:1px solid #ffffff26; display:grid; justify-items:end; gap:5px; }
+.growth-card.is-compact .growth-meter { grid-column:1/-1; margin-top:13px; height:4px; }
+.growth-card.is-compact .growth-seed { display:none; }
+:root[data-theme=lumi] { --reading-wash:light-dark(#f8fbff70,#14223c80); --reading-panel:light-dark(#f8fbffcc,#16253bd9); --muted:light-dark(#405676,#b9c9e3); }
+:root[data-theme=lumi] :is(.habit-card,.my-account-card,.account-list,.message-card) { background-image:linear-gradient(105deg,var(--reading-wash),transparent 92%); }
+:root[data-theme=lumi] :is(#statistics-page .detail-panel,#statistics-page .stats-overview article,#habit-detail .detail-panel,#inbox-detail,#feedback-detail,#coin-rules-content .detail-panel) { background-color:var(--reading-panel); }
+:root[data-theme=lumi] .growth-card.is-compact { background:linear-gradient(115deg,#213655e8,#486998c7); }
+:root[data-theme=lumi] .growth-card.is-compact::after { content:none; }
+@media(max-width:350px) {
+ .habit-card { gap:8px; padding:12px 10px; }
+ .habit-icon { width:36px; height:36px; }
+ .habit-controls,.habit-controls .habit-action { width:64px; }
+ .habit-filters button { min-width:48px; padding:0 8px; }
+ .week-strip button span { font-size:9px; }
+ .growth-card.is-compact { gap:0 10px; padding:14px; }
+ .growth-card.is-compact .growth-progress { padding-left:10px; }
+}

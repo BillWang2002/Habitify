@@ -24,9 +24,9 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
     <div class="app-content" id="workspace-content">
       <p class="demo-notice" id="sync-status" role="status">${preview ? '公开界面预览 · 数据不保存，不发金币' : '正在读取你的打卡…'}</p><button id="retry-data" class="sync-retry" hidden>重试连接</button>
       <section data-page="habits" aria-label="今日打卡">
-        <div class="page-title"><div><p id="today-date" class="date-label"></p><h1>今日打卡</h1></div><button class="add-habit" id="add-habit" aria-label="添加打卡">＋</button></div>
+        <div class="page-title"><div><p id="today-date" class="date-label"></p><h1>今日打卡</h1></div><button class="add-habit" id="add-habit" aria-label="添加打卡">${iconSvg('plus')}</button></div>
         <ol class="week-strip" id="week-strip" aria-label="本周日期"></ol>
-        <section class="growth-card" aria-label="今日行动状态"><div><span class="growth-eyebrow">一点行动，一点成长</span><h2 id="growth-title">让今天，向前一点。</h2><p id="action-status"></p><span id="completion-count"></span></div><div class="growth-seed" aria-hidden="true"><i></i><b></b><em></em></div><div class="growth-meter"><span id="completion-meter"></span></div></section>
+        <section class="growth-card" aria-label="今日行动状态"><div class="growth-copy"><span class="growth-eyebrow">一点行动，一点成长</span><h2 id="growth-title">让今天，向前一点。</h2><p id="action-status"></p></div><div class="growth-progress"><span id="completion-count"><strong id="completion-value">0</strong><span class="completion-divider" aria-hidden="true">/</span><span id="completion-total">0</span></span><span class="growth-count-label">项打卡已完成</span></div><div class="growth-seed" aria-hidden="true"><i></i><b></b><em></em></div><div class="growth-meter"><span id="completion-meter"></span></div></section>
         <div class="habit-toolbar"><h2>我的打卡 <span id="habit-count"></span></h2><div class="habit-filters" aria-label="筛选打卡"><span class="filter-slider" aria-hidden="true"></span><button data-filter="all" aria-pressed="true">全部</button><button data-filter="pending" aria-pressed="false">待完成</button><button data-filter="done" aria-pressed="false">已完成</button></div></div>
         <p id="selected-day-note" class="dialog-note"></p><div id="filter-results"><div id="habit-list" class="habit-list"></div><div id="habit-empty" class="habit-empty" hidden><span aria-hidden="true">🌱</span><h3 id="empty-title"></h3><p id="empty-note"></p></div></div>
         <p class="habits-footnote">点击卡片查看详情 · 右侧打卡 · 长按管理打卡。</p>
@@ -117,7 +117,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
   }
   function createHabitCard(habit, {archived=false,isToday=true}={}) {
       const done = isComplete(habit), card = document.createElement('article'); card.className = `habit-card ${archived ? 'is-archived' : done ? 'is-complete' : ''}`;
-      card.innerHTML = `<span class="habit-icon ${resolveHabitIcon(habit.icon)}" aria-hidden="true">${iconSvg(resolveHabitIcon(habit.icon))}</span><div class="habit-info"><button class="habit-open"><h3></h3><span class="habit-description"></span></button><progress></progress><div class="recent-days" aria-label="最近七天的记录"></div></div><div class="habit-controls"><button class="habit-action"></button><button class="habit-more" aria-label="更多操作">•••</button></div>`;
+      card.innerHTML = `<span class="habit-icon ${resolveHabitIcon(habit.icon)}" aria-hidden="true">${iconSvg(resolveHabitIcon(habit.icon))}</span><div class="habit-info"><button class="habit-open"><h3></h3><span class="habit-description"></span></button><progress></progress><div class="recent-days" aria-label="最近七天的记录"></div></div><div class="habit-controls"><button class="habit-action"></button><button class="habit-more" aria-label="更多操作">${iconSvg('more')}</button></div>`;
       card.dataset.habitId = habit.id; card.querySelector('h3').textContent=habit.name;
       const open=card.querySelector('.habit-open'); open.setAttribute('aria-label', `查看${habit.name}详情`); open.onclick=()=>navigation.navigate(`habit/${habit.id}`);
       card.querySelector('.habit-description').textContent = `${habit.progress} / ${habit.goal} ${habit.unit} · ${archived ? '已归档' : done ? '已完成' : '待完成'}`;
@@ -137,14 +137,19 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, ad
   }
   function renderHabits() {
     const summary = todaySummary(habits); if(snapshot) summary.actionDay=snapshot.actionDay;
-    $('action-status').textContent = summary.actionDay ? habits.some(item=>item.archived && isComplete(item)) ? '今天已成为行动日，包含归档前已完成的行动。' : '今天已成为行动日，继续按自己的节奏前进。' : '今天还没有完成的打卡，从一件小事开始。';
-    $('growth-title').textContent = summary.actionDay ? '今天，已经向前一步。' : '让今天，向前一点。';
-    $('completion-count').textContent = `${summary.completed} / ${summary.total} 项打卡已完成`;
+    const compact=summary.total>0;
+    root.querySelector('.growth-card').classList.toggle('is-compact',compact);
+    $('action-status').textContent = summary.actionDay ? habits.some(item=>item.archived && isComplete(item)) ? '行动日已达成，包含归档前的行动。' : '行动日已达成，按自己的节奏继续。' : compact ? '完成至少一项，就成为行动日。' : '今天还没有完成的打卡，从一件小事开始。';
+    $('growth-title').textContent = summary.actionDay ? '今天，已向前一步。' : compact ? '从一件小事开始。' : '让今天，向前一点。';
+    $('completion-value').textContent=summary.completed;
+    $('completion-total').textContent=summary.total;
+    $('completion-count').setAttribute('aria-label',`今日 ${summary.completed} / ${summary.total} 项打卡已完成`);
     $('completion-meter').style.width = `${summary.total ? summary.completed / summary.total * 100 : 0}%`;
     $('habit-count').textContent = habits.length;
     const active = habits.filter(item=>!item.archived && (!item.startDay || item.startDay<=selectedDay)), isToday = selectedDay === currentDay();
     $('habit-count').textContent = active.length;
     $('selected-day-note').textContent = isToday ? '完成至少一项打卡，今天就成为行动日。' : `${selectedDay} · 历史日期仅查看，补签后续开放。`;
+    $('selected-day-note').hidden=isToday && compact;
     const shown = active.map(item=>isToday ? item : {...item,progress:records.find(r=>r.habitId===item.id && r.day===selectedDay)?.progress || 0,goal:records.find(r=>r.habitId===item.id && r.day===selectedDay)?.goal || item.goal}).filter(item => filter === 'all' || (filter === 'done' ? isComplete(item) : !isComplete(item)));
     $('habit-list').replaceChildren();
     for (const habit of shown) $('habit-list').append(createHabitCard(habit,{isToday}));
