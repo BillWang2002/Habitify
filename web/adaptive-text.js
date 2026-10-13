@@ -1,3 +1,4 @@
+import {createTextScheduler} from './adaptive-text-scheduler.js';
 import {backgroundAssets} from './appearance-model.js';
 import {parseColor,compositeColor,chooseTextTone} from './adaptive-text-model.js';
 const selectors=[
@@ -13,7 +14,8 @@ function gradientColours(value){return [...value.matchAll(/rgba?\([^)]+\)/g)].ma
 function visibleRect(element){const r=element.getBoundingClientRect();return element.getClientRects().length&&r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth?r:null;}
 function samplePoints(r){const points=[];for(const y of [.25,.5,.75])for(const x of [.15,.5,.85])points.push([r.left+r.width*x,r.top+r.height*y]);return points;}
 export function initAdaptiveText(){
- const html=document.documentElement,bitmaps=new Map(),tracked=new Set();let timer,settled,frame=0,disposed=false;
+ const html=document.documentElement,bitmaps=new Map(),tracked=new Set();let settled,disposed=false;
+ const scheduler=createTextScheduler(update);
  const dark=()=>html.dataset.themeMode==='dark'||(html.dataset.themeMode!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
  function bitmap(path){
   if(!bitmaps.has(path)){
@@ -25,7 +27,7 @@ export function initAdaptiveText(){
  }
  function clean(){for(const element of tracked)element.removeAttribute('data-adaptive-text');tracked.clear();html.removeAttribute('data-adaptive-text-status');}
  function update(){
-  frame=0;if(disposed)return;if(html.dataset.theme!=='duckyo'){clean();return;}
+  if(disposed)return;if(html.dataset.theme!=='duckyo'){clean();return;}
   for(const element of tracked)if(!element.isConnected){tracked.delete(element);}
   const path=backgroundAssets[html.dataset.themeBackground],entry=path?bitmap(path):null;
   html.dataset.adaptiveTextStatus=entry?.data?'sampled':'fallback';
@@ -37,6 +39,7 @@ export function initAdaptiveText(){
    if(css.backgroundImage.startsWith('linear-gradient')){const stops=gradientColours(css.backgroundImage);if(stops.length){const b=layer.getBoundingClientRect(),t=Math.max(0,Math.min(1,(x-b.left)/Math.max(1,b.width)));const first=stops[0],last=stops.at(-1);colour=compositeColor(first.map((v,i)=>v*(1-t)+last[i]*t),colour);}}
   }return colour;}
 
+  const changesToApply=[];
   for(const element of document.querySelectorAll(selectors)){
    const r=visibleRect(element);if(!r)continue;
    // A dialog is in the browser top layer. Avoid sampling the dimmed page while
@@ -64,13 +67,14 @@ export function initAdaptiveText(){
     return colour;
    });
    const tone=chooseTextTone(samples,element.dataset.adaptiveText||(!data?(dark()?'light':'dark'):undefined));
-   if(element.dataset.adaptiveText!==tone)element.dataset.adaptiveText=tone;tracked.add(element);
+   changesToApply.push([element,tone]);
   }
+  for(const [element,tone] of changesToApply){if(element.dataset.adaptiveText!==tone)element.dataset.adaptiveText=tone;tracked.add(element);}
  }
- function schedule(){if(disposed)return;clearTimeout(timer);timer=setTimeout(()=>{if(!frame)frame=requestAnimationFrame(update);},80);}
+ function schedule(){scheduler.request();}
  function changes(){schedule();clearTimeout(settled);settled=setTimeout(schedule,550);}
  const observer=new MutationObserver(changes);observer.observe(html,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden','open','data-theme','data-theme-background','data-theme-surface','data-theme-mode']});
  document.addEventListener('scroll',schedule,true);window.addEventListener('resize',changes);window.visualViewport?.addEventListener('resize',changes);
  const media=matchMedia('(prefers-color-scheme: dark)');media.addEventListener('change',changes);schedule();
- return ()=>{disposed=true;observer.disconnect();clearTimeout(timer);clearTimeout(settled);cancelAnimationFrame(frame);document.removeEventListener('scroll',schedule,true);window.removeEventListener('resize',changes);window.visualViewport?.removeEventListener('resize',changes);media.removeEventListener('change',changes);clean();bitmaps.clear();};
+ return ()=>{disposed=true;observer.disconnect();scheduler.dispose();clearTimeout(settled);document.removeEventListener('scroll',schedule,true);window.removeEventListener('resize',changes);window.visualViewport?.removeEventListener('resize',changes);media.removeEventListener('change',changes);clean();bitmaps.clear();};
 }

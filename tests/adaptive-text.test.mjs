@@ -11,3 +11,10 @@ test('跨越背景明暗边界时稳定旧颜色，明确进入另一背景后�
  assert.equal(chooseTextTone([[255,255,255]],'light'),'dark');assert.equal(chooseTextTone([[0,0,0]],'dark'),'light');
  assert.equal(chooseTextTone([],'light'),'light');
 });
+
+test('持续滚动不推迟已排定的字色更新，重复事件合并，离开后取消待更新',async()=>{
+ const {createTextScheduler}=await import('../web/adaptive-text-scheduler.js');let timer,frame,runs=0,timers=0,cleared=0;
+ const s=createTextScheduler(()=>runs++,{setTimer:fn=>{timer=fn;timers++;return timers;},clearTimer:()=>cleared++,requestFrame:fn=>{frame=fn;return 1;},cancelFrame:()=>cleared++});
+ for(let i=0;i<20;i++)s.request();assert.equal(timers,1);timer();s.request();assert.equal(timers,1);frame();assert.equal(runs,1);
+ s.request();assert.equal(timers,2);s.dispose();assert.equal(cleared,1);s.request();assert.equal(timers,2);assert.equal(runs,1);
+});
