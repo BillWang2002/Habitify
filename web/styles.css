@@ -112,6 +112,8 @@ body.workspace-active { display: block; padding: 0; height: 100dvh; overflow: hi
 .habit-filters.shop-categories { width:100%; max-width:420px; grid-template-columns:repeat(2,minmax(0,1fr)); --filter-index:1; }
 .shop-categories .filter-slider { width:calc((100% - 8px) / 2); }
 .shop-preview-note { margin:12px 0 18px; color:var(--muted); font-size:11px; line-height:1.7; }
+.shop-results { position:relative; overflow-anchor:none; }
+.shop-results.is-switching { overflow:hidden; }
 .shop-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 #workspace .shop-card { width:100%; min-width:0; margin:0; padding:0; overflow:hidden; text-align:left; color:var(--ink); border-radius:20px; font:inherit; cursor:pointer; }
 .shop-picture { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; width:100%; aspect-ratio:1; color:var(--muted); background:color-mix(in srgb,var(--theme-soft,var(--panel)) 38%,transparent); border-bottom:1px solid var(--line); }

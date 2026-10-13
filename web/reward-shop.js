@@ -16,12 +16,39 @@ const samples={
 const picture=()=>`<div class="shop-picture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 4-5 5 6"/></svg><span>图片待选</span></div>`;
 
 export function rewardShopHtml(){
- return `<section data-page="rewards" hidden><div class="page-title rewards-heading"><div><p class="date-label">让努力有一点小期待</p><h1>激励</h1></div><div class="shop-balance" aria-label="当前金币余额"><span aria-hidden="true">${iconSvg('coins')}</span><div><small>我的金币</small><strong id="reward-balance">—</strong></div></div></div><div class="habit-filters shop-categories" aria-label="物品分类"><span class="filter-slider" aria-hidden="true"></span><button type="button" data-shop-category="virtual" aria-pressed="false">虚拟物品</button><button type="button" data-shop-category="real" aria-pressed="true">现实物品</button></div><p class="shop-preview-note">商品样式预览 · 图片与金币价格待定</p><div class="shop-grid" id="shop-grid"></div><dialog class="habit-dialog shop-dialog" id="shop-dialog" aria-labelledby="shop-dialog-title"><div class="dialog-heading"><h2 id="shop-dialog-title" tabindex="-1" autofocus></h2><button type="button" id="shop-dialog-close" aria-label="关闭商品详情">×</button></div>${picture()}<p id="shop-dialog-description" class="dialog-note"></p><div class="shop-dialog-price">金币价格待定</div><button type="button" class="primary" disabled>兑换暂未开放</button></dialog></section>`;
+ return `<section data-page="rewards" hidden><div class="page-title rewards-heading"><div><p class="date-label">让努力有一点小期待</p><h1>激励</h1></div><div class="shop-balance" aria-label="当前金币余额"><span aria-hidden="true">${iconSvg('coins')}</span><div><small>我的金币</small><strong id="reward-balance">—</strong></div></div></div><div class="habit-filters shop-categories" aria-label="物品分类"><span class="filter-slider" aria-hidden="true"></span><button type="button" data-shop-category="virtual" aria-pressed="false">个性装扮</button><button type="button" data-shop-category="real" aria-pressed="true">生活奖励</button></div><p class="shop-preview-note">商品样式预览 · 图片与金币价格待定</p><div class="shop-results" id="shop-results"><div class="shop-grid" id="shop-grid"></div></div><dialog class="habit-dialog shop-dialog" id="shop-dialog" aria-labelledby="shop-dialog-title"><div class="dialog-heading"><h2 id="shop-dialog-title" tabindex="-1" autofocus></h2><button type="button" id="shop-dialog-close" aria-label="关闭商品详情">×</button></div>${picture()}<p id="shop-dialog-description" class="dialog-note"></p><div class="shop-dialog-price">金币价格待定</div><button type="button" class="primary" disabled>兑换暂未开放</button></dialog></section>`;
 }
 
-export function createRewardShop(root){
- const grid=root.querySelector('#shop-grid'),dialog=root.querySelector('#shop-dialog');
- let category='real';
+export function createRewardShop(root,{onViewChange=()=>{}}={}){
+ const grid=root.querySelector('#shop-grid'),dialog=root.querySelector('#shop-dialog'),results=root.querySelector('#shop-results');
+ let category='real',revision=0,animations=[],ghost=null;
+ function cancelTransition(){
+  ++revision;animations.forEach(animation=>animation.cancel());animations=[];
+  ghost?.remove();ghost=null;results.inert=false;results.classList.remove('is-switching');
+ }
+ async function changeCategory(next){
+  if(category===next)return;
+  const direction=next==='real'?1:-1;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css=root.ownerDocument.defaultView.getComputedStyle(grid);
+  const previousTransform=css.transform,previousOpacity=css.opacity;
+  const snapshot=reduced?null:grid.cloneNode(true);
+  const height=Math.max(results.scrollHeight,results.getBoundingClientRect().height);
+  cancelTransition();const ticket=revision;
+  // Preserve the scroll range when a category has fewer cards, just like check-in filters.
+  results.style.minHeight=`${height}px`;category=next;render();onViewChange();
+  if(!snapshot || grid.closest('[data-page]').hidden)return;
+  snapshot.removeAttribute('id');snapshot.querySelectorAll('[id]').forEach(element=>element.removeAttribute('id'));
+  snapshot.classList.add('result-ghost','shop-ghost');snapshot.setAttribute('aria-hidden','true');snapshot.inert=true;
+  ghost=snapshot;results.append(snapshot);results.inert=true;results.classList.add('is-switching');
+  const options={duration:parseFloat(root.ownerDocument.defaultView.getComputedStyle(root).getPropertyValue('--slide-duration'))||480,easing:'cubic-bezier(.22,.8,.28,1)'};
+  animations=[
+   snapshot.animate([{opacity:previousOpacity,transform:previousTransform},{opacity:0,transform:`translateX(${-direction*44}px)`}],options),
+   grid.animate([{opacity:0,transform:`translateX(${direction*44}px)`},{opacity:1,transform:'translateX(0)'}],options)
+  ];
+  await Promise.all(animations.map(animation=>animation.finished.catch(()=>{})));
+  if(ticket===revision)cancelTransition();
+ }
  function render(){
   root.querySelector('.shop-categories').style.setProperty('--filter-index',category==='real'?1:0);
   root.querySelectorAll('[data-shop-category]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.shopCategory===category)));
@@ -33,8 +60,14 @@ export function createRewardShop(root){
    dialog.showModal();root.querySelector('#shop-dialog-title').focus({preventScroll:true});
   });
  }
- root.querySelectorAll('[data-shop-category]').forEach(button=>button.onclick=()=>{if(category===button.dataset.shopCategory)return;category=button.dataset.shopCategory;render();});
+ root.querySelectorAll('[data-shop-category]').forEach(button=>button.onclick=()=>changeCategory(button.dataset.shopCategory));
  root.querySelector('#shop-dialog-close').onclick=()=>dialog.close();
  render();
- return {close(){if(dialog.open)dialog.close();},isOpen:()=>dialog.open};
+ const close=()=>{if(dialog.open)dialog.close();cancelTransition();};
+ return {
+  close,isOpen:()=>dialog.open,
+  clear(){close();category='real';results.style.minHeight='';render();},
+  getView(){return {category,minHeight:results.style.minHeight};},
+  setView(view){if(!view)return;close();category=view.category==='virtual'?'virtual':'real';results.style.minHeight=view.minHeight||'';render();}
+ };
 }

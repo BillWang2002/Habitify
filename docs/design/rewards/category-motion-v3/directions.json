@@ -1,0 +1,14 @@
+{
+  "left": {
+    "height": "574px",
+    "incoming": "matrix(1, 0, 0, 1, -3.17604, 0)",
+    "outgoing": "matrix(1, 0, 0, 1, 40.824, 0)",
+    "selected": "个性装扮"
+  },
+  "right": {
+    "ghosts": 1,
+    "incoming": "matrix(1, 0, 0, 1, 3.25328, 0)",
+    "outgoing": "matrix(1, 0, 0, 1, -40.8688, 0)",
+    "selected": "生活奖励"
+  }
+}
