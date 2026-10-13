@@ -9,7 +9,7 @@
 - 背景保留平移版原尺寸并输出无损WebP；五条1px边缘素材延伸原背景，完整图片底部对齐、不裁切角色。浅色无全局遮罩，深色界面遮罩保证阅读。
 - 暖黄/深棕配色，纸感和玻璃卡面，弹窗不透明；保留现有语义图标、动画及几何。
 - 源图归属小刘鸭/Duckyo；原型出处、处理参数、去灯母版与文件哈希见SOURCES.json。原型归档docs/design/duckyo/originals；处理可用scripts/prepare-duckyo-v2.py复现。未声称官方合作或已独立核验再分发许可。
-- 背景、头像、封面和延伸条16张，加四张256px透明空状态贴纸，共20张公开素材进入精确PWA缓存；本人外观API仍不缓存。
-- 专属图标13款：4导航、6打卡图案、3我的空间入口，最终我的为人物轮廓、行动为笔直小路。SVG位于web/duckyo-icons.js，原图标ID保持。贴纸仅裁切现有原图，运行时无损WebP与批准PNG的RGBA一致；来源/参数见SOURCES.json及docs/design/duckyo/ui-kit-v1。默认/露米沿用原图案与空状态，图片失败回退基础图标。
+- 背景、头像、封面和延伸条共16张公开素材进入精确PWA缓存；本人外观API仍不缓存。四张空状态贴纸按用户最新要求退役，仅保留设计归档。
+- 专属图标13款：4导航、6打卡图案、3我的空间入口，最终我的为人物轮廓、行动为笔直小路。SVG位于web/duckyo-icons.js，原图标ID保持。全部主题空状态使用原默认设置，独立于主题专属图标。历史贴纸来源/参数见SOURCES.json及docs/design/duckyo/ui-kit-v1。
 
 本地预览：preview.html?theme=duckyo&background=duckyo-work&surface=glass&mode=light 。公开预览不保存真实账户；主题/背景变更先预览，应用才保存，未应用离开同时恢复背景和头像。

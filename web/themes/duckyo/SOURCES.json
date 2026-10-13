@@ -255,50 +255,9 @@
       "reason": "Removed from runtime background and avatar catalog at user request on 2026-10-13; archived reference only."
     }
   ],
-  "stickers": {
-    "processing": "Non-AI original crop, exterior alpha removal and proportional resize. Lossless runtime WebP matches approved PNG RGBA pixel-for-pixel.",
-    "cropManifest": "docs/design/duckyo/ui-kit-v1/sticker-sources.json",
-    "assets": [
-      {
-        "id": "archive",
-        "file": "sticker-archive-v1.webp",
-        "designSource": "docs/design/duckyo/ui-kit-v1/stickers/archive.png",
-        "size": [
-          256,
-          256
-        ],
-        "sha256": "0be12eac429bca4d1361370ef00242c9c997ca9d1b9d8d17cc33266e6b704f16"
-      },
-      {
-        "id": "first-step",
-        "file": "sticker-first-step-v1.webp",
-        "designSource": "docs/design/duckyo/ui-kit-v1/stickers/first-step.png",
-        "size": [
-          256,
-          256
-        ],
-        "sha256": "28c43cfc7f93fb5dca6db1966b391c0d7c792e2cda27ca2779c5cbb7b733a91c"
-      },
-      {
-        "id": "inventory",
-        "file": "sticker-inventory-v1.webp",
-        "designSource": "docs/design/duckyo/ui-kit-v1/stickers/inventory.png",
-        "size": [
-          256,
-          256
-        ],
-        "sha256": "2314cb80988220d9e07c02c83b7fb72d7494deeabc4eac369411b22e19aadb4d"
-      },
-      {
-        "id": "waiting-message",
-        "file": "sticker-waiting-message-v1.webp",
-        "designSource": "docs/design/duckyo/ui-kit-v1/stickers/waiting-message.png",
-        "size": [
-          256,
-          256
-        ],
-        "sha256": "68036d5cada63a7baa38560dc784cb520f98b4cf4d9e3bbf748d1ab0073d0d6f"
-      }
-    ]
+  "archivedStickers": {
+    "runtime": "Removed at user request; empty states restored to shared defaults.",
+    "designSource": "docs/design/duckyo/ui-kit-v1/stickers",
+    "cropManifest": "docs/design/duckyo/ui-kit-v1/sticker-sources.json"
   }
 }

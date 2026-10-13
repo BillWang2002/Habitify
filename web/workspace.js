@@ -8,7 +8,7 @@ import { accountPagesHtml } from './account-pages.js';
 import { checkinErrors, showFieldErrors } from './form-validation.js';
 import { createStatistics } from './statistics.js';
 import { sampleHabits, isComplete, todaySummary, setProgress, addHabit, removeHabit, archiveHabit, moveHabit } from './habits-model.js';
-import { defaultTheme, currentIconChoices, iconSvg, resolveHabitIcon, emptyArtwork } from './theme.js';
+import { defaultTheme, currentIconChoices, iconSvg, resolveHabitIcon, emptyIconSvg } from './theme.js';
 import { createNavigation } from './navigation.js';
 import { renderDetail, localDay } from './habit-details.js';
 import { isCurrentSnapshot } from './habits-api.js';
@@ -29,7 +29,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, pr
         <ol class="week-strip" id="week-strip" aria-label="本周日期"></ol>
         <section class="growth-card" aria-label="今日行动状态"><div class="growth-copy"><span class="growth-eyebrow">一点行动，一点成长</span><h2 id="growth-title">让今天，向前一点。</h2><p id="action-status"></p></div><div class="growth-progress"><span id="completion-count"><strong id="completion-value">0</strong><span class="completion-divider" aria-hidden="true">/</span><span id="completion-total">0</span></span><span class="growth-count-label">项打卡已完成</span></div><div class="growth-seed" aria-hidden="true"><i></i><b></b><em></em></div><div class="growth-meter"><span id="completion-meter"></span></div></section>
         <div class="habit-toolbar"><h2>我的打卡 <span id="habit-count"></span></h2><div class="habit-filters" aria-label="筛选打卡"><span class="filter-slider" aria-hidden="true"></span><button data-filter="all" aria-pressed="true">全部</button><button data-filter="pending" aria-pressed="false">待完成</button><button data-filter="done" aria-pressed="false">已完成</button></div></div>
-        <p id="selected-day-note" class="dialog-note"></p><div id="filter-results"><div id="habit-list" class="habit-list"></div><div id="habit-empty" class="habit-empty" hidden><span id="empty-art" class="theme-empty-art" data-theme-empty="" aria-hidden="true">${emptyArtwork('first-step','🌱')}</span><h3 id="empty-title"></h3><p id="empty-note"></p></div></div>
+        <p id="selected-day-note" class="dialog-note"></p><div id="filter-results"><div id="habit-list" class="habit-list"></div><div id="habit-empty" class="habit-empty" hidden><span aria-hidden="true">🌱</span><h3 id="empty-title"></h3><p id="empty-note"></p></div></div>
         <p class="habits-footnote">点击卡片查看详情 · 右侧打卡 · 长按管理打卡。</p>
       </section>
       <section data-page="detail" id="habit-detail" hidden aria-label="打卡详情"></section>
@@ -116,7 +116,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, pr
     $('archive-list').replaceChildren();
     const archived=habits.filter(item=>item.archived);
     for (const habit of archived) $('archive-list').append(createHabitCard(habit,{archived:true}));
-    if (!archived.length) $('archive-list').innerHTML=`<div class="archive-empty"><span class="theme-empty-art" data-theme-empty="archive" aria-hidden="true">${emptyArtwork('archive',iconSvg('archive'))}</span><h2>暂时没有归档打卡</h2><p>不再进行的打卡可以先归档，<br>历史记录会留在这里，随时都能恢复。</p><a href="#/habits">看看今日打卡 ${iconSvg('checkin')}</a></div>`;
+    if (!archived.length) $('archive-list').innerHTML=`<div class="archive-empty"><span aria-hidden="true">${emptyIconSvg('archive')}</span><h2>暂时没有归档打卡</h2><p>不再进行的打卡可以先归档，<br>历史记录会留在这里，随时都能恢复。</p><a href="#/habits">看看今日打卡 ${iconSvg('checkin')}</a></div>`;
   }
   function createHabitCard(habit, {archived=false,isToday=true}={}) {
       const done = isComplete(habit), card = document.createElement('article'); card.className = `habit-card ${archived ? 'is-archived' : done ? 'is-complete' : ''}`;
@@ -157,7 +157,6 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, pr
     $('habit-list').replaceChildren();
     for (const habit of shown) $('habit-list').append(createHabitCard(habit,{isToday}));
     $('habit-empty').hidden = shown.length > 0;
-    $('empty-art').dataset.themeEmpty=loaded && isToday && (!active.length || filter==='done')?'first-step':'';
     $('empty-title').textContent = !isToday ? '该日期没有符合筛选的打卡' : !active.length ? '从你的第一项打卡开始' : filter === 'done' ? '今天的第一步，等你出发' : '今天的计划，都完成了';
     $('empty-note').textContent = !isToday ? '返回今天可继续打卡；补签后续开放。' : !active.length ? '点击右上角 ＋，添加一件想坚持的小事。' : filter === 'done' ? '完成型打卡或数量达到目标后，会出现在这里。' : '按自己的节奏，明天继续。';
     if(!loaded) { $('empty-title').textContent='等待连接你的打卡'; $('empty-note').textContent='联网读取成功后即可添加和打卡。'; }

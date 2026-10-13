@@ -51,7 +51,6 @@ export function currentIconChoices(){return activeTheme==='duckyo'?iconChoices.m
 export function setIconTheme(id){activeTheme=['lumi','duckyo'].includes(id)?id:'growth';}
 export function iconSvg(id) { const safeId=Object.hasOwn(paths,id)?id:'leaf'; const themed=activeTheme==='lumi'?lumiPaths:activeTheme==='duckyo'?duckyoPaths:null; return `<svg data-theme-icon="${safeId}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${themed?.[safeId] || paths[safeId]}</svg>`; }
 export function refreshThemeIcons(root){for(const svg of root.querySelectorAll('svg[data-theme-icon]'))svg.outerHTML=iconSvg(svg.dataset.themeIcon);for(const label of root.querySelectorAll('[data-theme-icon-label]')){const choice=currentIconChoices().find(c=>c.id===label.dataset.themeIconLabel);if(choice)label.textContent=choice.name;}}
-export const emptyStickerAssets=Object.freeze(Object.fromEntries(['first-step','waiting-message','archive','inventory'].map(id=>[id,`./themes/duckyo/sticker-${id}-v1.webp`])));
-// Callers supply only existing, trusted icon/emoji markup as the fallback.
-export function emptyArtwork(id,fallback){return `<span class="theme-empty-fallback">${fallback}</span>${Object.hasOwn(emptyStickerAssets,id)?`<img class="theme-empty-sticker" src="${emptyStickerAssets[id]}" alt="" width="64" height="64">`:''}`;}
+// Shared empty-state icons use the original shapes, independent of the active theme.
+export function emptyIconSvg(id){const safeId=Object.hasOwn(paths,id)?id:'leaf';return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[safeId]}</svg>`;}
 export function resolveHabitIcon(id, ownedIds = defaultTheme.habitIcons) { return defaultTheme.habitIcons.includes(id) && ownedIds.includes(id) ? id : 'leaf'; }
