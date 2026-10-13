@@ -14,16 +14,17 @@ export function createHabitsApi(client, { fetcher=fetch, url, key, timezone=Intl
  return async function request(payload) {
   const { data, error } = await client.auth.getSession();
   if (error || !data.session?.access_token) throw apiError('LOGIN_REQUIRED');
-  const body=JSON.stringify({...payload,timezone});
+  const body=JSON.stringify({...payload,timezone}),purchase=payload.op==='reward-purchase';
   // Retrying a write preserves its request UUID and original payload.
   for(let attempt=0;attempt<2;attempt++) {
    let response;
    try { response=await fetcher(`${url}/functions/v1/habits`, {method:'POST',cache:'no-store',headers:{apikey:key,Authorization:`Bearer ${data.session.access_token}`,'Content-Type':'application/json'},body,signal:AbortSignal.timeout(20000)}); }
    catch { if(attempt===0) continue; throw apiError('NETWORK_ERROR'); }
    let result;
-   try { result=await response.json(); } catch { throw apiError('BACKEND_ERROR'); }
+   try { result=await response.json(); } catch { throw apiError(purchase?'NETWORK_ERROR':'BACKEND_ERROR'); }
+   if(purchase && (response.status>=500 || (response.ok && !result.data))) throw apiError('NETWORK_ERROR');
    if (!response.ok || !result.data) throw apiError(result.code || 'BACKEND_ERROR');
-   if (!Array.isArray(result.data.habits) || !Array.isArray(result.data.records) || !Number.isSafeInteger(result.data.revision) || !/^\d{4}-\d{2}-\d{2}$/.test(result.data.today)) throw apiError('BACKEND_ERROR');
+   if (!Array.isArray(result.data.habits) || !Array.isArray(result.data.records) || !Number.isSafeInteger(result.data.revision) || !/^\d{4}-\d{2}-\d{2}$/.test(result.data.today)) throw apiError(purchase?'NETWORK_ERROR':'BACKEND_ERROR');
    return result.data;
   }
  };

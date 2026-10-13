@@ -60,9 +60,9 @@ test('兑换按钮防重复点击，成功凭据与管理员提示，预览不�
  assert.equal(root.querySelector('#shop-dialog-title').textContent,'兑换成功');assert.equal(root.querySelector('#shop-dialog-description').textContent,'请找管理员小王核销');assert.equal(root.querySelector('#shop-inventory').hidden,false);assert.equal(buy.textContent,'我知道了');buy.click();assert.equal(root.querySelector('#shop-dialog').open,false);
 });
 test('网络结果未确认可按原价格重试，刷新余额不足也不会阻挡确认原请求',async()=>{
- const calls=[];let shop;const state=setup(false,{onRedeem:async p=>{calls.push(p);if(calls.length===1)throw Object.assign(new Error('结果未确认'),{code:'NETWORK_ERROR'});return {purchaseId:'old',purchases:[{id:'old',name:'零食',price:155}]};}});shop=state.shop;
+ const calls=[];let shop;const state=setup(false,{onRedeem:async p=>{calls.push(p);if(p.productId==='coffee')throw new Error('原操作尚未确认');if(calls.length===1)throw Object.assign(new Error('结果未确认'),{code:'NETWORK_ERROR'});return {purchaseId:'old',purchases:[{id:'old',name:'零食',price:155}]};}});shop=state.shop;
  shop.update({balance:155,rewardCatalog:catalog});state.root.querySelector('[data-shop-item="snack"]').click();const buy=state.root.querySelector('#shop-buy');buy.click();await tick();assert.equal(buy.textContent,'重试确认兑换');
- shop.update({balance:0,rewardCatalog:catalog.map(x=>({...x,price:999}))});assert.ok(state.root.querySelector('#shop-dialog-price').textContent.includes('155'));buy.click();await tick();assert.deepEqual(calls[0],calls[1]);assert.equal(state.root.querySelector('#shop-dialog-title').textContent,'兑换成功');
+ shop.update({balance:0,rewardCatalog:catalog.map(x=>({...x,price:999}))});assert.ok(state.root.querySelector('#shop-dialog-price').textContent.includes('155'));state.root.querySelector('#shop-dialog-close').click();state.root.querySelector('[data-shop-item=coffee]').click();buy.click();await tick();state.root.querySelector('#shop-dialog-close').click();state.root.querySelector('[data-shop-item=snack]').click();assert.ok(state.root.querySelector('#shop-dialog-price').textContent.includes('155'));buy.click();await tick();assert.deepEqual(calls[0],calls[2]);assert.equal(state.root.querySelector('#shop-dialog-title').textContent,'兑换成功');
 });
 test('账户清理后迟到兑换结果不能显示成功或解锁新账户正在进行的兑换',async()=>{
  const resolvers=[];const {root,shop}=setup(false,{onRedeem:()=>new Promise(r=>resolvers.push(r))});

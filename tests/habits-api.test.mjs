@@ -18,3 +18,12 @@ test('权限失效与数据库冲突不重试写入，不回显服务器细节',
 });
 
 test('迟到的旧revision或旧归属日不能覆盖新快照',()=> { const current={revision:5,today:'2026-10-05'}; assert.equal(isCurrentSnapshot({revision:4,today:'2026-10-05'},current),false); assert.equal(isCurrentSnapshot({revision:5,today:'2026-10-04'},current),false); assert.equal(isCurrentSnapshot({revision:5,today:'2026-10-05'},current),true); assert.equal(isCurrentSnapshot({revision:6,today:'2026-10-06'},current),true); });
+
+
+test('兑换的5xx、损坏正文和缺失快照均保留待确认状态，不作为明确失败开启新扣币',async()=>{
+ for(const response of [()=>Response.json({code:'BACKEND_ERROR'},{status:503}),()=>new Response('{bad',{status:200}),()=>Response.json({data:{}})]){
+  const calls=[];const request=createHabitsApi(client,{url:'https://example.supabase.co',key:'sb_publishable_test',fetcher:async(url,init)=>{calls.push(init.body);return calls.length===1?response():Response.json({data});}});
+  const payload={op:'reward-purchase',requestId:'original-purchase',productId:'snack',expectedPrice:155};
+  await assert.rejects(request(payload),e=>e.code==='NETWORK_ERROR');assert.deepEqual(await request(payload),data);assert.equal(calls[0],calls[1]);
+ }
+});

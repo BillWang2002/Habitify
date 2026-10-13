@@ -75,7 +75,7 @@ export function createRewardShop(root,{onViewChange=()=>{},onRedeem=async()=>{th
    if(ticket!==modalEpoch||!dialog.open||!data)return;
    const receipt=data.purchases?.find(x=>x.id===data.purchaseId);if(!receipt)throw new Error('兑换结果尚未确认，请刷新我的物品。');
    success=true;root.querySelector('#shop-dialog-title').textContent='兑换成功';root.querySelector('#shop-dialog-description').textContent='请找管理员小王核销';price.textContent=`${receipt.name} · 已支付 ${receipt.price} 金币`;buy.disabled=false;buy.textContent='我知道了';inventory.hidden=false;root.querySelector('#shop-dialog-title').focus({preventScroll:true});
-  }catch(e){if(accountTicket!==accountEpoch)return;if(e.code==='NETWORK_ERROR')uncertain=payload;else uncertain=null;if(ticket===modalEpoch&&dialog.open){error.textContent=e.code==='INSUFFICIENT_COINS'?`金币不足，还差 ${Math.max(0,itemFor(selected).price-balance)} 金币。`:e.message;}}finally{if(accountTicket===accountEpoch){buying=false;if(!success)renderDialog();}}
+  }catch(e){if(accountTicket!==accountEpoch)return;if(e.code==='NETWORK_ERROR')uncertain=payload;else if(uncertain?.productId===payload.productId)uncertain=null;if(ticket===modalEpoch&&dialog.open){error.textContent=e.code==='INSUFFICIENT_COINS'?`金币不足，还差 ${Math.max(0,itemFor(selected).price-balance)} 金币。`:e.code==='NETWORK_ERROR'?'兑换结果尚未确认，请重试确认兑换，或查看我的物品。':e.message;}}finally{if(accountTicket===accountEpoch){buying=false;if(!success)renderDialog();}}
  };
  root.addEventListener('error',event=>{const img=event.target;if(img?.classList?.contains('shop-product-image'))img.closest('.shop-picture').innerHTML='<span>配图暂不可用</span>';},true);
  render();
