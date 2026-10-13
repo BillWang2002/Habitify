@@ -281,6 +281,8 @@ html.workspace-active, #workspace { touch-action: pan-x pan-y; }
 /* Statistics shares the application scroll surface; only the chart scrolls sideways. */
 .stats-period { width:100%; max-width:360px; margin:0 0 20px; }
 .stats-overview { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:20px; }
+.stats-period-results { position:relative; display:flow-root; overflow-anchor:none; }
+.stats-period-results.is-switching { overflow:hidden; }
 .stats-overview article { background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:18px 14px; min-width:0; }
 .stats-overview span,.stats-overview small { display:block; color:var(--muted); font-size:.78rem; overflow-wrap:anywhere; }
 .stats-overview strong { display:block; font-size:1.75rem; color:var(--accent); margin:8px 0; }

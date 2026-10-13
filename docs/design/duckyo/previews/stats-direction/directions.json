@@ -1,0 +1,16 @@
+{
+  "fixture": "local synthetic snapshot; no account data",
+  "left": {
+    "ghosts": 1,
+    "incoming": "matrix(1, 0, 0, 1, -3.98495, 0)",
+    "outgoing": "matrix(1, 0, 0, 1, 40.0151, 0)",
+    "panels": 3,
+    "selected": "本周"
+  },
+  "right": {
+    "ghosts": 1,
+    "incoming": "matrix(1, 0, 0, 1, 3.9878, 0)",
+    "outgoing": "matrix(1, 0, 0, 1, -40.1657, 0)",
+    "selected": "全部"
+  }
+}

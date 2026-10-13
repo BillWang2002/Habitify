@@ -2,12 +2,45 @@ import { createStatisticsModel, daysBetween, monthBounds } from './statistics-mo
 const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const percent=value=>value===null ? '—' : `${Math.round(value*100)}%`;
 export function createStatistics(root,{onHabit=()=>{},readOnly=false,showHeading=true}={}) {
- let model=null, type='month', month=null, day=null, bucket=null, periodAnimation=null;
- const cancelPeriodAnimation=()=>{periodAnimation?.cancel();periodAnimation=null;};
- root.innerHTML=`${showHeading ? '<div class="page-title"><div><p class="date-label">看见每一步的积累</p><h1>统计</h1></div></div>' : ''}<p class="dialog-note" data-unavailable>正在读取行动记录…</p><div data-statistics hidden><div class="habit-filters stats-period" aria-label="统计时间范围"><span class="filter-slider" aria-hidden="true"></span>${['本周','本月','全部'].map((label,i)=>`<button data-period="${['week','month','all'][i]}" aria-pressed="${i===1}">${label}</button>`).join('')}</div><div data-period-content class="stats-period-content"><div data-overview class="stats-overview"></div><section class="detail-panel"><div class="stats-heading"><h2>行动趋势</h2><span data-grain></span></div><p class="stats-legend"><i></i>完成数 <b>⤴</b>累计完成数</p><div data-chart class="stats-chart" aria-label="完成数与累计完成数趋势图"></div><p data-bucket class="stats-selection" role="status"></p><p class="dialog-note">今天仍在进行中；未来日期不计为未完成。点击柱形或折线节点查看数值。</p></section><section class="detail-panel"><div class="stats-heading"><button data-month-prev aria-label="上个月">‹</button><h2 data-month></h2><button data-month-next aria-label="下个月">›</button></div><div class="stats-calendar" data-calendar></div><p class="dialog-note">● 已有达标行动 · ◐ 部分进度 · 空心为无达标行动</p><div data-day class="stats-day" aria-live="polite"></div></section><section class="detail-panel"><h2>打卡统计</h2><p class="dialog-note">完成率只统计截至昨天的计划；单项打卡连续记录按计划日计算。</p><div data-habits class="stats-habits"></div></section></div></div>`;
+ let model=null, type='month', month=null, day=null, bucket=null, periodRevision=0, periodAnimations=[], periodGhost=null;
+ let previousMinHeight='';
+ function cancelPeriodAnimation(){
+  ++periodRevision;periodAnimations.forEach(animation=>animation.cancel());periodAnimations=[];
+  periodGhost?.remove();periodGhost=null;
+  const results=root.querySelector('[data-period-results]');
+  if(results){results.classList.remove('is-switching');results.style.minHeight=previousMinHeight;results.inert=false;}
+ }
+ root.innerHTML=`${showHeading ? '<div class="page-title"><div><p class="date-label">看见每一步的积累</p><h1>统计</h1></div></div>' : ''}<p class="dialog-note" data-unavailable>正在读取行动记录…</p><div data-statistics hidden><div class="habit-filters stats-period" aria-label="统计时间范围"><span class="filter-slider" aria-hidden="true"></span>${['本周','本月','全部'].map((label,i)=>`<button data-period="${['week','month','all'][i]}" aria-pressed="${i===1}">${label}</button>`).join('')}</div><div data-period-results class="stats-period-results"><div data-period-content class="stats-period-content"><div data-overview class="stats-overview"></div><section class="detail-panel"><div class="stats-heading"><h2>行动趋势</h2><span data-grain></span></div><p class="stats-legend"><i></i>完成数 <b>⤴</b>累计完成数</p><div data-chart class="stats-chart" aria-label="完成数与累计完成数趋势图"></div><p data-bucket class="stats-selection" role="status"></p><p class="dialog-note">今天仍在进行中；未来日期不计为未完成。点击柱形或折线节点查看数值。</p></section><section class="detail-panel"><div class="stats-heading"><button data-month-prev aria-label="上个月">‹</button><h2 data-month></h2><button data-month-next aria-label="下个月">›</button></div><div class="stats-calendar" data-calendar></div><p class="dialog-note">● 已有达标行动 · ◐ 部分进度 · 空心为无达标行动</p><div data-day class="stats-day" aria-live="polite"></div></section><section class="detail-panel"><h2>打卡统计</h2><p class="dialog-note">完成率只统计截至昨天的计划；单项打卡连续记录按计划日计算。</p><div data-habits class="stats-habits"></div></section></div></div></div>`;
  const $=key=>root.querySelector(`[data-${key}]`);
  const periods=['week','month','all'];
- root.querySelectorAll('[data-period]').forEach(button=>button.onclick=()=> { if(type===button.dataset.period)return;const direction=periods.indexOf(button.dataset.period)-periods.indexOf(type);cancelPeriodAnimation();type=button.dataset.period;bucket=null;render();if(!matchMedia('(prefers-reduced-motion: reduce)').matches) periodAnimation=$('period-content').animate([{opacity:.6,transform:`translateX(${Math.sign(direction)*18}px)`},{opacity:1,transform:'translateX(0)'}],{duration:480,easing:'cubic-bezier(.22,.8,.28,1)'}); });
+ async function changePeriod(next){
+  if(type===next || !model)return;
+  const direction=periods.indexOf(next)>periods.indexOf(type)?1:-1;
+  const content=$('period-content'),results=$('period-results');
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css=root.ownerDocument.defaultView.getComputedStyle(content);
+  const previousTransform=css.transform,previousOpacity=css.opacity;
+  const snapshot=reduced?null:content.cloneNode(true);
+  const chartScroll=$('chart').scrollLeft;
+  const height=Math.max(results.scrollHeight,results.getBoundingClientRect().height);
+  cancelPeriodAnimation();const revision=periodRevision;
+  type=next;bucket=null;render();
+  if(!snapshot || root.hidden)return;
+  previousMinHeight=results.style.minHeight;results.style.minHeight=`${height}px`;
+  snapshot.removeAttribute('data-period-content');snapshot.removeAttribute('id');
+  snapshot.querySelectorAll('[id]').forEach(element=>element.removeAttribute('id'));
+  snapshot.classList.add('result-ghost','stats-period-ghost');snapshot.setAttribute('aria-hidden','true');snapshot.inert=true;
+  periodGhost=snapshot;results.append(snapshot);results.inert=true;results.classList.add('is-switching');
+  snapshot.querySelector('[data-chart]').scrollLeft=chartScroll;
+  const options={duration:parseFloat(root.ownerDocument.defaultView.getComputedStyle(root).getPropertyValue('--slide-duration'))||480,easing:'cubic-bezier(.22,.8,.28,1)'};
+  periodAnimations=[
+   snapshot.animate([{opacity:previousOpacity,transform:previousTransform},{opacity:0,transform:`translateX(${-direction*44}px)`}],options),
+   content.animate([{opacity:0,transform:`translateX(${direction*44}px)`},{opacity:1,transform:'translateX(0)'}],options)
+  ];
+  await Promise.all(periodAnimations.map(animation=>animation.finished.catch(()=>{})));
+  if(revision===periodRevision)cancelPeriodAnimation();
+ }
+ root.querySelectorAll('[data-period]').forEach(button=>button.onclick=()=>changePeriod(button.dataset.period));
  for(const [key,n] of [['month-prev',-1],['month-next',1]]) $(key).onclick=()=>{const date=new Date(`${month}-01T00:00:00Z`);date.setUTCMonth(date.getUTCMonth()+n);month=date.toISOString().slice(0,7);day=month===model.today.slice(0,7) ? model.today : month+'-01';if(day<model.first)day=model.first;calendar();};
  function render() {
   $('statistics').hidden=!model; $('unavailable').hidden=!!model;if(!model)return;
