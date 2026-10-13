@@ -1,3 +1,4 @@
+-- Historical verification for migration 014; use 2026-10-13-background-avatars.sql after 015.
 -- Run on the selected Habitify-dev project. Every synthetic row and write is rolled back.
 begin;
 do $$

@@ -561,7 +561,7 @@ input[aria-invalid="true"] { border-color:var(--error); }
 .appearance-options{display:flex;gap:9px;flex-wrap:wrap}
 .appearance-options button{min-height:44px;border:1px solid var(--line);background:var(--field);color:var(--ink);padding:9px 16px;border-radius:13px;font-size:13px}
 .appearance-options button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--bg)}
-.appearance-avatars button{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:82px;padding:12px 8px}
+.appearance-linked-avatar{display:flex;align-items:center;gap:14px;margin:22px 0}.appearance-linked-avatar .appearance-avatar{flex-shrink:0}.appearance-linked-avatar p{font-size:13px;margin:0}.appearance-linked-avatar small{display:block;margin-top:5px;color:var(--muted);font-size:12px;line-height:1.6}
 .appearance-avatar{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;overflow:hidden;background:var(--bg);color:var(--accent)}
 .appearance-avatar svg{width:30px;height:30px}.appearance-avatar img,#profile-avatar img{width:100%;height:100%;object-fit:cover;display:block}
 #profile-avatar{overflow:hidden;border-radius:50%}
@@ -572,7 +572,7 @@ input[aria-invalid="true"] { border-color:var(--error); }
 .appearance-preview .dialog-note{font-size:12px;margin-bottom:0}
 .appearance-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.appearance-actions .secondary{margin:0}
 .appearance-note{font-size:12px;color:var(--muted);line-height:1.7;text-align:center}
-@media(max-width:350px){.appearance-themes{gap:10px}.theme-cover{height:120px}.theme-choice-copy{padding:11px}.theme-choice-copy strong{font-size:13px}.appearance-settings,.appearance-preview{padding:16px}.appearance-options button{padding:9px 12px}.appearance-avatars button{min-width:74px}}
+@media(max-width:350px){.appearance-themes{gap:10px}.theme-cover{height:120px}.theme-choice-copy{padding:11px}.theme-choice-copy strong{font-size:13px}.appearance-settings,.appearance-preview{padding:16px}.appearance-options button{padding:9px 12px}}
 @media(prefers-reduced-motion:reduce){:root[data-theme=lumi] .habit-card.celebrate{animation:none}}
 
 /* In installed iOS apps, paint behind the status bar while content keeps its safe insets. */
@@ -735,7 +735,6 @@ body.is-standalone.workspace-active{background:transparent}
 :root[data-theme=duckyo][data-theme-background=duckyo-phone]{--duckyo-photo:url('../themes/duckyo/phone.webp');--duckyo-edge:url('../themes/duckyo/edge-phone.webp');--duckyo-top:#ffefd6;--duckyo-ratio:2.338542}
 :root[data-theme=duckyo][data-theme-background=duckyo-snack]{--duckyo-photo:url('../themes/duckyo/snack.webp');--duckyo-edge:url('../themes/duckyo/edge-snack.webp');--duckyo-top:#a7c8cf;--duckyo-ratio:1.92037}
 :root[data-theme=duckyo][data-theme-background=duckyo-cake]{--duckyo-photo:url('../themes/duckyo/cake.webp');--duckyo-edge:url('../themes/duckyo/edge-cake.webp');--duckyo-top:#f8eeb1;--duckyo-ratio:1.917188}
-:root[data-theme=duckyo][data-theme-background=duckyo-meal]{--duckyo-photo:url('../themes/duckyo/meal.webp');--duckyo-edge:url('../themes/duckyo/edge-meal.webp');--duckyo-top:#ffffff;--duckyo-ratio:1.971875}
 
 :root[data-theme=duckyo]{--app-scene:linear-gradient(var(--duckyo-overlay),var(--duckyo-overlay)),var(--duckyo-photo),var(--duckyo-edge);--duckyo-size:100% 100%,auto min(100%,calc(100vw * var(--duckyo-ratio))),100% min(100%,calc(100vw * var(--duckyo-ratio)))}
 :root[data-theme=duckyo] :is(.app-frame,#restoring),:root.is-standalone[data-theme=duckyo]{background-image:var(--app-scene);background-color:var(--duckyo-top);background-size:var(--duckyo-size);background-position:center bottom;background-repeat:no-repeat}

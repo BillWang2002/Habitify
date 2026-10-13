@@ -22,5 +22,5 @@ test('禁用本地存储不阻止启动或退出',()=>{
 });
 test('小刘鸭启动背景可恢复，启动提示仍不包含账号头像或私人信息',()=>{
  const s=storage();writeLoadingAppearance({theme:'duckyo',background:'duckyo-phone',surface:'glass',mode:'dark',avatar:'duckyo-meal',email:'private'},s,'/Habitify/');
- assert.deepEqual(readLoadingAppearance(s,'/Habitify/'),{theme:'duckyo',background:'duckyo-phone',surface:'glass',mode:'dark',avatar:'duckyo-work'});assert.equal([...s.data.values()][0].includes('private'),false);assert.equal([...s.data.values()][0].includes('avatar'),false);
+ assert.deepEqual(readLoadingAppearance(s,'/Habitify/'),{theme:'duckyo',background:'duckyo-phone',surface:'glass',mode:'dark',avatar:'duckyo-phone'});assert.equal([...s.data.values()][0].includes('private'),false);assert.equal([...s.data.values()][0].includes('avatar'),false);
 });

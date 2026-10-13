@@ -8,11 +8,13 @@ test('外观清单限制资源与搭配，头像限定主题且保留显示模�
  assert.equal(selectTheme({...a,avatar:'lumi-harbor'},'growth').avatar,'growth');assert.equal(normalizeAppearance({theme:'lumi',avatar:'star'}).avatar,'lumi');assert.equal(normalizeAppearance({theme:'growth',avatar:'lumi-library'}).avatar,'growth');assert.equal(normalizeAppearance({...a,background:'library',avatar:'lumi-library'}).avatar,'lumi-library');
  setIconTheme('growth');const plain=iconSvg('book');setIconTheme('lumi');assert.notEqual(iconSvg('book'),plain);assert.equal(resolveHabitIcon('book'),'book');assert.equal(iconSvg('<script>').includes('<script>'),false);setIconTheme('growth');
 });
-test('小刘鸭目录包含六幅背景与三款主题头像，跨主题资源回退到本套装默认值',()=>{
- const theme=themes.find(t=>t.id==='duckyo');assert.equal(theme.backgrounds.length,6);assert.equal(theme.avatars.length,3);
- const a=selectTheme({...defaultAppearance,mode:'dark'},'duckyo');assert.equal(a.avatar,'duckyo-work');assert.equal(a.background,'duckyo-study');assert.equal(a.mode,'dark');
- for(const [background] of theme.backgrounds)for(const [avatar] of theme.avatars){const v=normalizeAppearance({...a,background,avatar,surface:'glass'});assert.equal(v.background,background);assert.equal(v.avatar,avatar);assert.ok(backgroundAssets[background].startsWith('./themes/duckyo/'));assert.ok(avatarAssets[avatar].startsWith('./themes/duckyo/'));}
- assert.equal(normalizeAppearance({...a,avatar:'lumi-library',background:'garden'}).avatar,'duckyo-work');assert.equal(normalizeAppearance({...a,avatar:'lumi-library',background:'garden'}).background,'duckyo-study');assert.equal(selectTheme(a,'lumi').avatar,'lumi');assert.equal(selectTheme(a,'growth').avatar,'growth');
+test('头像始终由背景推导，移除的吃饭配置回退且旧头像选择不能覆盖对应头像',()=>{
+ const duck=themes.find(t=>t.id==='duckyo');assert.equal(duck.backgrounds.length,5);assert.equal(duck.avatars.length,5);
+ const a=selectTheme({...defaultAppearance,mode:'dark'},'duckyo');assert.equal(a.avatar,'duckyo-study');assert.equal(a.mode,'dark');
+ for(const [background] of duck.backgrounds)for(const [avatar] of duck.avatars){const v=normalizeAppearance({...a,background,avatar,surface:'glass'});assert.equal(v.background,background);assert.equal(v.avatar,background);assert.ok(backgroundAssets[background].startsWith('./themes/duckyo/'));assert.ok(avatarAssets[v.avatar].startsWith('./themes/duckyo/'));}
+ for(const [background,avatar] of [['garden','lumi'],['meadow','lumi-meadow'],['harbor','lumi-harbor'],['library','lumi-library'],['sky','lumi']])assert.equal(normalizeAppearance({theme:'lumi',background,avatar:'lumi-harbor'}).avatar,avatar);
+ const retired=normalizeAppearance({...a,background:'duckyo-meal',avatar:'duckyo-meal'});assert.equal(retired.background,'duckyo-study');assert.equal(retired.avatar,'duckyo-study');assert.equal(backgroundAssets['duckyo-meal'],undefined);assert.equal(avatarAssets['duckyo-meal'],undefined);
+ assert.equal(normalizeAppearance({...a,avatar:'lumi-library',background:'garden'}).avatar,'duckyo-study');assert.equal(selectTheme(a,'lumi').avatar,'lumi');assert.equal(selectTheme(a,'growth').avatar,'growth');
 });
 test('外观接口只转发本人令牌、不自动重试写入，并报告并发与网络失败',async()=>{
  let calls=0;const client={auth:{getSession:async()=>({data:{session:{access_token:'user-token'}}})}};

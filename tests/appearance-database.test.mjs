@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {randomUUID} from 'node:crypto';import {PGlite} from '@electric-sql/pglite';
 test('外观SQL：本人隔离、默认不建资料、幂等、并发拒绝、旧JWT拒绝及账号删除级联',async()=>{
  const db=new PGlite(),a=randomUUID(),b=randomUUID();try{
- await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,banned_until timestamptz,created_at timestamptz default now());create function auth.uid() returns uuid language sql as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql as $$select jsonb_build_object('iat',nullif(current_setting('request.jwt.claim.iat',true),'')::bigint)$$;grant usage on schema auth to anon,authenticated;`);
+ await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,banned_until timestamptz,created_at timestamptz default now(),updated_at timestamptz default now());create function auth.uid() returns uuid language sql as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;create function auth.jwt() returns jsonb language sql as $$select jsonb_build_object('iat',nullif(current_setting('request.jwt.claim.iat',true),'')::bigint)$$;grant usage on schema auth to anon,authenticated;`);
  await db.query('insert into auth.users(id,email) values($1,$2),($3,$4)',[a,'a@example.test',b,'b@example.test']);
  for(const f of ['202610030001_infrastructure.sql','202610040002_habits.sql','202610040003_statistics.sql','202610040004_delete_confirmation.sql','202610050005_admin_sessions.sql','202610050006_admin_members.sql','202610100007_admin_identity.sql','202610100008_admin_member_management.sql','202610100009_appearance.sql','202610110010_appearance_catalog.sql','202610130014_duckyo_catalog.sql'])await db.exec(await readFile(new URL('../supabase/migrations/'+f,import.meta.url),'utf8'));
  async function rpc(p,uid=a,iat=100){await db.query("select set_config('request.jwt.claim.sub',$1,false),set_config('request.jwt.claim.iat',$2,false)",[uid,String(iat)]);await db.exec('set role authenticated');try{return(await db.query('select public.appearance_request($1::jsonb) as data',[JSON.stringify(p)])).rows[0].data;}finally{await db.exec('reset role');}}
@@ -12,17 +12,36 @@ test('外观SQL：本人隔离、默认不建资料、幂等、并发拒绝、�
  await db.exec('set role authenticated');await assert.rejects(db.query('select * from public.account_appearance'),/permission denied/);await db.exec('reset role');await db.exec('set role anon');await assert.rejects(db.query("select public.appearance_request('{\"op\":\"appearance-get\"}')"),/permission denied/);await db.exec('reset role');
  const variant={...p,settings:{...p.settings,background:'library',avatar:'lumi-library'},expectedRevision:1,requestId:randomUUID()};assert.equal((await rpc(variant)).settings.avatar,'lumi-library');await assert.rejects(rpc({...variant,settings:{...variant.settings,theme:'growth',background:'plain',surface:'paper'},expectedRevision:2,requestId:randomUUID()}),/INVALID_REQUEST/);
  const legacy={...variant,settings:{...variant.settings,avatar:'star'},expectedRevision:2,requestId:randomUUID()};assert.equal((await rpc(legacy)).settings.avatar,'lumi');assert.equal((await rpc(legacy)).revision,3);
- let duckRevision=3;
- for(const background of ['study','work','phone','snack','cake','meal'])for(const avatar of ['work','study','meal']){
+ // Simulate stored independent avatars and a removed meal background before 015.
+ const oldMeal={op:'appearance-set',settings:{theme:'duckyo',background:'duckyo-meal',surface:'glass',avatar:'duckyo-work',mode:'dark'},expectedRevision:3,requestId:randomUUID()};await rpc(oldMeal);
+ const oldLumi={op:'appearance-set',settings:{theme:'lumi',background:'harbor',surface:'paper',avatar:'lumi-library',mode:'light'},expectedRevision:0,requestId:randomUUID()};await rpc(oldLumi,b);
+ await db.exec(await readFile(new URL('../supabase/migrations/202610130015_background_avatars.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../docs/verification/2026-10-13-background-avatars.sql',import.meta.url),'utf8'));
+ const upgraded=await rpc({op:'appearance-get'});assert.equal(upgraded.settings.background,'duckyo-study');assert.equal(upgraded.settings.avatar,'duckyo-study');assert.equal(upgraded.revision,5);
+ const lumiUpgraded=await rpc({op:'appearance-get'},b);assert.equal(lumiUpgraded.settings.avatar,'lumi-harbor');assert.equal(lumiUpgraded.revision,2);
+ assert.equal((await db.query('select last_request from public.account_appearance where user_id=$1',[a])).rows[0].last_request,null);
+ await assert.rejects(rpc(oldMeal),/STALE_DATA/);
+ // Re-running the migration must not invalidate already canonical saved rows.
+ await db.exec(await readFile(new URL('../supabase/migrations/202610130015_background_avatars.sql',import.meta.url),'utf8'));assert.equal((await rpc({op:'appearance-get'})).revision,5);
+ let duckRevision=5;
+ for(const background of ['study','work','phone','snack','cake'])for(const avatar of ['work','study','meal']){
   const settings={theme:'duckyo',background:'duckyo-'+background,surface:'glass',avatar:'duckyo-'+avatar,mode:'light'};
   const payload={op:'appearance-set',settings,expectedRevision:duckRevision,requestId:randomUUID()};
-  const result=await rpc(payload);assert.deepEqual(result.settings,settings);assert.deepEqual(await rpc(payload),result);duckRevision++;assert.equal(result.revision,duckRevision);
+  const result=await rpc(payload);assert.deepEqual(result.settings,{...settings,avatar:'duckyo-'+background});assert.deepEqual(await rpc(payload),result);duckRevision++;assert.equal(result.revision,duckRevision);
+  await assert.rejects(rpc({...payload,settings:{...settings,avatar:avatar==='work'?'duckyo-study':'duckyo-work'}}),/REQUEST_REUSED/);
  }
+ const retired={op:'appearance-set',settings:oldMeal.settings,expectedRevision:duckRevision,requestId:randomUUID()};assert.equal((await rpc(retired)).settings.avatar,'duckyo-study');duckRevision++;
+ // Current catalog payloads and generic legacy avatars both derive the avatar.
+ for(const background of ['garden','meadow','harbor','library','sky']){
+  const payload={op:'appearance-set',settings:{theme:'lumi',background,surface:'glass',avatar:'star',mode:'light'},expectedRevision:duckRevision,requestId:randomUUID()};
+  const result=await rpc(payload);assert.equal(result.settings.avatar,({meadow:'lumi-meadow',harbor:'lumi-harbor',library:'lumi-library'})[background]||'lumi');duckRevision++;
+ }
+ const newDuck={op:'appearance-set',settings:{theme:'duckyo',background:'duckyo-phone',surface:'glass',avatar:'duckyo-phone',mode:'light'},expectedRevision:duckRevision,requestId:randomUUID()};assert.equal((await rpc(newDuck)).settings.avatar,'duckyo-phone');duckRevision++;
  const duck=(await rpc({op:'appearance-get'})).settings;
  for(const settings of [{...duck,avatar:'lumi'},{...duck,background:'garden'},{...duck,theme:'growth'},{...duck,background:'duckyo-external'},{...duck,avatar:'https://evil.test'}])await assert.rejects(rpc({op:'appearance-set',settings,expectedRevision:duckRevision,requestId:randomUUID()}),/INVALID_REQUEST/);
- assert.equal((await rpc({op:'appearance-get'},b)).settings.theme,'growth');
+ assert.deepEqual(await rpc({op:'appearance-get'},b),lumiUpgraded);
  await assert.rejects(rpc({op:'appearance-set',settings:duck,expectedRevision:duckRevision-1,requestId:randomUUID()}),/STALE_DATA/);
  await db.query('insert into habitify_admin.member_access(user_id,revoked_before) values($1,100)',[a]);await assert.rejects(rpc({op:'appearance-get'}),/LOGIN_REQUIRED/);assert.equal((await rpc({op:'appearance-get'},a,101)).revision,duckRevision);
- await db.query('delete from auth.users where id=$1',[a]);assert.equal((await db.query('select count(*)::int as n from public.account_appearance')).rows[0].n,0);
+ await db.query('delete from auth.users where id=$1',[a]);assert.equal((await db.query('select count(*)::int as n from public.account_appearance where user_id=$1',[a])).rows[0].n,0);
  }finally{await db.close();}
 });

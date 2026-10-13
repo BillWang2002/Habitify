@@ -1,5 +1,5 @@
 {
-  "processing": "User-approved non-AI original crop, resize and pixel relocation. Wallpapers use lossless WebP; decoded RGB equality verified. Edge strips only extend original background outside full-image contain layout.",
+  "processing": "Non-AI original crops, resize and pixel relocation. Work lamp removal uses neighbouring original wall pixels; outside-mask equality verified. Backgrounds remain lossless. Avatars are determined by background.",
   "assets": [
     {
       "id": "A",
@@ -45,19 +45,31 @@
       ],
       "insertAtY": 227,
       "shiftPx": 91,
-      "verification": "All original decoded RGB pixels retained exactly; removing inserted background strip restores original pixel-for-pixel. No source pixels cropped, scaled or redrawn.",
+      "verification": "Only the user-requested lamp region edited; all other original pixels retained before pixel relocation.",
       "backgroundId": "duckyo-work",
       "projectFile": "work.webp",
       "edgeFile": "edge-work.webp",
       "topColor": "#c8daf0",
       "ratio": 1.920313,
-      "sha256": "b106190dbf18ab3ea6df884927533614895d85314983b3f07ce6487847004c48",
+      "sha256": "83f39370b88c418f2ed7e8fa8372ed30b71374c05e4ce6af4057413eae7354bf",
       "avatarCrop": [
         74,
         475,
         490,
         891
-      ]
+      ],
+      "edit": {
+        "master": "docs/design/duckyo/work-no-lamp.png",
+        "removed": "Hanging lamp, cord and rays",
+        "bounds": [
+          480,
+          0,
+          608,
+          580
+        ],
+        "fill": "Repeat original wall strip x=620..640, same source rows",
+        "verification": "RGB outside edit bounds unchanged; shifted lossless WebP matches edited master plus original background strip."
+      }
     },
     {
       "id": "C",
@@ -80,7 +92,13 @@
       "edgeFile": "edge-phone.webp",
       "topColor": "#ffefd6",
       "ratio": 2.338542,
-      "sha256": "b02764fc9fef04253eaf017dd2fdbf60500019f206a4a2ab96950ec26780f1f7"
+      "sha256": "b02764fc9fef04253eaf017dd2fdbf60500019f206a4a2ab96950ec26780f1f7",
+      "avatarCrop": [
+        100,
+        830,
+        700,
+        1430
+      ]
     },
     {
       "id": "D",
@@ -103,7 +121,13 @@
       "edgeFile": "edge-snack.webp",
       "topColor": "#a7c8cf",
       "ratio": 1.92037,
-      "sha256": "7dea25047209dc32df2356262b6f8545ce31b8623724d4db6b4bbd10e4710967"
+      "sha256": "7dea25047209dc32df2356262b6f8545ce31b8623724d4db6b4bbd10e4710967",
+      "avatarCrop": [
+        330,
+        1010,
+        810,
+        1490
+      ]
     },
     {
       "id": "E",
@@ -126,53 +150,16 @@
       "edgeFile": "edge-cake.webp",
       "topColor": "#f8eeb1",
       "ratio": 1.917188,
-      "sha256": "c202127bfcd9aa8e0c4168ebc2d838685aefec8405178a69b0c169546a03002b"
-    },
-    {
-      "id": "F",
-      "name": "吃饭",
-      "reference": "docs/design/duckyo/originals/F-meal.jpg",
-      "sourcePage": "https://kknews.cc/zh-hk/comic/e3vr6pr.html",
-      "originalSize": [
-        640,
-        1138
-      ],
-      "outputSize": [
-        640,
-        1262
-      ],
-      "insertAtY": 200,
-      "shiftPx": 124,
-      "verification": "All original decoded RGB pixels retained exactly; removing inserted background strip restores original pixel-for-pixel. No source pixels cropped, scaled or redrawn.",
-      "backgroundId": "duckyo-meal",
-      "projectFile": "meal.webp",
-      "edgeFile": "edge-meal.webp",
-      "topColor": "#ffffff",
-      "ratio": 1.971875,
-      "sha256": "f629738fbb7e492e0c7163fd9c929c999ff7f70d8af86913fc9b156db28250c6",
+      "sha256": "c202127bfcd9aa8e0c4168ebc2d838685aefec8405178a69b0c169546a03002b",
       "avatarCrop": [
-        125,
-        430,
-        535,
-        840
+        220,
+        506,
+        508,
+        794
       ]
     }
   ],
   "avatars": [
-    {
-      "file": "avatar-work.webp",
-      "source": "B",
-      "crop": [
-        74,
-        475,
-        490,
-        891
-      ],
-      "size": [
-        256,
-        256
-      ]
-    },
     {
       "file": "avatar-study.webp",
       "source": "A",
@@ -188,13 +175,56 @@
       ]
     },
     {
-      "file": "avatar-meal.webp",
-      "source": "F",
+      "file": "avatar-work.webp",
+      "source": "B",
       "crop": [
-        125,
-        430,
-        535,
-        840
+        74,
+        475,
+        490,
+        891
+      ],
+      "size": [
+        256,
+        256
+      ],
+      "editedMaster": "docs/design/duckyo/work-no-lamp.png"
+    },
+    {
+      "file": "avatar-phone.webp",
+      "source": "C",
+      "crop": [
+        100,
+        830,
+        700,
+        1430
+      ],
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "avatar-snack.webp",
+      "source": "D",
+      "crop": [
+        330,
+        1010,
+        810,
+        1490
+      ],
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "avatar-cake.webp",
+      "source": "E",
+      "crop": [
+        220,
+        506,
+        508,
+        794
       ],
       "size": [
         256,
@@ -214,7 +244,15 @@
     "size": [
       600,
       400
-    ]
+    ],
+    "editedMaster": "docs/design/duckyo/work-no-lamp.png"
   },
-  "sourceStatus": "Public wallpaper reference pages; creator credit Duckyo / 小刘鸭. No claim of official partnership or independently verified redistribution license."
+  "sourceStatus": "Public wallpaper reference pages; creator credit Duckyo / 小刘鸭. No claim of official partnership or independently verified redistribution license.",
+  "retired": [
+    {
+      "source": "F",
+      "reference": "docs/design/duckyo/originals/F-meal.jpg",
+      "reason": "Removed from runtime background and avatar catalog at user request on 2026-10-13; archived reference only."
+    }
+  ]
 }
