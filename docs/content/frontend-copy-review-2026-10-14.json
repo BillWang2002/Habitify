@@ -4183,7 +4183,10 @@
       "types": [
         "名称/选项"
       ],
-      "id": "LOOK-010"
+      "id": "LOOK-010",
+      "replacement": "星灯旅人",
+      "status": "implemented",
+      "implementedAt": "2026-10-14"
     },
     {
       "group": "LOOK",
@@ -4408,7 +4411,10 @@
       "types": [
         "名称/选项"
       ],
-      "id": "LOOK-023"
+      "id": "LOOK-023",
+      "replacement": "小刘鸭",
+      "status": "implemented",
+      "implementedAt": "2026-10-14"
     },
     {
       "group": "LOOK",
@@ -4425,7 +4431,10 @@
       "types": [
         "说明"
       ],
-      "id": "LOOK-024"
+      "id": "LOOK-024",
+      "replacement": "小刘鸭来袭！",
+      "status": "implemented",
+      "implementedAt": "2026-10-14"
     },
     {
       "group": "LOOK",
@@ -9661,7 +9670,10 @@
       "types": [
         "说明"
       ],
-      "id": "SHOP-003"
+      "id": "SHOP-003",
+      "replacement": "兑换后请找管理员小王核销哦～",
+      "status": "implemented",
+      "implementedAt": "2026-10-14"
     },
     {
       "group": "SHOP",
@@ -9712,7 +9724,10 @@
       "types": [
         "说明"
       ],
-      "id": "SHOP-006"
+      "id": "SHOP-006",
+      "replacement": "兑换后请找管理员小王核销哦～",
+      "status": "implemented",
+      "implementedAt": "2026-10-14"
     },
     {
       "group": "SHOP",
@@ -9763,7 +9778,10 @@
       "types": [
         "说明"
       ],
-      "id": "SHOP-009"
+      "id": "SHOP-009",
+      "replacement": "兑换后请找管理员小王核销哦～",
+      "status": "implemented",
+      "implementedAt": "2026-10-14"
     },
     {
       "group": "SHOP",

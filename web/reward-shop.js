@@ -4,9 +4,9 @@ import {rewardAssets} from './reward-assets.js';
 // Preview prices only. Signed-in purchases use the catalog and balance from the backend.
 const samples={
  real:[
-  {id:'milk-tea',name:'奶茶',price:310,description:'一杯喜欢的口味',detail:'留给自己的小奖励。兑换后请找管理员小王核销，具体口味线下商定。'},
-  {id:'coffee',name:'咖啡',price:310,description:'给日常加一点香气',detail:'用一杯咖啡奖励自己的行动。兑换后请找管理员小王核销。'},
-  {id:'snack',name:'零食',price:155,description:'一点喜欢的小滋味',detail:'为自己的行动准备一份小零食。兑换后请找管理员小王核销，具体品类线下商定。'}
+  {id:'milk-tea',name:'奶茶',price:310,description:'一杯喜欢的口味',detail:'兑换后请找管理员小王核销哦～'},
+  {id:'coffee',name:'咖啡',price:310,description:'给日常加一点香气',detail:'兑换后请找管理员小王核销哦～'},
+  {id:'snack',name:'零食',price:155,description:'一点喜欢的小滋味',detail:'兑换后请找管理员小王核销哦～'}
  ],
  virtual:[]
 };
