@@ -47,7 +47,7 @@
       "shiftPx": 91,
       "verification": "Only the user-requested lamp region edited; all other original pixels retained before pixel relocation.",
       "backgroundId": "duckyo-work",
-      "projectFile": "work.webp",
+      "projectFile": "work-v2.webp",
       "edgeFile": "edge-work.webp",
       "topColor": "#c8daf0",
       "ratio": 1.920313,
@@ -175,7 +175,7 @@
       ]
     },
     {
-      "file": "avatar-work.webp",
+      "file": "avatar-work-v2.webp",
       "source": "B",
       "crop": [
         74,
@@ -233,7 +233,7 @@
     }
   ],
   "cover": {
-    "file": "cover.webp",
+    "file": "cover-v2.webp",
     "source": "B",
     "crop": [
       0,

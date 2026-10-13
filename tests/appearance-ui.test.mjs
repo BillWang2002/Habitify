@@ -7,9 +7,9 @@ test('背景预览联动头像，取消恢复已应用搭配，保存请求不�
  const {dom,root}=setup();const saved={theme:'duckyo',background:'duckyo-work',surface:'glass',avatar:'duckyo-study',mode:'light'};let payload;
  const ui=createAppearance(root,{request:async p=>{if(p.op==='appearance-get')return {settings:saved,revision:3};payload=p;return {settings:p.settings,revision:4};}});
  ui.enter({id:'test-owner'});await tick();ui.show();root.querySelector('[data-theme-choice="duckyo"]').click();
- assert.equal(root.querySelectorAll('#appearance-avatars button').length,0);assert.ok(root.querySelector('#profile-avatar img').src.endsWith('/avatar-work.webp'));
+ assert.equal(root.querySelectorAll('#appearance-avatars button').length,0);assert.ok(root.querySelector('#profile-avatar img').src.endsWith('/avatar-work-v2.webp'));
  root.querySelector('[data-appearance-value="duckyo-phone"]').click();assert.ok(root.querySelector('#profile-avatar img').src.endsWith('/avatar-phone.webp'));assert.ok(root.querySelector('#appearance-linked-avatar img').src.endsWith('/avatar-phone.webp'));
- ui.hide();assert.equal(document.documentElement.dataset.themeBackground,'duckyo-work');assert.ok(root.querySelector('#profile-avatar img').src.endsWith('/avatar-work.webp'));
+ ui.hide();assert.equal(document.documentElement.dataset.themeBackground,'duckyo-work');assert.ok(root.querySelector('#profile-avatar img').src.endsWith('/avatar-work-v2.webp'));
  ui.show();root.querySelector('[data-theme-choice="duckyo"]').click();root.querySelector('[data-appearance-value="duckyo-cake"]').click();root.querySelector('#appearance-save').click();await tick();
  assert.equal(payload.expectedRevision,3);assert.equal(payload.settings.avatar,'duckyo-cake');assert.equal(payload.settings.background,'duckyo-cake');ui.hide();assert.ok(root.querySelector('#profile-avatar img').src.endsWith('/avatar-cake.webp'));
  assert.equal(JSON.parse(localStorage.getItem('habitify-appearance:/Habitify/:test-owner')).settings.avatar,'duckyo-cake');dom.window.close();
