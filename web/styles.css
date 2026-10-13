@@ -133,6 +133,10 @@ body.workspace-active { display: block; padding: 0; height: 100dvh; overflow: hi
 .shop-dialog .shop-picture { border:1px solid var(--line); border-radius:16px; margin-bottom:18px; }
 .shop-dialog-price { font-weight:650; margin:18px 0; }
 .shop-dialog .primary { width:100%; }
+.shop-dialog-actions { display:grid; gap:10px; }
+.inventory-card h2 { font-size:16px; margin:0 0 10px; }
+.inventory-card p { margin:6px 0; line-height:1.7; }
+.inventory-reference { overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
 @media(min-width:701px) { .shop-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; } }
 @media(min-width:1100px) { .shop-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
 @media(max-width:350px) { .shop-grid { gap:10px; } .shop-card-copy { padding:12px; } .shop-card h2 { font-size:15px; } .shop-balance strong { font-size:20px; } }

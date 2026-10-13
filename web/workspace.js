@@ -1,3 +1,4 @@
+import {renderInventory} from './reward-inventory.js';
 import {rewardShopHtml,createRewardShop} from './reward-shop.js';
 import {createInbox} from './inbox.js';
 import {createFeedback} from './feedback.js';
@@ -49,7 +50,11 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, pr
     <dialog id="habit-dialog" class="habit-dialog" aria-labelledby="dialog-title"><div class="dialog-heading"><h2 id="dialog-title" tabindex="-1" autofocus></h2><button id="close-dialog" aria-label="关闭">×</button></div><form id="habit-form" novalidate><div id="create-fields"><label for="habit-name">打卡名称</label><input id="habit-name" maxlength="30" placeholder="例如：睡前读书" aria-describedby="habit-name-error"><p id="habit-name-error" class="field-error" role="status" hidden></p><fieldset class="icon-picker"><legend>打卡图标</legend><div id="icon-options"></div><p class="dialog-note">基础图标免费；更多个性图案后续开放。</p></fieldset><label id="kind-label">记录方式</label><input id="habit-kind" type="hidden" value="complete"><div class="kind-select"><button id="kind-trigger" type="button" aria-labelledby="kind-label kind-value" aria-haspopup="listbox" aria-expanded="false"><span id="kind-value">完成型 · 做完就打卡</span><span aria-hidden="true">⌄</span></button><div id="kind-options" role="listbox" aria-labelledby="kind-label" hidden><button type="button" role="option" data-kind="complete" aria-selected="true">完成型 · 做完就打卡</button><button type="button" role="option" data-kind="quantity" aria-selected="false">数量型 · 达到目标才完成</button></div></div><div id="quantity-fields" hidden><label for="habit-goal">每日目标</label><input id="habit-goal" type="number" inputmode="numeric" min="1" max="100000" step="1" value="8" aria-describedby="habit-goal-error"><p id="habit-goal-error" class="field-error" role="status" hidden></p><label for="habit-unit">单位</label><input id="habit-unit" maxlength="6" placeholder="杯、分钟、页" aria-describedby="habit-unit-error"><p id="habit-unit-error" class="field-error" role="status" hidden></p></div><label for="habit-note">备注（可选）</label><input id="habit-note" maxlength="200" placeholder="给这项打卡留一句提醒" aria-describedby="habit-note-error"><p id="habit-note-error" class="field-error" role="status" hidden></p><p class="dialog-note">当前按每天计划；达标奖励统一由金币规则规定。</p></div><div id="delete-fields" hidden><p class="dialog-note">删除后无法撤回。今日进度及失效金币奖励会清除，历史记录保留。若只是暂时停止，建议使用归档。</p><label for="delete-name">输入打卡名称确认</label><p id="delete-expected" class="delete-expected"></p><input id="delete-name" maxlength="30" autocomplete="off" spellcheck="false" aria-describedby="delete-name-error"><p id="delete-name-error" class="field-error" role="status" hidden></p></div><div id="progress-fields" hidden><label for="habit-progress">今日累计进度</label><input id="habit-progress" type="number" inputmode="numeric" min="0" step="1" aria-describedby="habit-progress-error"><p id="habit-progress-error" class="field-error" role="status" hidden></p><p id="progress-note" class="dialog-note"></p></div><p id="dialog-error" role="status" class="message"></p><button class="primary" id="save-habit" type="submit"></button></form></dialog>
   </div>`;
   const $ = id => root.querySelector(`#${id}`);
-  const rewardShop=createRewardShop(root,{onViewChange:()=>navigation.remember()});
+  const rewardShop=createRewardShop(root,{onViewChange:()=>navigation.remember(),onInventory:()=>navigation.navigate('inventory'),onRedeem:async item=>{
+    if(preview)throw new Error('公开预览不扣金币，请登录后兑换。');
+    const data=pending?.op==='reward-purchase'&&pending.productId===item.productId&&pending.expectedPrice===item.expectedPrice ? await sendPending() : await mutate({op:'reward-purchase',...item});
+    if(!data)throw new Error('兑换结果尚未确认，请刷新我的物品。');return data;
+  }});
   const inbox=createInbox(root,{request:inboxRequest,preview,onOpen:id=>navigation.navigate(`inbox/${id}`),onBack:()=>navigation.back('inbox'),onCount:n=>{const entry=root.querySelector('a[href="#/inbox"]');const nav=root.querySelector('[data-route="me"]');for(const el of [entry,nav])el.classList.toggle('has-unread',n>0);let badge=entry.querySelector('.inbox-entry-count');if(!badge){badge=document.createElement('span');badge.className='inbox-entry-count';entry.append(badge);}badge.hidden=!(n>0);badge.textContent=n>99?'99+':String(n||0);entry.setAttribute('aria-label',`收件箱${n>0?'，'+n+'条未读':''}`);nav.setAttribute('aria-label',`我的${n>0?'，有未读消息':''}`);}});
   const appearance=createAppearance(root,{request:appearanceRequest,preview,initialPreview:previewAppearance});
   const feedback=createFeedback(root,{request:feedbackRequest,preview,onOpen:id=>navigation.navigate(`feedback/${id}`),onBack:()=>navigation.back('feedback')});
@@ -92,6 +97,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, pr
     else route = [...routes,'archive',...accountRoutes].includes(next) ? next : 'habits';
     if (route === 'appearance') appearance.show(); else appearance.hide();
     if(route==='feedback')feedback.show(next.startsWith('feedback/')?next.slice(9):null);else feedback.hide();
+    if(route==='inventory'&&!preview)loadData();
     if(route==='inbox')inbox.show(next.startsWith('inbox/')?next.slice(6):null);else {inbox.hide();if(route==='me')inbox.refresh();}
     if (route === 'archive') renderArchive();
     root.classList.toggle('admin-active',route==='admin');
@@ -166,7 +172,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, pr
     statistics.update(data);
     snapshot=data; habits=data.habits; records=data.records; logs=data.logs; loaded=true;
     renderProfile();
-    $('reward-balance').textContent=data.balance;
+    $('reward-balance').textContent=data.balance; rewardShop.update(data); renderInventory(root,data);
     $('coin-rules-content').innerHTML=coinRulesHtml(data.rules);
     $('sync-status').textContent=`已同步 · 账户时区 ${data.timezone}`; $('retry-data').hidden=true;
     renderHabits(); if(route==='detail') refreshDetail(); if(route==='archive') renderArchive();
@@ -206,7 +212,7 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, pr
       if(token!==epoch) return;
       if(error.code!=='NETWORK_ERROR') pending=null;
       $('sync-status').textContent=error.message; $('retry-data').hidden=false; notify(error.message);
-      if(['STALE_DATA','TODAY_CHANGED','HABIT_NOT_FOUND'].includes(error.code)) await loadData();
+      if(['STALE_DATA','TODAY_CHANGED','HABIT_NOT_FOUND','PRICE_CHANGED','INSUFFICIENT_COINS','PRODUCT_UNAVAILABLE'].includes(error.code)) await loadData();
       throw error;
     } finally { if(token===epoch) { writing=false; root.removeAttribute('aria-busy'); renderHabits(); if(route==='detail') refreshDetail(); if(route==='archive') renderArchive(); } }
   }
@@ -347,14 +353,14 @@ export function createWorkspace(root, { onLogout = () => {}, preview = false, pr
   return {
     enter(user) {
       ++epoch; writing=false; pending=null; root.removeAttribute('aria-busy');
-      if(owner!==user.id) { rewardShop.clear(); $('reward-balance').textContent='—'; statistics.clear(); snapshot=null; habits=preview ? sampleHabits() : []; logs=[]; records=[]; loaded=preview; selectedDay=localDay(); filter='all'; updateFilters(); }
+      if(owner!==user.id) { rewardShop.clear(); renderInventory(root,null); $('reward-balance').textContent='—'; statistics.clear(); snapshot=null; habits=preview ? sampleHabits() : []; logs=[]; records=[]; loaded=preview; selectedDay=localDay(); filter='all'; updateFilters(); }
       if(owner!==user.id) admin.clear();
       owner=user.id; account=user; appearance.enter(user); inbox.enter(user); feedback.enter(user); renderProfile(); $('data-message').textContent=''; dates(); renderHabits(); root.hidden=false;
       document.body.classList.add('workspace-active'); document.documentElement.classList.add('workspace-active');
       const requested=location.hash.slice(2); navigation.start((requested.startsWith('inbox/')||requested.startsWith('feedback/')) ? requested : requested.startsWith('habit/') && habits.some(item=>item.id===requested.slice(6)) ? requested : [...routes,'archive',...accountRoutes].includes(requested) ? requested : 'habits');
       if(!preview) loadData();
     },
-    leave(reset = false) { rewardShop.clear(); feedback.clear(); inbox.clear(); appearance.clear(reset); root.classList.remove('admin-active'); admin.clear(); statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); account=null; renderProfile(); $('reward-balance').textContent='—'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
+    leave(reset = false) { rewardShop.clear(); renderInventory(root,null); feedback.clear(); inbox.clear(); appearance.clear(reset); root.classList.remove('admin-active'); admin.clear(); statistics.clear(); ++epoch; writing=false; pending=null; loaded=preview; snapshot=null; habits=preview ? sampleHabits() : []; records=[]; logs=[]; $('habit-list').replaceChildren(); $('habit-detail').replaceChildren(); $('archive-list').replaceChildren(); account=null; renderProfile(); $('reward-balance').textContent='—'; $('coin-rules-content').replaceChildren(); root.removeAttribute('aria-busy'); $('save-habit').disabled=false; navigation.stop({reset}); root.hidden = true; cancelResultsTransition(); pinchActive=false; tapStart=null; previousTap=null; document.body.classList.remove('workspace-active'); document.documentElement.classList.remove('workspace-active'); cancelHold(); if (manage.open) manage.close(); $('account-email').textContent = ''; $('data-message').textContent = ''; if (dialog.open) dialog.close(); $('habit-form').reset(); clearTimeout(toastTimer); $('workspace-toast').hidden = true; if (reset) owner = null; },
     isEditing() { return feedback.busy() || inbox.busy() || appearance.busy() || admin.busy() || writing || !!pending || dialog.open || manage.open || rewardShop.isOpen(); }
   };
 }

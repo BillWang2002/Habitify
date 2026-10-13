@@ -1,4 +1,5 @@
 const messages = {
+ PRODUCT_UNAVAILABLE:'商品暂不可兑换，请重新选择。', PRICE_CHANGED:'商品价格已更新，请确认新价格后再兑换。', INSUFFICIENT_COINS:'金币不足，请继续积累后再兑换。',
  DELETE_CONFIRMATION_REQUIRED: '请更新应用，并重新输入完整打卡名称确认删除。',
  LOGIN_REQUIRED: '登录状态已失效，请重新登录。', STALE_DATA: '其他设备已修改记录，已刷新数据，请重新操作。',
  TODAY_CHANGED: '日期已经变化，已刷新今天的记录，请重新操作。',
