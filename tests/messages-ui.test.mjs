@@ -33,3 +33,10 @@ test('消息详情已读、回收站移入与恢复不会重复生成消息，�
  root.querySelector('.message-row-action').click();await tick();root.querySelector('[data-mail-view=inbox]').click();await tick();assert.equal(root.querySelectorAll('.message-card').length,1);assert.equal(count,0);
  box.clear();dom.window.close();
 });
+
+test('消息贴纸只用于读取成功的空收件箱，回收站及读取失败不冒充空消息',async()=>{
+ const dom=new JSDOM('<div id="root"></div>'),root=dom.window.document.querySelector('#root');root.innerHTML=inboxHtml();let fail=false;
+ const box=createInbox(root,{request:async()=>{if(fail)throw new Error('连接失败');return {unread:0,items:[],total:0,page:1,pageSize:20};}}),tick=()=>new Promise(r=>setImmediate(r));
+ box.enter({id:'test'});box.show();await tick();assert.ok(root.querySelector('[data-theme-empty="waiting-message"]'));root.querySelector('[data-mail-view=trash]').click();await tick();assert.equal(root.querySelector('.theme-empty-sticker'),null);assert.ok(root.querySelector('#inbox-items').textContent.includes('回收站为空'));
+ box.clear();fail=true;box.enter({id:'other'});box.show();await tick();assert.equal(root.querySelector('#inbox-items').textContent,'');assert.ok(root.querySelector('#inbox-status').textContent.includes('连接失败'));box.clear();dom.window.close();
+});

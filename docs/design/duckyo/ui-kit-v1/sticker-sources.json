@@ -1,0 +1,106 @@
+[
+  {
+    "id": "first-step",
+    "purpose": "暂无打卡",
+    "source": "../originals/A-writing.jpg",
+    "editedMaster": null,
+    "crop": [
+      270,
+      1110,
+      870,
+      1685
+    ],
+    "deskLineAlphaTrim": [
+      [
+        1546,
+        1570,
+        314,
+        818
+      ]
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "recommendedDisplayPx": 64,
+    "rgbPreservationBeforeResize": true
+  },
+  {
+    "id": "waiting-message",
+    "purpose": "空收件箱",
+    "source": "../originals/C-phone.jpg",
+    "editedMaster": null,
+    "crop": [
+      92,
+      850,
+      915,
+      1510
+    ],
+    "deskLineAlphaTrim": [
+      [
+        1300,
+        1323,
+        112,
+        889
+      ]
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "recommendedDisplayPx": 64,
+    "rgbPreservationBeforeResize": true
+  },
+  {
+    "id": "archive",
+    "purpose": "暂无归档",
+    "source": "../originals/B-work.jpg",
+    "editedMaster": "../work-no-lamp.png",
+    "crop": [
+      45,
+      470,
+      638,
+      985
+    ],
+    "deskLineAlphaTrim": [
+      [
+        817,
+        861,
+        103,
+        636
+      ]
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "recommendedDisplayPx": 64,
+    "rgbPreservationBeforeResize": true
+  },
+  {
+    "id": "inventory",
+    "purpose": "暂无物品",
+    "source": "../originals/D-snack.jpg",
+    "editedMaster": null,
+    "crop": [
+      177,
+      1004,
+      905,
+      1548
+    ],
+    "deskLineAlphaTrim": [
+      [
+        1365,
+        1389,
+        194,
+        900
+      ]
+    ],
+    "size": [
+      256,
+      256
+    ],
+    "recommendedDisplayPx": 64,
+    "rgbPreservationBeforeResize": true
+  }
+]

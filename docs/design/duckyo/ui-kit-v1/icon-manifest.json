@@ -1,0 +1,158 @@
+[
+  {
+    "id": "checkin",
+    "label": "打卡",
+    "meaning": "圆角便签 · 完成勾选",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "rewards",
+    "label": "激励",
+    "meaning": "礼物袋 · 蝴蝶结",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "stats",
+    "label": "统计",
+    "meaning": "圆润柱形 · 上升趋势",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "me",
+    "label": "我的",
+    "meaning": "圆形头像 · 柔和肩线",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "leaf",
+    "label": "成长",
+    "meaning": "向上嫩芽",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "book",
+    "label": "阅读",
+    "meaning": "打开的手账",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "water",
+    "label": "喝水",
+    "meaning": "日常水杯",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "walk",
+    "label": "行动",
+    "meaning": "笔直小路 · 一步一步向前",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "target",
+    "label": "目标",
+    "meaning": "命中圆靶",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "sun",
+    "label": "阳光",
+    "meaning": "温暖太阳",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "inbox",
+    "label": "收件箱",
+    "meaning": "一封来信",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "archive",
+    "label": "已归档",
+    "meaning": "收纳抽屉",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  },
+  {
+    "id": "inventory",
+    "label": "我的物品",
+    "meaning": "打开的物品盒",
+    "viewBox": [
+      0,
+      0,
+      24,
+      24
+    ],
+    "strokeWidth": 1.8
+  }
+]

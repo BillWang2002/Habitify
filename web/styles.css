@@ -439,6 +439,14 @@ input[aria-invalid="true"] { border-color:var(--error); }
 .account-feature-state { width: min(100%,560px); margin: 24px auto; padding: 36px 24px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); text-align: center; }
 .account-feature-icon { display: grid; place-items: center; width: 62px; height: 62px; margin: 0 auto 14px; border-radius: 20px; color: var(--accent); background: color-mix(in srgb,var(--accent) 10%,transparent); }
 .account-feature-icon svg { width: 30px; height: 30px; }
+.theme-empty-fallback { display: contents; }
+.theme-empty-sticker { display: none; }
+.inbox-empty-duckyo { display: none; }
+:root[data-theme=duckyo] .inbox-empty-default { display: none; }
+:root[data-theme=duckyo] .inbox-empty-duckyo { display: block; }
+:root[data-theme=duckyo] .theme-empty-art[data-theme-empty]:not([data-theme-empty=""]):not(.has-art-error) { display: grid; place-items: center; width: 64px; height: 64px; margin-left: auto; margin-right: auto; background: none; border-radius: 0; }
+:root[data-theme=duckyo] .theme-empty-art[data-theme-empty]:not([data-theme-empty=""]):not(.has-art-error) > .theme-empty-fallback { display: none; }
+:root[data-theme=duckyo] .theme-empty-art[data-theme-empty]:not([data-theme-empty=""]):not(.has-art-error) > .theme-empty-sticker { display: block; width: 64px; height: 64px; object-fit: contain; }
 .account-feature-state h2 { font-size: 18px; margin: 12px 0; }
 .account-feature-state p { max-width: 360px; margin: 0 auto; color: var(--muted); font-size: 13px; line-height: 1.8; overflow-wrap: anywhere; }
 

@@ -1,4 +1,5 @@
 // Bundled, trusted SVG assets only. Future inventory supplies owned IDs, never arbitrary markup.
+import {duckyoPaths} from './duckyo-icons.js';
 let activeTheme = 'growth';
 const paths = {
   plus: '<path d="M12 5v14M5 12h14"/>',
@@ -46,8 +47,11 @@ const lumiPaths={
  palette:'<path d="M4 18 17 5l2 2L6 20l-2-2ZM14 2v3m6 5h3M3 8l1 2 2 1-2 1-1 2-1-2-2-1 2-1Z"/>',
  coins:'<circle cx="12" cy="12" r="9"/><path d="m12 5 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/>'
 };
-export function currentIconChoices(){return iconChoices;}
-export function setIconTheme(id){activeTheme=id==='lumi'?'lumi':'growth';}
-export function iconSvg(id) { return `<svg data-theme-icon="${Object.hasOwn(paths,id)?id:'leaf'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${(activeTheme==='lumi' && lumiPaths[id]) || paths[id] || paths.leaf}</svg>`; }
-export function refreshThemeIcons(root){for(const svg of root.querySelectorAll('svg[data-theme-icon]'))svg.outerHTML=iconSvg(svg.dataset.themeIcon);}
+export function currentIconChoices(){return activeTheme==='duckyo'?iconChoices.map(choice=>choice.id==='walk'?{...choice,name:'行动'}:choice):iconChoices;}
+export function setIconTheme(id){activeTheme=['lumi','duckyo'].includes(id)?id:'growth';}
+export function iconSvg(id) { const safeId=Object.hasOwn(paths,id)?id:'leaf'; const themed=activeTheme==='lumi'?lumiPaths:activeTheme==='duckyo'?duckyoPaths:null; return `<svg data-theme-icon="${safeId}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${themed?.[safeId] || paths[safeId]}</svg>`; }
+export function refreshThemeIcons(root){for(const svg of root.querySelectorAll('svg[data-theme-icon]'))svg.outerHTML=iconSvg(svg.dataset.themeIcon);for(const label of root.querySelectorAll('[data-theme-icon-label]')){const choice=currentIconChoices().find(c=>c.id===label.dataset.themeIconLabel);if(choice)label.textContent=choice.name;}}
+export const emptyStickerAssets=Object.freeze(Object.fromEntries(['first-step','waiting-message','archive','inventory'].map(id=>[id,`./themes/duckyo/sticker-${id}-v1.webp`])));
+// Callers supply only existing, trusted icon/emoji markup as the fallback.
+export function emptyArtwork(id,fallback){return `<span class="theme-empty-fallback">${fallback}</span>${Object.hasOwn(emptyStickerAssets,id)?`<img class="theme-empty-sticker" src="${emptyStickerAssets[id]}" alt="" width="64" height="64">`:''}`;}
 export function resolveHabitIcon(id, ownedIds = defaultTheme.habitIcons) { return defaultTheme.habitIcons.includes(id) && ownedIds.includes(id) ? id : 'leaf'; }
