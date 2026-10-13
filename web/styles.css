@@ -729,7 +729,7 @@ body.is-standalone.workspace-active{background:transparent}
 }
 
 /* Duckyo uses the original pixels and geometry; photo contain + source-edge fill avoids cropping. */
-:root[data-theme=duckyo]{--bg:light-dark(#fff6e2,#211c17);--panel:light-dark(#fffdf5,#30281f);--ink:light-dark(#433d35,#fff3dc);--muted:light-dark(#665e51,#d0bfa2);--line:light-dark(#dcd0bb,#67523a);--accent:light-dark(#79591e,#f2d080);--button-ink:light-dark(#fffdf5,#271c0f);--field:light-dark(#fffef9,#261f18);--error:light-dark(#a5372d,#ffc1b0);--theme-soft:light-dark(#f8edca,#4a3923);--duckyo-overlay:light-dark(#0000,#211c17ad);--reading-wash:light-dark(#fffdf560,#30281f70);--reading-panel:light-dark(#fffdf5d9,#30281feb)}
+:root[data-theme=duckyo]{--bg:light-dark(#fff6e2,#211c17);--panel:light-dark(#fffdf5,#30281f);--ink:light-dark(#362f25,#fff5e3);--muted:light-dark(#514737,#e0cfaf);--line:light-dark(#dcd0bb,#67523a);--accent:light-dark(#79591e,#f2d080);--button-ink:light-dark(#fffdf5,#271c0f);--field:light-dark(#fffef9,#261f18);--error:light-dark(#a5372d,#ffc1b0);--theme-soft:light-dark(#f8edca,#4a3923);--duckyo-overlay:light-dark(#fff8e34d,#211c17b8);--reading-wash:light-dark(#fffdf54d,#30281f4d);--reading-wash-end:light-dark(#fffdf526,#30281f2e);--reading-panel:light-dark(#fffdf5eb,#30281ff0)}
 :root[data-theme=duckyo][data-theme-background=duckyo-study]{--duckyo-photo:url('../themes/duckyo/study.webp');--duckyo-edge:url('../themes/duckyo/edge-study.webp');--duckyo-top:#9ad7dc;--duckyo-ratio:2.338667}
 :root[data-theme=duckyo][data-theme-background=duckyo-work]{--duckyo-photo:url('../themes/duckyo/work-v2.webp');--duckyo-edge:url('../themes/duckyo/edge-work.webp');--duckyo-top:#c8daf0;--duckyo-ratio:1.920313}
 :root[data-theme=duckyo][data-theme-background=duckyo-phone]{--duckyo-photo:url('../themes/duckyo/phone.webp');--duckyo-edge:url('../themes/duckyo/edge-phone.webp');--duckyo-top:#ffefd6;--duckyo-ratio:2.338542}
@@ -739,18 +739,18 @@ body.is-standalone.workspace-active{background:transparent}
 :root[data-theme=duckyo]{--app-scene:linear-gradient(var(--duckyo-overlay),var(--duckyo-overlay)),var(--duckyo-photo),var(--duckyo-edge);--duckyo-size:100% 100%,auto min(100%,calc(100vw * var(--duckyo-ratio))),100% min(100%,calc(100vw * var(--duckyo-ratio)))}
 :root[data-theme=duckyo] :is(.app-frame,#restoring),:root.is-standalone[data-theme=duckyo]{background-image:var(--app-scene);background-color:var(--duckyo-top);background-size:var(--duckyo-size);background-position:center bottom;background-repeat:no-repeat}
 :root.is-standalone[data-theme=duckyo] .app-frame{background:transparent}
-:root[data-theme=duckyo] .growth-card{background:light-dark(#fff7dda8,#42311dcf);color:var(--ink);border:1px solid var(--line);box-shadow:0 5px 18px #5e4c2910}
+:root[data-theme=duckyo] .growth-card{background:light-dark(#fff7ddd9,#42311ded);color:var(--ink);border:1px solid var(--line);box-shadow:0 5px 18px #5e4c2910}
 :root[data-theme=duckyo] .growth-card p,:root[data-theme=duckyo] .growth-eyebrow{color:var(--muted)}
 :root[data-theme=duckyo] .growth-seed{display:none}
 :root[data-theme=duckyo] .growth-meter{background:light-dark(#dbc88b80,#89714450)}
 :root[data-theme=duckyo] .growth-meter span{background:light-dark(#9a8036,#eac56b)}
-:root[data-theme=duckyo] :is(.habit-card,.habit-empty,.archive-empty,.account-feature-state,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview,.message-card){border-color:var(--line);box-shadow:0 5px 18px #5e4c290a;background-color:light-dark(#fffdf5ad,#30281fc7)}
-:root[data-theme=duckyo][data-theme-surface=glass] :is(.habit-card,.habit-empty,.archive-empty,.account-feature-state,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview,.message-card){background-color:light-dark(#fffdf573,#30281f94);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
-:root[data-theme=duckyo] :is(.habit-card,.my-account-card,.account-list,.message-card){background-image:linear-gradient(105deg,var(--reading-wash),transparent 92%)}
+:root[data-theme=duckyo] :is(.habit-card,.habit-empty,.archive-empty,.account-feature-state,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview,.message-card){border-color:var(--line);box-shadow:0 5px 18px #5e4c290a;background-color:light-dark(#fffdf5d6,#30281fe0)}
+:root[data-theme=duckyo][data-theme-surface=glass] :is(.habit-card,.habit-empty,.archive-empty,.account-feature-state,.my-account-card,.account-list,.module-intro,.module-item,.detail-panel,.stats-overview article,.admin-members-panel,.admin-member-identity,.appearance-settings,.appearance-preview,.message-card){background-color:light-dark(#fffdf5b3,#30281fcc);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+:root[data-theme=duckyo] :is(.habit-card,.my-account-card,.account-list,.message-card){background-image:linear-gradient(105deg,var(--reading-wash),var(--reading-wash-end))}
 :root[data-theme=duckyo] :is(#statistics-page .detail-panel,#statistics-page .stats-overview article,#habit-detail .detail-panel,#inbox-detail,#feedback-detail,#coin-rules-content .detail-panel){background-color:var(--reading-panel)}
 :root[data-theme=duckyo] :is(.habit-icon,.account-row-icon,.recent-partial,.is-complete .habit-action,#kind-options button[aria-selected=true],#icon-options button[aria-pressed=true]){background:var(--theme-soft);color:var(--accent)}
 :root[data-theme=duckyo] :is(.primary:not(.danger),.add-habit,.habit-action:not(:disabled)){background:light-dark(#f1cd70,#eac56b);color:light-dark(#433517,#271c0f)}
-:root[data-theme=duckyo] :is(.app-nav,.habit-filters,.admin-task-nav){background:light-dark(#fff7e3ba,#30281fe0);border-color:light-dark(#fffdf5,#a88b5640)}
+:root[data-theme=duckyo] :is(.app-nav,.habit-filters,.admin-task-nav){background:light-dark(#fff7e3db,#30281feb);border-color:light-dark(#fffdf5,#a88b5640)}
 :root[data-theme=duckyo] :is(.nav-slider,.filter-slider,.admin-task-slider){background:light-dark(#fffdf5e0,#7c5d325e);border-color:light-dark(#fff,#e6c98e35)}
 :root[data-theme=duckyo] .habit-dialog{background:var(--panel);border-color:var(--line);backdrop-filter:none;-webkit-backdrop-filter:none}
 :root[data-theme=duckyo] .habit-dialog::backdrop{background:#33271d80}
@@ -763,3 +763,6 @@ body.is-standalone.workspace-active{background:transparent}
 @media(min-width:701px){.appearance-themes{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 :root[data-theme=duckyo] .week-strip li.today{background:light-dark(#f1cd70,#eac56b);color:#433517}
+
+/* Keep historical day labels legible over the theme picture. */
+:root[data-theme=duckyo] .recent-unknown{opacity:.9}

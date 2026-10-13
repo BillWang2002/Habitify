@@ -1,0 +1,65 @@
+{
+  "method": "Conservative sRGB compositing against pure black (light) or pure white (dark) source. Uses browser computed scene/card/text; ignores the extra reading gradient and blur. Covers default title/progress text, not every opacity/state/font or full accessibility conformance.",
+  "results": [
+    {
+      "mode": "light",
+      "background": "duckyo-study",
+      "inkContrast": 7.84,
+      "mutedContrast": 5.4
+    },
+    {
+      "mode": "light",
+      "background": "duckyo-work",
+      "inkContrast": 7.84,
+      "mutedContrast": 5.4
+    },
+    {
+      "mode": "light",
+      "background": "duckyo-phone",
+      "inkContrast": 7.84,
+      "mutedContrast": 5.4
+    },
+    {
+      "mode": "light",
+      "background": "duckyo-snack",
+      "inkContrast": 7.84,
+      "mutedContrast": 5.4
+    },
+    {
+      "mode": "light",
+      "background": "duckyo-cake",
+      "inkContrast": 7.84,
+      "mutedContrast": 5.4
+    },
+    {
+      "mode": "dark",
+      "background": "duckyo-study",
+      "inkContrast": 11.62,
+      "mutedContrast": 8.2
+    },
+    {
+      "mode": "dark",
+      "background": "duckyo-work",
+      "inkContrast": 11.62,
+      "mutedContrast": 8.2
+    },
+    {
+      "mode": "dark",
+      "background": "duckyo-phone",
+      "inkContrast": 11.62,
+      "mutedContrast": 8.2
+    },
+    {
+      "mode": "dark",
+      "background": "duckyo-snack",
+      "inkContrast": 11.62,
+      "mutedContrast": 8.2
+    },
+    {
+      "mode": "dark",
+      "background": "duckyo-cake",
+      "inkContrast": 11.62,
+      "mutedContrast": 8.2
+    }
+  ]
+}
