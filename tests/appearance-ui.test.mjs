@@ -4,6 +4,29 @@ const {appearanceHtml,createAppearance,applyAppearance}=await import('../web/app
 const {iconSvg,setIconTheme,currentIconChoices,emptyIconSvg}=await import('../web/theme.js');
 const setup=()=>{const dom=new JSDOM('<meta name="theme-color"><div id="root"><div id="profile-avatar"></div></div>',{url:'https://example.test/Habitify/'});globalThis.document=dom.window.document;globalThis.location=dom.window.location;globalThis.localStorage=dom.window.localStorage;const root=document.querySelector('#root');root.insertAdjacentHTML('beforeend',appearanceHtml());return {dom,root};};
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+const lumi={theme:'lumi',background:'harbor',surface:'glass',avatar:'lumi-harbor',mode:'dark'};
+const access=admin=>({settings:admin?lumi:{theme:'growth',mode:'dark'},revision:2,allowedThemes:admin?['growth','lumi','duckyo']:['growth','duckyo']});
+test('普通成员与公开预览无法选择露米，伪造本机缓存和角色字段无效',async()=>{
+ const {dom,root}=setup();let resolve;localStorage.setItem('habitify-appearance:/Habitify/:ordinary',JSON.stringify({version:1,settings:lumi,isAdmin:true}));
+ const ui=createAppearance(root,{request:()=>new Promise(r=>resolve=r)});ui.enter({id:'ordinary',isAdmin:true});
+ assert.equal(document.documentElement.dataset.theme,'growth');assert.equal(root.querySelector('[data-theme-choice="lumi"]').hidden,true);
+ resolve(access(false));await tick();root.querySelector('[data-theme-choice="lumi"]').onclick();assert.equal(document.documentElement.dataset.theme,'growth');
+ ui.clear();const preview=createAppearance(root,{preview:true,initialPreview:lumi});preview.enter({id:'preview'});assert.equal(document.documentElement.dataset.theme,'growth');assert.equal(root.querySelector('[data-theme-choice="lumi"]').hidden,true);dom.window.close();
+});
+test('管理员云端许可才显示露米，账户切换后迟到响应不能恢复旧权限',async()=>{
+ const {dom,root}=setup();const queue=[];const ui=createAppearance(root,{request:()=>new Promise(resolve=>queue.push(resolve))});
+ ui.enter({id:'admin'});queue.shift()(access(true));await tick();assert.equal(document.documentElement.dataset.theme,'lumi');assert.equal(root.querySelector('[data-theme-choice="lumi"]').hidden,false);
+ ui.refresh();const late=queue.shift();ui.enter({id:'member'});assert.equal(document.documentElement.dataset.theme,'growth');queue.shift()(access(false));await tick();late(access(true));await tick();assert.equal(document.documentElement.dataset.theme,'growth');assert.equal(root.querySelector('[data-theme-choice="lumi"]').hidden,true);dom.window.close();
+});
+test('读取响应乱序、未保存露米预览和权限撤销时立即回退',async()=>{
+ const {dom,root}=setup();const queue=[];const ui=createAppearance(root,{request:()=>new Promise(resolve=>queue.push(resolve))});ui.enter({id:'admin'});queue.shift()(access(true));await tick();
+ ui.refresh();const old=queue.shift();ui.refresh();const newest=queue.shift();root.querySelector('[data-theme-choice="lumi"]').click();root.querySelector('[data-appearance-value="garden"]').click();assert.equal(ui.busy(),false);ui.show();assert.equal(ui.busy(),true);
+ newest(access(false));await tick();assert.equal(document.documentElement.dataset.theme,'growth');assert.equal(ui.busy(),false);old(access(true));await tick();assert.equal(root.querySelector('[data-theme-choice="lumi"]').hidden,true);dom.window.close();
+});
+test('保存时后台撤销权限，403后清除露米预览、读取新版并保留普通主题',async()=>{
+ const {dom,root}=setup();let count=0;const ui=createAppearance(root,{request:async p=>{if(p.op==='appearance-get')return access(count++===0);throw Object.assign(new Error('露米主题仅供管理员使用'),{code:'THEME_FORBIDDEN'});}});
+ ui.enter({id:'admin'});await tick();root.querySelector('[data-theme-choice="lumi"]').click();root.querySelector('[data-appearance-value="garden"]').click();root.querySelector('#appearance-save').click();await tick();await tick();assert.equal(document.documentElement.dataset.theme,'growth');assert.equal(root.querySelector('[data-theme-choice="lumi"]').hidden,true);assert.equal(root.querySelector('[data-theme-choice="duckyo"]').disabled,false);dom.window.close();
+});
 test('背景预览联动头像，取消恢复已应用搭配，保存请求不传独立头像选择',async()=>{
  const {dom,root}=setup();const saved={theme:'duckyo',background:'duckyo-work',surface:'glass',avatar:'duckyo-study',mode:'light'};let payload;
  const ui=createAppearance(root,{request:async p=>{if(p.op==='appearance-get')return {settings:saved,revision:3};payload=p;return {settings:p.settings,revision:4};}});

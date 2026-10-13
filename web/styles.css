@@ -798,7 +798,7 @@ body.is-standalone.workspace-active{background:transparent}
 .theme-choice-duckyo .theme-cover img{object-position:center}
 :root[data-theme=duckyo] .appearance-bg-thumb{background:#fff6df}
 :root[data-theme=duckyo] .appearance-bg-thumb img{object-fit:contain;object-position:center bottom}
-@media(min-width:701px){.appearance-themes{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:701px){.appearance-themes{grid-template-columns:repeat(var(--theme-columns,3),minmax(0,1fr))}}
 
 :root[data-theme=duckyo] .week-strip li.today{background:light-dark(#f1cd70,#eac56b);color:#433517}
 
