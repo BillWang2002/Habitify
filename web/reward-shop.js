@@ -50,7 +50,7 @@ export function createRewardShop(root,{onViewChange=()=>{}}={}){
   root.querySelector('.shop-categories').style.setProperty('--filter-index',category==='real'?1:0);
   root.querySelectorAll('[data-shop-category]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.shopCategory===category)));
   root.querySelector('.shop-preview-note').hidden=category==='virtual';
-  grid.innerHTML=samples[category].length?samples[category].map(item=>`<button type="button" class="shop-card module-item" data-shop-item="${item.id}" aria-label="查看${item.name}样式">${picture(item)}<div class="shop-card-copy"><h2>${item.name}</h2><p>${item.description}</p><div class="shop-card-footer"><span>价格待定</span><span class="shop-card-open" aria-hidden="true">${iconSvg('back')}</span></div></div></button>`).join(''):'<div class="shop-empty account-feature-state"><h2>个性装扮后续添加</h2><p>新的装扮内容将在后续更新中加入。</p></div>';
+  grid.innerHTML=samples[category].length?samples[category].map(item=>`<button type="button" class="shop-card module-item" data-shop-item="${item.id}" aria-label="查看${item.name}样式">${picture(item)}<div class="shop-card-copy"><h2>${item.name}</h2><p>${item.description}</p><div class="shop-card-footer"><span>价格待定</span><span class="shop-card-open" aria-hidden="true">${iconSvg('back')}</span></div></div></button>`).join(''):'<div class="shop-empty module-item"><h2>个性装扮后续添加</h2><p>新的装扮内容将在后续更新中加入。</p></div>';
   grid.querySelectorAll('[data-shop-item]').forEach(button=>button.onclick=()=>{
    const item=samples[category].find(item=>item.id===button.dataset.shopItem);
    root.querySelector('#shop-dialog-title').textContent=item.name;
