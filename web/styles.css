@@ -109,7 +109,7 @@ body.workspace-active { display: block; padding: 0; height: 100dvh; overflow: hi
 .shop-balance svg { width:28px; height:28px; }
 .shop-balance small { display:block; font-size:11px; color:var(--muted); margin-bottom:3px; }
 .shop-balance strong { display:block; font-size:22px; line-height:1.15; font-variant-numeric:tabular-nums; }
-.shop-categories { width:100%; max-width:420px; grid-template-columns:repeat(2,minmax(0,1fr)); --filter-index:1; }
+.habit-filters.shop-categories { width:100%; max-width:420px; grid-template-columns:repeat(2,minmax(0,1fr)); --filter-index:1; }
 .shop-categories .filter-slider { width:calc((100% - 8px) / 2); }
 .shop-preview-note { margin:12px 0 18px; color:var(--muted); font-size:11px; line-height:1.7; }
 .shop-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
@@ -780,7 +780,7 @@ body.is-standalone.workspace-active{background:transparent}
 :root[data-theme=duckyo] :is(.primary:not(.danger),.add-habit,.habit-action:not(:disabled)){background:light-dark(#f1cd70,#eac56b);color:light-dark(#433517,#271c0f)}
 :root[data-theme=duckyo] :is(.app-nav,.habit-filters,.admin-task-nav){background:light-dark(#fff7e3ba,#30281fe0);border-color:light-dark(#fffdf5,#a88b5640)}
 :root[data-theme=duckyo] :is(.nav-slider,.filter-slider,.admin-task-slider){background:light-dark(#fffdf5e0,#7c5d325e);border-color:light-dark(#fff,#e6c98e35)}
-:root[data-theme=duckyo] .habit-dialog{background:light-dark(#fffdf573,#30281f94);border-color:var(--line);backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-theme=duckyo] .habit-dialog{background:var(--panel);border-color:var(--line);backdrop-filter:none;-webkit-backdrop-filter:none}
 :root[data-theme=duckyo] .habit-dialog::backdrop{background:#33271d80}
 :root[data-theme=duckyo] input:focus{box-shadow:0 0 0 3px light-dark(#b78a2020,#e6c98e25)}
 :root[data-theme=duckyo] .admin-member-row:nth-child(odd){background:var(--theme-soft)}
@@ -795,6 +795,8 @@ body.is-standalone.workspace-active{background:transparent}
 /* Text adapts locally; the original card surfaces and wallpaper remain visible. */
 :root[data-theme=duckyo] [data-adaptive-text=dark]{--ink:#21180f;--muted:#3a2d1c;--error:#a5372d;--text-halo:#fffdf5e8;color:var(--ink);text-shadow:0 1px 2px var(--text-halo),0 0 1px var(--text-halo)}
 :root[data-theme=duckyo] [data-adaptive-text=light]{--ink:#fffdf5;--muted:#fff3dc;--error:#ffc1b0;--text-halo:#20180df2;color:var(--ink);text-shadow:0 1px 2px var(--text-halo),0 0 1px var(--text-halo)}
+:root[data-theme=duckyo] .habit-dialog [data-adaptive-text]{--ink:light-dark(#433d35,#fff3dc);--muted:light-dark(#665e51,#d0bfa2);--error:light-dark(#a5372d,#ffc1b0);text-shadow:none}
+:root[data-theme=duckyo] .habit-dialog .dialog-note[data-adaptive-text]{color:var(--muted)}
 :root[data-theme=duckyo] :is(.stats-overview article,.profile-metrics)[data-adaptive-text] strong{color:var(--ink)}
 :root[data-theme=duckyo] :is(input,textarea,.kind-select,.appearance-options button,.theme-choice){--ink:light-dark(#433d35,#fff3dc);--muted:light-dark(#665e51,#d0bfa2);color:var(--ink);text-shadow:none}
 :root[data-theme=duckyo] :is(.primary,.habit-action,.add-habit,.habit-icon,.account-row-icon){text-shadow:none}
