@@ -10,7 +10,7 @@ test('普通成员与公开预览无法选择露米，伪造本机缓存和角�
  const {dom,root}=setup();let resolve;localStorage.setItem('habitify-appearance:/Habitify/:ordinary',JSON.stringify({version:1,settings:lumi,isAdmin:true}));
  const ui=createAppearance(root,{request:()=>new Promise(r=>resolve=r)});ui.enter({id:'ordinary',isAdmin:true});
  assert.equal(document.documentElement.dataset.theme,'growth');assert.equal(root.querySelector('[data-theme-choice="lumi"]').hidden,true);
- resolve(access(false));await tick();root.querySelector('[data-theme-choice="lumi"]').onclick();assert.equal(document.documentElement.dataset.theme,'growth');
+ resolve({settings:lumi,revision:1});await tick();root.querySelector('[data-theme-choice="lumi"]').onclick();assert.equal(document.documentElement.dataset.theme,'growth');
  ui.clear();const preview=createAppearance(root,{preview:true,initialPreview:lumi});preview.enter({id:'preview'});assert.equal(document.documentElement.dataset.theme,'growth');assert.equal(root.querySelector('[data-theme-choice="lumi"]').hidden,true);dom.window.close();
 });
 test('管理员云端许可才显示露米，账户切换后迟到响应不能恢复旧权限',async()=>{
