@@ -1,0 +1,64 @@
+{
+  "assets": [
+    {
+      "id": "milk-tea",
+      "sourcePage": "https://au.pinterest.com/pin/cute-duck-drinking-bubble-tea-by-chinese-illustrator--309411436905456361/",
+      "sourceImage": "https://i.pinimg.com/736x/bb/22/6a/bb226a0c3b801b6dd197de54fea02dd6.jpg",
+      "original": "docs/design/rewards/products-v2/originals/milk-tea.jpg",
+      "originalSize": [
+        736,
+        736
+      ],
+      "output": "web/rewards/duckyo/milk-tea-v1.webp",
+      "outputSize": [
+        500,
+        500
+      ],
+      "processing": "Full original square preserved; proportional resize only; no AI redraw, crop, watermark removal, background reuse or recolouring.",
+      "meaning": "小刘鸭喝珍珠奶茶",
+      "sha256": "844a484e37bf8a6fd8f74119d0e41381ae84c4e032cd3fb1c10554b9868b61be"
+    },
+    {
+      "id": "coffee",
+      "sourcePage": "https://www.keaitupian.cn/touxiang/42286_3.html",
+      "sourceImage": "https://ss0.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u%3D378500829%2C1605204275%26fm%3D253%26gp%3D0.jpg",
+      "original": "docs/design/rewards/products-v2/originals/coffee-avatar.jpg",
+      "originalSize": [
+        500,
+        500
+      ],
+      "output": "web/rewards/duckyo/coffee-v1.webp",
+      "outputSize": [
+        500,
+        500
+      ],
+      "processing": "Full original square preserved; proportional resize only; no AI redraw, crop, watermark removal, background reuse or recolouring.",
+      "meaning": "小刘鸭手持外带杯，作为咖啡配图",
+      "sha256": "49788f42550b581ac3737425ea7af39d7e369964391c069f9d0e5d99e79fb1ac"
+    },
+    {
+      "id": "snack",
+      "sourcePage": "https://touxiangkong.com/touxiang/71669.html",
+      "sourceImage": "https://img.touxiangkong.com/uploads/allimg/2021090511/qd24vj5mzg5.jpg",
+      "original": "docs/design/rewards/products-v2/originals/snack-cookie.jpg",
+      "originalSize": [
+        1000,
+        1000
+      ],
+      "output": "web/rewards/duckyo/snack-v1.webp",
+      "outputSize": [
+        500,
+        500
+      ],
+      "processing": "Full original square preserved; proportional resize only; no AI redraw, crop, watermark removal, background reuse or recolouring.",
+      "meaning": "小刘鸭抱着饼干",
+      "sha256": "838d70cb4a253c81c640f827aaec31f2b268d2228ce0e06787ad5eb63adbb5e0"
+    }
+  ],
+  "credit": "Duckyo / 小刘鸭; public repost sources recorded. No claim of official partnership or independently verified redistribution licence.",
+  "unusedCandidate": {
+    "file": "docs/design/rewards/products-v2/originals/coffee-scene.jpg",
+    "page": "https://www.moyubuluo.com/hdwallpapers/81631.html",
+    "reason": "Portrait computer scene; square cup illustration selected for consistent product framing."
+  }
+}

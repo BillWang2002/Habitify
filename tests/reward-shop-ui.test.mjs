@@ -16,7 +16,8 @@ const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
 
 test('商城双向切换保留滚动范围，旧层不可交互，动画结束恢复商品操作',async()=>{
  const {root,shop,results,animations,remembered,click}=setup();click('virtual');
- assert.equal(root.querySelector('#shop-grid').querySelectorAll('.shop-card').length,2);
+ assert.equal(root.querySelector('#shop-grid').querySelectorAll('.shop-card').length,0);
+ assert.ok(root.querySelector('.shop-empty').textContent.includes('后续添加'));
  assert.equal(animations[0].frames[1].transform,'translateX(44px)');assert.equal(animations[1].frames[0].transform,'translateX(-44px)');
  assert.equal(animations[0].target.inert,true);assert.equal(animations[0].target.getAttribute('aria-hidden'),'true');
  assert.equal(animations[1].target.id,'shop-grid');assert.equal(animations[1].options.duration,480);
@@ -25,7 +26,7 @@ test('商城双向切换保留滚动范围，旧层不可交互，动画结束�
  animations[0].finish();animations[1].finish();await tick();
  assert.equal(root.querySelector('.shop-ghost'),null);assert.equal(results.inert,false);assert.equal(results.style.minHeight,'600px');
  click('real');assert.equal(animations[2].frames[1].transform,'translateX(-44px)');assert.equal(animations[3].frames[0].transform,'translateX(44px)');
- assert.equal(root.querySelector('#shop-grid').querySelectorAll('.shop-card').length,4);shop.close();
+ assert.equal(root.querySelector('#shop-grid').querySelectorAll('.shop-card').length,3);shop.close();
  assert.equal(root.querySelector('.shop-ghost'),null);assert.equal(results.inert,false);
 });
 
@@ -36,9 +37,9 @@ test('商城快速反向切换不残留旧层，恢复视图与账户清理取�
  shop.setView({category:'virtual',minHeight:'700px'});await tick();
  assert.equal(root.querySelector('.shop-ghost'),null);assert.equal(results.inert,false);
  assert.deepEqual(shop.getView(),{category:'virtual',minHeight:'700px'});
- assert.equal(root.querySelector('#shop-grid').querySelectorAll('.shop-card').length,2);
+ assert.equal(root.querySelector('#shop-grid').querySelectorAll('.shop-card').length,0);
  shop.clear();assert.deepEqual(shop.getView(),{category:'real',minHeight:''});
- assert.equal(root.querySelector('#shop-grid').querySelectorAll('.shop-card').length,4);
+ assert.equal(root.querySelector('#shop-grid').querySelectorAll('.shop-card').length,3);
 });
 
 test('减少动态效果时直接切换商城且不产生旧层，相同分类不重复执行',()=>{
