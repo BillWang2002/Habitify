@@ -1,0 +1,142 @@
+[
+  {
+    "background": "duckyo-study",
+    "blur": "blur(3px)",
+    "card": "rgba(255, 253, 245, 0.45)",
+    "mode": "light",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "dark",
+      "dark",
+      "dark"
+    ],
+    "width": 390
+  },
+  {
+    "background": "duckyo-work",
+    "blur": "blur(3px)",
+    "card": "rgba(255, 253, 245, 0.45)",
+    "mode": "light",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "dark",
+      "dark",
+      "dark"
+    ],
+    "width": 390
+  },
+  {
+    "background": "duckyo-phone",
+    "blur": "blur(3px)",
+    "card": "rgba(255, 253, 245, 0.45)",
+    "mode": "light",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "dark",
+      "dark",
+      "dark"
+    ],
+    "width": 390
+  },
+  {
+    "background": "duckyo-snack",
+    "blur": "blur(3px)",
+    "card": "rgba(255, 253, 245, 0.45)",
+    "mode": "light",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "dark",
+      "dark",
+      "dark"
+    ],
+    "width": 390
+  },
+  {
+    "background": "duckyo-cake",
+    "blur": "blur(3px)",
+    "card": "rgba(255, 253, 245, 0.45)",
+    "mode": "light",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "dark",
+      "dark",
+      "dark"
+    ],
+    "width": 390
+  },
+  {
+    "background": "duckyo-study",
+    "blur": "blur(3px)",
+    "card": "rgba(48, 40, 31, 0.58)",
+    "mode": "dark",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "light",
+      "light",
+      "light"
+    ],
+    "width": 390
+  },
+  {
+    "background": "duckyo-work",
+    "blur": "blur(3px)",
+    "card": "rgba(48, 40, 31, 0.58)",
+    "mode": "dark",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "light",
+      "light",
+      "light"
+    ],
+    "width": 390
+  },
+  {
+    "background": "duckyo-phone",
+    "blur": "blur(3px)",
+    "card": "rgba(48, 40, 31, 0.58)",
+    "mode": "dark",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "light",
+      "light",
+      "light"
+    ],
+    "width": 390
+  },
+  {
+    "background": "duckyo-snack",
+    "blur": "blur(3px)",
+    "card": "rgba(48, 40, 31, 0.58)",
+    "mode": "dark",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "light",
+      "light",
+      "light"
+    ],
+    "width": 390
+  },
+  {
+    "background": "duckyo-cake",
+    "blur": "blur(3px)",
+    "card": "rgba(48, 40, 31, 0.58)",
+    "mode": "dark",
+    "scrollWidth": 390,
+    "status": "sampled",
+    "tones": [
+      "light",
+      "light",
+      "light"
+    ],
+    "width": 390
+  }
+]

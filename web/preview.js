@@ -1,8 +1,10 @@
+import {initAdaptiveText} from './adaptive-text.js';
 import { initKeyboardViewport } from './keyboard-viewport.js';
 import { createWorkspace } from './workspace.js';
 import {normalizeAppearance} from './appearance-model.js';
 const params=new URLSearchParams(location.search);
 const previewAppearance=normalizeAppearance(Object.fromEntries(['theme','background','surface','mode'].map(key=>[key,params.get(key)])));
 initKeyboardViewport();
+initAdaptiveText();
 const workspace = createWorkspace(document.getElementById('workspace'), { preview: true, previewAppearance, onLogout: () => { location.href = './'; } });
 workspace.enter({id: 'public-preview'});
