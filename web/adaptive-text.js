@@ -3,7 +3,7 @@ import {backgroundAssets} from './appearance-model.js';
 import {parseColor,compositeColor,chooseTextTone} from './adaptive-text-model.js';
 const selectors=[
  '.page-title h1','.date-label','.week-strip button','.habit-toolbar h2','.habit-info','.recent-days','.habit-more',
- '.growth-copy','.growth-progress','.habit-empty','.archive-empty','.account-feature-state','.module-intro','.module-item',
+ '.shop-balance','.shop-preview-note','.growth-copy','.growth-progress','.habit-empty','.archive-empty','.account-feature-state','.module-intro','.module-item',
  '.profile-card>div','.profile-status','.account-facts','.profile-metrics','.account-row-copy','.account-section>h2',
  '.account-header-copy','.account-feedback','.habits-footnote','.detail-panel','.stats-overview article','.message-open',
  '.appearance-page>.dialog-note','.appearance-theme-hint','.appearance-linked-avatar p','.appearance-note',
